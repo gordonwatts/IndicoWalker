@@ -1,10 +1,12 @@
-﻿using System;
+﻿using IWalker.Util;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.Storage;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -38,7 +40,11 @@ namespace IWalker
         /// This parameter is typically used to configure the page.</param>
         protected override void OnNavigatedTo(NavigationEventArgs e)
         {
-            // TODO: Prepare page for display here.
+            // Display our very simple go-to dialog box with whatever was
+            // last used.
+
+            IndicoUrl.Text = Settings.LastViewedMeeting;
+            IndicoUrl.SelectAll();
 
             // TODO: If your application contains multiple pages, ensure that you are
             // handling the hardware Back button by registering for the
@@ -49,7 +55,7 @@ namespace IWalker
 
         private void FindIndicoUrl_Click(object sender, RoutedEventArgs e)
         {
-
+            Settings.LastViewedMeeting = IndicoUrl.Text;
         }
     }
 }
