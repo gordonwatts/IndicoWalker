@@ -43,6 +43,7 @@ namespace IWalker.ViewModel
             ////}
 
             SimpleIoc.Default.Register<MainViewModel>();
+            SimpleIoc.Default.Register<SimpleMeetingViewModel>();
         }
 
         public MainViewModel Main

@@ -6,12 +6,13 @@
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
-    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}"
+    DataContext="{Binding Main, Source={StaticResource Locator}}">
 
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBox Name="IndicoUrl" MinWidth="200"/>
-            <Button Name="FindIndicoUrl" Content="Load It!" Click="FindIndicoUrl_Click"/>
+            <TextBox Name="IndicoUrl" MinWidth="200" Text="{Binding MeetingURL, Mode=TwoWay}"/>
+            <Button Name="FindIndicoUrl" Content="Load It!" Command="{Binding DoItCommand}"/>
         </StackPanel>
     </Grid>
 </Page>

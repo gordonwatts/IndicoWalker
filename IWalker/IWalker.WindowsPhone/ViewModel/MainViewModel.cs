@@ -30,5 +30,10 @@ namespace IWalker.ViewModel
             ////    // Code runs "for real"
             ////}
         }
+
+        public string MeetingAddress
+        {
+            get { return "hi"; }
+        }
     }
 }
