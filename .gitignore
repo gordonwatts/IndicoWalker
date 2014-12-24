@@ -2,4 +2,5 @@
 Debug/
 Release/
 
-packages/*/
+packages/*/*
+!**/packages/repositories.config
