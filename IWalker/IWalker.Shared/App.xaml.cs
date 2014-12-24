@@ -1,4 +1,6 @@
-﻿using System;
+﻿using ReactiveUI;
+using Splat;
+using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
@@ -30,6 +32,11 @@ namespace IWalker
 #endif
 
         /// <summary>
+        /// Suspension helper.
+        /// </summary>
+        readonly AutoSuspendHelper autoSuspendHelper;
+
+        /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
         /// executed, and as such is the logical equivalent of main() or WinMain().
         /// </summary>
@@ -37,6 +44,20 @@ namespace IWalker
         {
             this.InitializeComponent();
             this.Suspending += this.OnSuspending;
+
+            autoSuspendHelper = new AutoSuspendHelper(this);
+            RxApp.SuspensionHost.CreateNewAppState = () => new MainPageViewModel();
+            RxApp.SuspensionHost.SetupDefaultSuspendResume();
+
+            // Register everything... becasue....
+
+            Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
+            Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
+
+            // Create the main view model, and register that.
+            var r = new RoutingState();
+            Locator.CurrentMutable.RegisterConstant(r, typeof(RoutingState));
+            Locator.CurrentMutable.RegisterConstant(new MainPageViewModel(r), typeof(IScreen));
         }
 
         /// <summary>
