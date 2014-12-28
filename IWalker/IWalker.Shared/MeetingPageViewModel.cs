@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using IWalker.DataModel.Interfaces;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -10,10 +11,26 @@ namespace IWalker
     /// </summary>
     public class MeetingPageViewModel : ReactiveObject, IRoutableViewModel
     {
-        public MeetingPageViewModel(IScreen hs, string title)
+        public MeetingPageViewModel(IScreen hs, IMeetingRef mRef)
         {
+            // Initial default values
             HostScreen = hs;
-            MeetingTitle = title;
+            MeetingTitle = "";
+
+            // And start off a background guy to populate everything.
+            LoadMeeting(mRef);
+        }
+
+        /// <summary>
+        /// Given a meeting, load the info. Since this is an asynchronous command, we have to schedule stuff off it.
+        /// </summary>
+        /// <param name="title"></param>
+        private void LoadMeeting(IMeetingRef title)
+        {
+            var ldrCmd = ReactiveCommand.CreateAsyncTask<IMeeting>(_ => title.GetMeeting());
+
+            ldrCmd.Subscribe(x => { MeetingTitle = x.Title; });
+            ldrCmd.Execute(null);
         }
 
         /// <summary>

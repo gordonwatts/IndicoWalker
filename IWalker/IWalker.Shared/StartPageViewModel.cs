@@ -6,6 +6,8 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Windows;
 using IWalker.Util;
+using IWalker.DataModel.Interfaces;
+using IWalker.DataModel.Inidco;
 
 namespace IWalker
 {
@@ -47,11 +49,16 @@ namespace IWalker
                 .Subscribe(addr =>
                 {
                     Settings.LastViewedMeeting = addr;
-                    HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, addr));
+                    HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
                 });
 
             // Setup the first value for the last time we ran.
             MeetingAddress = Settings.LastViewedMeeting;
+        }
+
+        private IMeetingRef ConvertToIMeeting(string addr)
+        {
+            return new IndicoMeetingRef(addr);
         }
 
         /// <summary>
