@@ -1,4 +1,5 @@
 ﻿using IWalker.ViewModels;
+using IWalker.Views;
 using ReactiveUI;
 using Splat;
 using System;

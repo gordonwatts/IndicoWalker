@@ -7,7 +7,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace IWalker
+namespace IWalker.ViewModels
 {
     /// <summary>
     /// Main page host
