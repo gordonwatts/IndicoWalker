@@ -96,6 +96,9 @@
     <Content Include="Assets\WideLogo.scale-240.png" />
   </ItemGroup>
   <ItemGroup>
+    <Reference Include="IndicoInterface.NET">
+      <HintPath>..\..\packages\IndicoInterface.NET.1.0.0\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
+    </Reference>
     <Reference Include="ReactiveUI">
       <HintPath>..\..\packages\reactiveui-core.6.2.1.1\lib\Portable-Win81+WPA81\ReactiveUI.dll</HintPath>
     </Reference>
