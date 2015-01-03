@@ -9,7 +9,7 @@ using IWalker.Util;
 using IWalker.DataModel.Interfaces;
 using IWalker.DataModel.Inidco;
 
-namespace IWalker
+namespace IWalker.ViewModels
 {
     /// <summary>
     /// Main page with a simple button on it.

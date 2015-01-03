@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using IWalker.ViewModels;
+using ReactiveUI;
 using Splat;
 using System;
 using System.Collections.Generic;
