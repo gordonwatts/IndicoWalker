@@ -28,7 +28,7 @@ namespace IWalker
             this.InitializeComponent();
 
             // Bind everything together we need.
-            this.Bind(ViewModel, x => x.MeetingTitle, y => y.TitleBlock.Text);
+            this.Bind(ViewModel, x => x.MeetingTitle, y => y.MeetingTitle.Text);
         }
 
         /// <summary>

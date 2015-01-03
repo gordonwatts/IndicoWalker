@@ -58,6 +58,19 @@ namespace IWalker
             var r = new RoutingState();
             Locator.CurrentMutable.RegisterConstant(r, typeof(RoutingState));
             Locator.CurrentMutable.RegisterConstant(new MainPageViewModel(r), typeof(IScreen));
+
+#if WINDOWS_PHONE_APP
+            // And the back button on windows phone.
+            Windows.Phone.UI.Input.HardwareButtons.BackPressed += (o, args) =>
+            {
+                if (r.NavigateBack.CanExecute(null))
+                {
+                    r.NavigateBack.Execute(null);
+                    args.Handled = true;
+                }
+            };
+
+#endif
         }
 
         /// <summary>
