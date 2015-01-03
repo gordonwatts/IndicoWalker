@@ -23,9 +23,6 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MainPageViewModel.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)MeetingPage.xaml.cs">
-      <DependentUpon>MeetingPage.xaml</DependentUpon>
-    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)MeetingPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)StartPage.xaml.cs">
       <DependentUpon>StartPage.xaml</DependentUpon>
@@ -35,10 +32,6 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="$(MSBuildThisFileDirectory)MainPage.xaml">
-      <SubType>Designer</SubType>
-      <Generator>MSBuild:Compile</Generator>
-    </Page>
-    <Page Include="$(MSBuildThisFileDirectory)MeetingPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
