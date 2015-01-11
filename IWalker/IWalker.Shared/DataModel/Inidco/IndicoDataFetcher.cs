@@ -1,4 +1,5 @@
-﻿using IndicoInterface.NET;
+﻿using CERNSSO;
+using IndicoInterface.NET;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -14,11 +15,6 @@ namespace IWalker.DataModel.Inidco
     class IndicoDataFetcher : IUrlFetcher
     {
         /// <summary>
-        /// Cache the http client
-        /// </summary>
-        static Lazy<HttpClient> _http = new Lazy<HttpClient>();
-
-        /// <summary>
         /// Fetch the reader to read everything back from the website
         /// for a given URL.
         /// </summary>
@@ -29,7 +25,7 @@ namespace IWalker.DataModel.Inidco
         /// </remarks>
         public async Task<StreamReader> GetDataFromURL(Uri uri)
         {
-            var r = await _http.Value.GetAsync(uri);
+            var r = await CERNSSO.WebAccess.GetWebResponse(uri);
             var s = await r.Content.ReadAsInputStreamAsync();
             return new StreamReader(s.AsStreamForRead());
         }
