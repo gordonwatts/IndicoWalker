@@ -26,27 +26,26 @@ namespace IWalker.Views
     /// </summary>
     public sealed partial class StartPage : Page, IViewFor<StartPageViewModel>
     {
+        IDisposable startup;
+
         public StartPage()
         {
             this.InitializeComponent();
 
             RxApp.SuspensionHost.ObserveAppState<StartPageViewModel>()
                 .BindTo(this, x => x.ViewModel);
-
             this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
 
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
+            // Cert stuff
+            this.BindCommand(ViewModel, x => x.LoadCert, x => x.LoadIt);
+            this.Bind(ViewModel, x => x.CertPassword, x => x.CertPassword.Text);
+            this.Bind(ViewModel, x => x.CertStateText, x => x.CertStatus.Text);
+            this.BindCommand(ViewModel, x => x.StartSequence, x => x.Start);
+            this.Bind(ViewModel, x => x.CertPasswordEnabled, x => x.CertControls.Visibility);
+            // Navagation.
             //this.NavigationCacheMode = NavigationCacheMode.Required;
-        }
-
-        /// <summary>
-        /// Invoked when this page is about to be displayed in a Frame.
-        /// </summary>
-        /// <param name="e">Event data that describes how this page was reached.
-        /// This parameter is typically used to configure the page.</param>
-        protected override void OnNavigatedTo(NavigationEventArgs e)
-        {
         }
 
         /// <summary>
