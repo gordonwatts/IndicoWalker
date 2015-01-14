@@ -145,6 +145,8 @@ namespace IWalker.ViewModels
                 .CombineLatest(_certState, (ok, cs) => ok && cs == CertLoadState.NotLoaded);
             LoadCert = ReactiveCommand.Create(canTryToPickCert);
 
+            var xme = new HtmlAgilityPack.HtmlDocument();
+
             // Allow the user to load a cert. It is always possible to do the create.
             LoadCert.SelectMany(async o =>
             {

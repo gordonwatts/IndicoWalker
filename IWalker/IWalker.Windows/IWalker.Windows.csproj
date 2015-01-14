@@ -122,13 +122,12 @@
     <Content Include="Assets\StoreLogo.scale-100.png" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="CERNSSO, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="CERNSSO">
       <HintPath>..\..\packages\CERNSSO.2.0.0\lib\portable-wpa+windows8\CERNSSO.dll</HintPath>
     </Reference>
-    <Reference Include="HtmlAgilityPack, Version=1.4.8.0, Culture=neutral, processorArchitecture=MSIL">
-      <SpecificVersion>False</SpecificVersion>
+    <Reference Include="HtmlAgilityPack">
       <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\NetCore45\HtmlAgilityPack.dll</HintPath>
+      <Private>True</Private>
     </Reference>
     <Reference Include="IndicoInterface.NET">
       <HintPath>..\..\packages\IndicoInterface.NET.1.0.0\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>

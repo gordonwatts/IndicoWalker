@@ -99,7 +99,8 @@
     <Content Include="Assets\WideLogo.scale-240.png" />
   </ItemGroup>
   <ItemGroup>
-    <Reference Include="CERNSSO">
+    <Reference Include="CERNSSO, Version=1.0.0.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\CERNSSO.2.0.0\lib\portable-wpa+windows8\CERNSSO.dll</HintPath>
     </Reference>
     <Reference Include="HtmlAgilityPack">
