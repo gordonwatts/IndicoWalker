@@ -1,20 +1,14 @@
-﻿using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Text;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Reactive.Windows;
-using System.Linq;
-using IWalker.Util;
-using IWalker.DataModel.Interfaces;
+﻿using CERNSSO;
 using IWalker.DataModel.Inidco;
-using Windows.Storage.Pickers;
-using Windows.Security.Cryptography.Certificates;
-using System.Threading.Tasks;
-using System.Reactive.Subjects;
+using IWalker.DataModel.Interfaces;
+using IWalker.Util;
+using ReactiveUI;
+using System;
 using System.Reactive.Linq;
-using CERNSSO;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
+using Windows.Security.Cryptography.Certificates;
+using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
 
 namespace IWalker.ViewModels
@@ -148,7 +142,7 @@ namespace IWalker.ViewModels
             var xme = new HtmlAgilityPack.HtmlDocument();
 
             // Allow the user to load a cert. It is always possible to do the create.
-            LoadCert.SelectMany(async o =>
+            var setupAsk = LoadCert.Select(o =>
             {
                 // Configure for a boring cert picking.
                 var op = new FileOpenPicker();
@@ -156,12 +150,25 @@ namespace IWalker.ViewModels
                 op.SettingsIdentifier = "OpenCert";
                 op.FileTypeFilter.Add(".pfx");
                 op.ViewMode = PickerViewMode.List;
+                return op;
+            });
 
-                // Now, open the file, and when we are done we need to load in the cert.
-                // ToDo: Freeze the UI until this is all done?
-                return await op.PickSingleFileAsync();
-            })
-            .SelectMany(async f =>
+            var storageFile = setupAsk.SelectMany(async fp => await fp.PickSingleFileAsync());
+
+            LoadCertIntoAppContainer(_certState, storageFile);
+
+            // Clear out the password after we've got something loaded. Make sure it is only enabled when we want it enabled.
+            var clearItOut = _certState
+                .Where(c => c == CertLoadState.Loaded)
+                .Subscribe(c => CertPassword = "");
+
+            // Setup the first value for the last time we ran to make life a little simpler.
+            MeetingAddress = Settings.LastViewedMeeting;
+        }
+
+        private void LoadCertIntoAppContainer(Subject<CertLoadState> _certState, IObservable<Windows.Storage.StorageFile> storageFile)
+        {
+            storageFile.SelectMany(async f =>
             {
                 var buffer = await Windows.Storage.FileIO.ReadBufferAsync(f);
                 var cert = Windows.Security.Cryptography.CryptographicBuffer.EncodeToBase64String(buffer);
@@ -174,14 +181,6 @@ namespace IWalker.ViewModels
                 c => _certState.OnNext(CertLoadState.SearchingInAppContainer),
                 e => _certState.OnNext(CertLoadState.NotLoaded)
             );
-
-            // Clear out the password after we've got something loaded. Make sure it is only enabled when we want it enabled.
-            var clearItOut = _certState
-                .Where(c => c == CertLoadState.Loaded)
-                .Subscribe(c => CertPassword = "");
-
-            // Setup the first value for the last time we ran to make life a little simpler.
-            MeetingAddress = Settings.LastViewedMeeting;
         }
 
         /// <summary>

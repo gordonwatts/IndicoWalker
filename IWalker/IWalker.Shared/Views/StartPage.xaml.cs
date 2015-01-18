@@ -26,8 +26,6 @@ namespace IWalker.Views
     /// </summary>
     public sealed partial class StartPage : Page, IViewFor<StartPageViewModel>
     {
-        IDisposable startup;
-
         public StartPage()
         {
             this.InitializeComponent();
