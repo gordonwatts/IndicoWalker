@@ -7,6 +7,7 @@ using System;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
+using Windows.ApplicationModel.Activation;
 using Windows.Security.Cryptography.Certificates;
 using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
@@ -158,9 +159,22 @@ namespace IWalker.ViewModels
             setupAsk
                 .Subscribe(op => op.PickSingleFileAndContinue());
 
-            int j = 0;
-            RxApp.SuspensionHost.IsResuming
-                .Subscribe(o => j = 10);
+            // We pick up from an activation
+            var phoneFileList = IWalker.Util.AutoSuspendHelper.IsActivated
+                .Where(args => args.Kind == ActivationKind.PickFileContinuation)
+                .Cast<FileOpenPickerContinuationEventArgs>()
+                .Select(f => f.Files);
+
+            // Now, when things go wrong, we bail out.
+            phoneFileList
+                .Where(f => f == null || f.Count == 0)
+                .Subscribe(_ => _certState.OnNext(CertLoadState.NotLoaded));
+
+            // Now, continue on as if we were normal here. :-)
+            var firstFile = phoneFileList
+                .Where(f => f != null && f.Count > 0)
+                .Select(f => f[0]);
+            LoadCertIntoAppContainer(_certState, firstFile);
 #else
             var storageFile = setupAsk.SelectMany(async fp => await fp.PickSingleFileAsync());
             LoadCertIntoAppContainer(_certState, storageFile);

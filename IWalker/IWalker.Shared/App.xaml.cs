@@ -36,7 +36,7 @@ namespace IWalker
         /// <summary>
         /// Suspension helper.
         /// </summary>
-        readonly AutoSuspendHelper autoSuspendHelper;
+        readonly IWalker.Util.AutoSuspendHelper autoSuspendHelper;
 
         /// <summary>
         /// Initializes the singleton application object.  This is the first line of authored code
@@ -60,9 +60,10 @@ namespace IWalker
             // we have routine info.
             this.Suspending += this.OnSuspending;
 
-            autoSuspendHelper = new AutoSuspendHelper(this);
+            autoSuspendHelper = new IWalker.Util.AutoSuspendHelper(this);
             RxApp.SuspensionHost.CreateNewAppState = () => new MainPageViewModel(r);
             RxApp.SuspensionHost.SetupDefaultSuspendResume();
+            Locator.CurrentMutable.RegisterConstant(autoSuspendHelper, typeof(IWalker.Util.AutoSuspendHelper));
 
 #if WINDOWS_PHONE_APP
             // And the back button on windows phone.
@@ -78,10 +79,16 @@ namespace IWalker
 #endif
         }
 
+        /// <summary>
+        /// When we come back in, make sure anyone that wants to know knows...
+        /// </summary>
+        /// <param name="args"></param>
         protected override void OnActivated(IActivatedEventArgs args)
         {
-                base.OnActivated(args);
+            base.OnActivated(args);
+            autoSuspendHelper.OnActivated(args);
         }
+
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used when the application is launched to open a specific file, to display
