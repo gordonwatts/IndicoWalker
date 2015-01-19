@@ -45,11 +45,6 @@ namespace IWalker
         public App()
         {
             this.InitializeComponent();
-            this.Suspending += this.OnSuspending;
-
-            autoSuspendHelper = new AutoSuspendHelper(this);
-            RxApp.SuspensionHost.CreateNewAppState = () => new MainPageViewModel();
-            RxApp.SuspensionHost.SetupDefaultSuspendResume();
 
             // Register everything... becasue....
 
@@ -60,6 +55,14 @@ namespace IWalker
             var r = new RoutingState();
             Locator.CurrentMutable.RegisterConstant(r, typeof(RoutingState));
             Locator.CurrentMutable.RegisterConstant(new MainPageViewModel(r), typeof(IScreen));
+
+            // Setup suspend and resume. Note we need to do this once
+            // we have routine info.
+            this.Suspending += this.OnSuspending;
+
+            autoSuspendHelper = new AutoSuspendHelper(this);
+            RxApp.SuspensionHost.CreateNewAppState = () => new MainPageViewModel(r);
+            RxApp.SuspensionHost.SetupDefaultSuspendResume();
 
 #if WINDOWS_PHONE_APP
             // And the back button on windows phone.
@@ -75,6 +78,10 @@ namespace IWalker
 #endif
         }
 
+        protected override void OnActivated(IActivatedEventArgs args)
+        {
+                base.OnActivated(args);
+        }
         /// <summary>
         /// Invoked when the application is launched normally by the end user.  Other entry points
         /// will be used when the application is launched to open a specific file, to display
@@ -83,6 +90,8 @@ namespace IWalker
         /// <param name="e">Details about the launch request and process.</param>
         protected override void OnLaunched(LaunchActivatedEventArgs e)
         {
+            base.OnLaunched(e);
+            autoSuspendHelper.OnLaunched(e);
 #if DEBUG
             if (System.Diagnostics.Debugger.IsAttached)
             {

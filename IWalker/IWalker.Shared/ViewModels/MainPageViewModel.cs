@@ -22,7 +22,10 @@ namespace IWalker.ViewModels
         public MainPageViewModel(RoutingState state = null)
         {
             Router = state;
+        }
 
+        public void MoveAlong()
+        {
             // Go to the first page and get this show ion the road.
             Router.Navigate.Execute(new StartPageViewModel(this));
         }

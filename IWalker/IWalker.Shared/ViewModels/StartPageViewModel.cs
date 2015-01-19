@@ -148,14 +148,23 @@ namespace IWalker.ViewModels
                 var op = new FileOpenPicker();
                 op.CommitButtonText = "Use Certificate";
                 op.SettingsIdentifier = "OpenCert";
+                op.FileTypeFilter.Add(".p12");
                 op.FileTypeFilter.Add(".pfx");
                 op.ViewMode = PickerViewMode.List;
                 return op;
             });
 
-            var storageFile = setupAsk.SelectMany(async fp => await fp.PickSingleFileAsync());
+#if WINDOWS_PHONE_APP
+            setupAsk
+                .Subscribe(op => op.PickSingleFileAndContinue());
 
+            int j = 0;
+            RxApp.SuspensionHost.IsResuming
+                .Subscribe(o => j = 10);
+#else
+            var storageFile = setupAsk.SelectMany(async fp => await fp.PickSingleFileAsync());
             LoadCertIntoAppContainer(_certState, storageFile);
+#endif
 
             // Clear out the password after we've got something loaded. Make sure it is only enabled when we want it enabled.
             var clearItOut = _certState
