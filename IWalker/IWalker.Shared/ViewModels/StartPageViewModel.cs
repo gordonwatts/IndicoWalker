@@ -214,6 +214,13 @@ namespace IWalker.ViewModels
         /// <returns>null if the cert isn't there, otherwise the cert that was found.</returns>
         private async Task<Certificate> FindCert(string certName)
         {
+            // Work around for the TplEventListener not working correctly.
+            // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
+
+            await Task.Delay(1);
+
+            // Do the CERT query
+
             var query = new CertificateQuery();
             query.FriendlyName = certName;
             var certificates = await CertificateStores.FindAllAsync(query);
