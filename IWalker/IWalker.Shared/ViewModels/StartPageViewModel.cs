@@ -183,6 +183,7 @@ namespace IWalker.ViewModels
             // Clear out the password after we've got something loaded. Make sure it is only enabled when we want it enabled.
             var clearItOut = _certState
                 .Where(c => c == CertLoadState.Loaded)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(c => CertPassword = "");
 
             // Setup the first value for the last time we ran to make life a little simpler.
