@@ -46,7 +46,7 @@ namespace IWalker
         {
             this.InitializeComponent();
 
-            // Register everything... becasue....
+            // Register everything... because....
 
             Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
