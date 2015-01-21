@@ -34,5 +34,6 @@
             <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
         </Grid>
+        <VariableSizedWrapGrid x:Name="TalkList" Grid.Row="1" Grid.Column="0" Orientation="Vertical" ItemWidth="300"/>
     </Grid>
 </Page>

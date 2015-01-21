@@ -3,11 +3,13 @@ using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
+using System.Reactive.Linq;
 
 namespace IWalker.ViewModels
 {
     /// <summary>
-    /// A single meeting
+    /// A single meeting. A meeting has a single session, a conference has multiple sessions.
     /// </summary>
     public class MeetingPageViewModel : ReactiveObject, IRoutableViewModel
     {
@@ -15,7 +17,6 @@ namespace IWalker.ViewModels
         {
             // Initial default values
             HostScreen = hs;
-            MeetingTitle = "";
 
             // And start off a background guy to populate everything.
             LoadMeeting(mRef);
@@ -29,7 +30,19 @@ namespace IWalker.ViewModels
         {
             var ldrCmd = ReactiveCommand.CreateAsyncTask<IMeeting>(_ => title.GetMeeting());
 
-            ldrCmd.Subscribe(x => { MeetingTitle = x.Title; });
+            ldrCmd
+                .Select(m => m.Title)
+                .ToProperty(this, x => x.MeetingTitle, out _title, "");
+
+            ldrCmd
+                .Select(m => m.Sessions)
+                .Where(s => s != null && s.Length > 0)
+                .Select(s => s[0])
+                .Where(t => t.Talks != null)
+                .Select(t => t.Talks)
+                .ToProperty(this, x => x.Talks, out _talks, new ITalk[0]);
+
+            // Start everything off.
             ldrCmd.Execute(null);
         }
 
@@ -43,10 +56,18 @@ namespace IWalker.ViewModels
         /// </summary>
         public string MeetingTitle
         {
-            get { return _title; }
-            set { this.RaiseAndSetIfChanged(ref _title, value); }
+            get { return _title.Value; }
         }
-        private string _title;
+        private ObservableAsPropertyHelper<string> _title;
+
+        /// <summary>
+        /// Get the list of talks
+        /// </summary>
+        public ITalk[] Talks
+        {
+            get { return _talks.Value; }
+        }
+        private ObservableAsPropertyHelper<ITalk[]> _talks;
 
         /// <summary>
         /// Where we will be located.
