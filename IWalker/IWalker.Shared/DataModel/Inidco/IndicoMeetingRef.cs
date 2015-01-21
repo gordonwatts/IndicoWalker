@@ -4,6 +4,7 @@ using IWalker.DataModel.Interfaces;
 using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Linq;
 using System.Threading.Tasks;
 
 namespace IWalker.DataModel.Inidco
@@ -28,6 +29,64 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
+        /// Implement the interface to a sesson.
+        /// </summary>
+        private class IndicoSesson : ISession
+        {
+            private Session _session;
+
+            /// <summary>
+            /// Cache the session for later use.
+            /// </summary>
+            /// <param name="s"></param>
+            public IndicoSesson(Session s)
+            {
+                // TODO: Complete member initialization
+                this._session = s;
+            }
+
+            private IndicoTalk[] _talks = null;
+
+            /// <summary>
+            /// Get the talks for this meeting.
+            /// </summary>
+            public ITalk[] Talks
+            {
+                get
+                {
+                    if (_talks == null)
+                    {
+                        _talks = _session.Talks.Select(t => new IndicoTalk(t)).ToArray();
+                    }
+                    return _talks;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Implement the interface to a talk
+        /// </summary>
+        private class IndicoTalk : ITalk
+        {
+            private Talk _talk;
+
+            public IndicoTalk(Talk t)
+            {
+                // TODO: Complete member initialization
+                this._talk = t;
+            }
+
+            /// <summary>
+            /// Get the talk title.
+            /// </summary>
+            public string Title
+            {
+                get { return _talk.Title; }
+            }
+        }
+
+
+        /// <summary>
         /// The meeting
         /// </summary>
         private class IndicoMeeting : IMeeting
@@ -36,6 +95,8 @@ namespace IWalker.DataModel.Inidco
             /// Hold onto a complete agenda internally.
             /// </summary>
             private Meeting _agenda;
+
+            private IndicoSesson[] _sessons = null;
 
             /// <summary>
             /// Start up and cache the meeting agenda.
@@ -49,6 +110,21 @@ namespace IWalker.DataModel.Inidco
             public string Title
             {
                 get { return _agenda.Title; }
+            }
+
+            /// <summary>
+            /// Get the sessons. Populate them if need be!
+            /// </summary>
+            public ISession[] Sessions
+            {
+                get
+                {
+                    if (_sessons == null)
+                    {
+                        _sessons = _agenda.Sessions.Select(s => new IndicoSesson(s)).ToArray();
+                    }
+                    return _sessons;
+                }
             }
         }
 
