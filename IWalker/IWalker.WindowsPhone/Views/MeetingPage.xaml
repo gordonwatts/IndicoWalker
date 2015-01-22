@@ -27,6 +27,7 @@
 
         <!--TODO: Content should be placed within the following grid-->
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,9.5,19,0">
+            <ListBox x:Name="TalkList" Grid.Row="1" Grid.Column="0"/>
         </Grid>
     </Grid>
 </Page>
