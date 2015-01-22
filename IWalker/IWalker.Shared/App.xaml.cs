@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.DataModel.Interfaces;
+using IWalker.ViewModels;
 using IWalker.Views;
 using ReactiveUI;
 using Splat;
@@ -50,6 +51,7 @@ namespace IWalker
 
             Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
+            Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk>));
 
             // Create the main view model, and register that.
             var r = new RoutingState();

@@ -17,6 +17,7 @@ namespace IWalker.ViewModels
         {
             // Initial default values
             HostScreen = hs;
+            Talks = new ReactiveList<ITalk>();
 
             // And start off a background guy to populate everything.
             LoadMeeting(mRef);
@@ -40,10 +41,19 @@ namespace IWalker.ViewModels
                 .Select(s => s[0])
                 .Where(t => t.Talks != null)
                 .Select(t => t.Talks)
-                .ToProperty(this, x => x.Talks, out _talks, new ITalk[0]);
+                .Subscribe(talks => SetAsTalks(talks));
 
             // Start everything off.
             ldrCmd.Execute(null);
+        }
+
+        /// <summary>
+        /// Given the talk list, make our current list look like it.
+        /// </summary>
+        /// <param name="talks"></param>
+        private void SetAsTalks(ITalk[] talks)
+        {
+            Talks.AddRange(talks);
         }
 
         /// <summary>
@@ -63,11 +73,11 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get the list of talks
         /// </summary>
-        public ITalk[] Talks
+        public ReactiveList<ITalk> Talks
         {
-            get { return _talks.Value; }
+            get;
+            private set;
         }
-        private ObservableAsPropertyHelper<ITalk[]> _talks;
 
         /// <summary>
         /// Where we will be located.

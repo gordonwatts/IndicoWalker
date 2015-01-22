@@ -12,7 +12,7 @@ namespace IWalker.DataModel.Inidco
     /// <summary>
     /// Meeting reference for Indico
     /// </summary>
-    class IndicoMeetingRef : IMeetingRef
+    public class IndicoMeetingRef : IMeetingRef
     {
         /// <summary>
         /// The URL for this meeting.
@@ -66,7 +66,7 @@ namespace IWalker.DataModel.Inidco
         /// <summary>
         /// Implement the interface to a talk
         /// </summary>
-        private class IndicoTalk : ITalk
+        public class IndicoTalk : ITalk
         {
             private Talk _talk;
 

@@ -30,7 +30,7 @@ namespace IWalker.Views
 
             // Bind everything together we need.
             this.Bind(ViewModel, x => x.MeetingTitle, y => y.MeetingTitle.Text);
-            this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.Children);
+            this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.ItemsSource);
             this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
         }
 
