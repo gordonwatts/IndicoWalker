@@ -19,7 +19,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace IWalker.Views
 {
-    public sealed partial class TalkView : UserControl, IViewFor<IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk>
+    public sealed partial class TalkView : UserControl, IViewFor<ITalk>
     {
         public TalkView()
         {
@@ -31,18 +31,18 @@ namespace IWalker.Views
         /// <summary>
         /// Stash the view model
         /// </summary>
-        public IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk ViewModel
+        public ITalk ViewModel
         {
-            get { return (IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk)GetValue(ViewModelProperty); }
+            get { return (ITalk)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk), typeof(TalkView), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(ITalk), typeof(TalkView), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
-            set { ViewModel = (IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk)value; }
+            set { ViewModel = (ITalk)value; }
         }
     }
 }
