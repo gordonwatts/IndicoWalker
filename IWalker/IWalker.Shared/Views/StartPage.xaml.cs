@@ -42,7 +42,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.CertStateText, x => x.CertStatus.Text);
             this.BindCommand(ViewModel, x => x.StartSequence, x => x.Start);
             this.Bind(ViewModel, x => x.CertPasswordEnabled, x => x.CertControls.Visibility);
-            // Navagation.
+            // Navigation.
             //this.NavigationCacheMode = NavigationCacheMode.Required;
         }
 
