@@ -30,7 +30,6 @@ namespace IWalker.Views
             this.InitializeComponent();
             DataContext = Locator.Current.GetService(typeof(IScreen));
 
-            int j;
             RxApp.SuspensionHost.ObserveAppState<MainPageViewModel>()
                 .Subscribe(o => o.MoveAlong());
         }
