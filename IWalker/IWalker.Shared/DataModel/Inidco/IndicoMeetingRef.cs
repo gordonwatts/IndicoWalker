@@ -29,7 +29,7 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
-        /// Implement the interface to a sesson.
+        /// Implement the interface to a session.
         /// </summary>
         private class IndicoSesson : ISession
         {
@@ -77,6 +77,14 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
+            /// Get the URL for the slide
+            /// </summary>
+            //public string SlideURL
+            //{
+            //    get { return _talk.SlideURL; }
+            //}
+
+            /// <summary>
             /// Get the talk title.
             /// </summary>
             public string Title
@@ -113,7 +121,7 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
-            /// Get the sessons. Populate them if need be!
+            /// Get the sessions. Populate them if need be!
             /// </summary>
             public ISession[] Sessions
             {
