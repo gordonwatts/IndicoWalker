@@ -52,6 +52,7 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
             Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoTalk>));
+            //Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<ITalk>));
 
             // Create the main view model, and register that.
             var r = new RoutingState();
