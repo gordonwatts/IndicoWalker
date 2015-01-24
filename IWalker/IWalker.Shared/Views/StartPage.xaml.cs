@@ -30,10 +30,7 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
 
-            RxApp.SuspensionHost.ObserveAppState<StartPageViewModel>()
-                .BindTo(this, x => x.ViewModel);
             this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
-
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
             // Cert stuff
