@@ -6,6 +6,7 @@ using System.Reactive;
 using System.Text;
 using System.Reactive.Linq;
 using Windows.Storage;
+using Windows.System;
 
 namespace IWalker.ViewModels
 {
@@ -40,12 +41,14 @@ namespace IWalker.ViewModels
             ClickedUs
                 .Where(_ => _localFile != null)
                 .Select(_ => _localFile)
-                .Subscribe(f => OpenFile(f));
-        }
-
-        private void OpenFile(StorageFile f)
-        {
-            throw new NotImplementedException();
+                .SelectMany(async f => Tuple.Create(await Launcher.LaunchFileAsync(f), f))
+                .Subscribe(g =>
+                {
+                    if (!g.Item1)
+                    {
+                        throw new InvalidOperationException(string.Format("Didn't know how to open file of type {0}", g.Item2.DisplayName));
+                    }
+                });
         }
 
         /// <summary>
