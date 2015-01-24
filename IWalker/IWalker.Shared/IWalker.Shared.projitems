@@ -21,6 +21,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ISession.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ITalk.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Settings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainPageViewModel.cs" />

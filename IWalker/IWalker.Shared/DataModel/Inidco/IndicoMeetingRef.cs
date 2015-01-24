@@ -91,6 +91,40 @@ namespace IWalker.DataModel.Inidco
             {
                 get { return _talk.Title; }
             }
+
+            private IndicoFile _file;
+
+            /// <summary>
+            /// Retrn the file associated with this talk.
+            /// </summary>
+            public IFile TalkFile
+            {
+                get
+                {
+                    if (_file == null)
+                    {
+                        _file = new IndicoFile(_talk.SlideURL);
+                    }
+                    return _file;
+                }
+            }
+        }
+
+        /// <summary>
+        /// Represents a file on the indico server.
+        /// </summary>
+        public class IndicoFile : IFile
+        {
+            private Uri _url;
+
+            /// <summary>
+            /// Initialize with the url for this talk
+            /// </summary>
+            /// <param name="p"></param>
+            public IndicoFile(string p)
+            {
+                this._url = new Uri(p);
+            }
         }
 
 
