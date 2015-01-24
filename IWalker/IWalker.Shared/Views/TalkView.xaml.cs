@@ -1,4 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
+using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
@@ -19,7 +20,7 @@ using Windows.UI.Xaml.Navigation;
 
 namespace IWalker.Views
 {
-    public sealed partial class TalkView : UserControl, IViewFor<ITalk>
+    public sealed partial class TalkView : UserControl, IViewFor<TalkUserControlViewModel>
     {
         public TalkView()
         {
@@ -31,18 +32,18 @@ namespace IWalker.Views
         /// <summary>
         /// Stash the view model
         /// </summary>
-        public ITalk ViewModel
+        public TalkUserControlViewModel ViewModel
         {
-            get { return (ITalk)GetValue(ViewModelProperty); }
+            get { return (TalkUserControlViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(ITalk), typeof(TalkView), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(TalkUserControlViewModel), typeof(TalkView), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
-            set { ViewModel = (ITalk)value; }
+            set { ViewModel = (TalkUserControlViewModel)value; }
         }
     }
 }

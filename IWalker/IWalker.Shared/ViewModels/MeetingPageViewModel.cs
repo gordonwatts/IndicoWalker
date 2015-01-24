@@ -17,7 +17,7 @@ namespace IWalker.ViewModels
         {
             // Initial default values
             HostScreen = hs;
-            Talks = new ReactiveList<ITalk>();
+            Talks = new ReactiveList<TalkUserControlViewModel>();
 
             // And start off a background guy to populate everything.
             LoadMeeting(mRef);
@@ -53,7 +53,7 @@ namespace IWalker.ViewModels
         /// <param name="talks"></param>
         private void SetAsTalks(ITalk[] talks)
         {
-            Talks.AddRange(talks);
+            Talks.AddRange(talks.Select(t => new TalkUserControlViewModel(t)));
         }
 
         /// <summary>
@@ -73,11 +73,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get the list of talks
         /// </summary>
-        public ReactiveList<ITalk> Talks
-        {
-            get;
-            private set;
-        }
+        public ReactiveList<TalkUserControlViewModel> Talks { get; private set; }
 
         /// <summary>
         /// Where we will be located.
