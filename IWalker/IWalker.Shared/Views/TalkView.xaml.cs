@@ -12,6 +12,7 @@ namespace IWalker.Views
             this.InitializeComponent();
 
             this.Bind(ViewModel, x => x.Title, y => y.TalkTitle.Text);
+            this.OneWayBind(ViewModel, x => x.File, y => y.GoodFile.ViewModel);
             this.OneWayBind(ViewModel, x => x.HasValidMainFile, y => y.GoodFile.Visibility);
         }
 

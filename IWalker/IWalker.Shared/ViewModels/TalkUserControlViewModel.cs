@@ -31,6 +31,11 @@ namespace IWalker.ViewModels
         public string Title { get { return _talk.Title; } }
 
         /// <summary>
+        /// The talk file
+        /// </summary>
+        public FileUserControlViewModel File { get { return new FileUserControlViewModel(_talk.TalkFile); } }
+
+        /// <summary>
         /// True if the file should be visible
         /// </summary>
         public bool HasValidMainFile

@@ -12,6 +12,7 @@ namespace IWalker.Views
         public FileView()
         {
             this.InitializeComponent();
+            this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick);
         }
 
         public FileUserControlViewModel ViewModel

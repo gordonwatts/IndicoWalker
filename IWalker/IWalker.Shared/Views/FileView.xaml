@@ -10,6 +10,6 @@
     d:DesignWidth="100">
     
     <Grid Background="#FFC73333">
-
+        <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
     </Grid>
 </UserControl>
