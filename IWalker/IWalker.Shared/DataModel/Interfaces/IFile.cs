@@ -9,5 +9,10 @@ namespace IWalker.DataModel.Interfaces
     /// </summary>
     public interface IFile
     {
+        /// <summary>
+        /// Is the file valid... should we even display an icon on the UI for
+        /// this file?
+        /// </summary>
+        bool IsValid { get; }
     }
 }

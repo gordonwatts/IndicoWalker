@@ -123,7 +123,12 @@ namespace IWalker.DataModel.Inidco
             /// <param name="p"></param>
             public IndicoFile(string p)
             {
-                this._url = new Uri(p);
+                _url = string.IsNullOrWhiteSpace(p)? null : new Uri(p);
+            }
+
+            public bool IsValid
+            {
+                get { return _url != null; }
             }
         }
 

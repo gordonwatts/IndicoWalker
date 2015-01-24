@@ -1,4 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
 using System.Text;
@@ -8,7 +9,7 @@ namespace IWalker.ViewModels
     /// <summary>
     /// Class for talk view models.
     /// </summary>
-    public class TalkUserControlViewModel
+    public class TalkUserControlViewModel : ReactiveObject
     {
         /// <summary>
         /// Hold onto the talk we need
@@ -28,5 +29,16 @@ namespace IWalker.ViewModels
         /// Get the title (for the UI).
         /// </summary>
         public string Title { get { return _talk.Title; } }
+
+        /// <summary>
+        /// True if the file should be visible
+        /// </summary>
+        public bool HasValidMainFile
+        {
+            get
+            {
+                return _talk.TalkFile.IsValid;
+            }
+        }
     }
 }

@@ -24,10 +24,14 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Settings.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MeetingPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\StartPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TalkUserControlViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\FileView.xaml.cs">
+      <DependentUpon>FileView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\MainPage.xaml.cs">
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
@@ -39,6 +43,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Views\FileView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)Views\MainPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
