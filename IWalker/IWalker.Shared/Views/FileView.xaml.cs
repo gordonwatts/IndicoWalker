@@ -21,7 +21,7 @@ namespace IWalker.Views
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(FileUserControlViewModel), typeof(TalkView), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(FileUserControlViewModel), typeof(FileView), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
