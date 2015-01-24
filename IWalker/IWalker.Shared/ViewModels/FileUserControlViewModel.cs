@@ -41,6 +41,6 @@ namespace IWalker.ViewModels
         /// If file isn't downloaded, then download the file.
         /// If file is downloaded, then open the file in another program.
         /// </remarks>
-        public ReactiveCommand<object> ClickedUs;
+        public ReactiveCommand<object> ClickedUs { get; private set; }
     }
 }
