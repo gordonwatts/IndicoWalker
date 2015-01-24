@@ -1,6 +1,8 @@
 ﻿using System;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace IWalker.DataModel.Interfaces
 {
@@ -14,5 +16,12 @@ namespace IWalker.DataModel.Interfaces
         /// this file?
         /// </summary>
         bool IsValid { get; }
+
+        /// <summary>
+        /// Return a storage file on the local system that contains the data
+        /// for this file.
+        /// </summary>
+        /// <returns></returns>
+        Task<StorageFile> DownloadFile();
     }
 }

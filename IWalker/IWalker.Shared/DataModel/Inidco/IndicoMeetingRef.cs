@@ -6,6 +6,8 @@ using System.Collections.Generic;
 using System.Text;
 using System.Linq;
 using System.Threading.Tasks;
+using Windows.Storage;
+using System.IO;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -120,15 +122,75 @@ namespace IWalker.DataModel.Inidco
             /// <summary>
             /// Initialize with the url for this talk
             /// </summary>
-            /// <param name="p"></param>
-            public IndicoFile(string p)
+            /// <param name="fileUri"></param>
+            public IndicoFile(string fileUri)
             {
-                _url = string.IsNullOrWhiteSpace(p)? null : new Uri(p);
+                _url = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
             }
 
+            /// <summary>
+            /// Does this object have any hope of fetching a file?
+            /// </summary>
             public bool IsValid
             {
                 get { return _url != null; }
+            }
+
+            /// <summary>
+            /// Download the file from indico, and store it locally in some unique spot.
+            /// </summary>
+            /// <returns></returns>
+            /// <remarks>
+            /// This will change as we move forward to just being a stream of some sort.
+            /// </remarks>
+            public async Task<StorageFile> DownloadFile()
+            {
+                // Get the file reseting place for the file name
+                var fname = CleanFilename(_url.AbsolutePath);
+
+                // Now, see if the file exists already. If so, we can just return it.
+                var local = ApplicationData.Current.LocalFolder;
+                var indico = (await local.TryGetItemAsync("indico")) as StorageFolder;
+                if (indico == null)
+                {
+                    indico = await local.CreateFolderAsync("indico");
+                }
+
+                var file = (await indico.TryGetItemAsync(fname)) as StorageFile;
+                if (file != null)
+                    return file;
+
+                // Get the file, save it to the proper location, and then return it.
+                var dataStream = await _fetcher.Value.GetDataFromURL(_url);
+                var fnameTemp = fname + "-temp";
+                var tempFile = await indico.CreateFileAsync(fnameTemp, CreationCollisionOption.ReplaceExisting);
+                var outputStream = await tempFile.OpenAsync(FileAccessMode.ReadWrite);
+                using (var sw = outputStream.AsStreamForWrite())
+                {
+                    await dataStream.BaseStream.CopyToAsync(sw);
+                }
+
+                await tempFile.RenameAsync(fname);
+
+                // Finally, get back the file and return it.
+                file = await indico.GetFileAsync(fname);
+                return file;
+            }
+
+            /// <summary>
+            /// Clean up a string so it can be used as a filename.
+            /// </summary>
+            /// <param name="str"></param>
+            /// <returns></returns>
+            private string CleanFilename(string str)
+            {
+                return str
+                    .Replace("/", "_")
+                    .Replace("\\", "_")
+                    .Replace(":", "_")
+                    .Replace("?", "_")
+                    .Replace("=", "_")
+                    .Replace("&", "_");
             }
         }
 

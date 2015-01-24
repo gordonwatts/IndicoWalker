@@ -4,6 +4,8 @@ using System;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Text;
+using System.Reactive.Linq;
+using Windows.Storage;
 
 namespace IWalker.ViewModels
 {
@@ -18,6 +20,11 @@ namespace IWalker.ViewModels
         private IFile _file;
 
         /// <summary>
+        /// Pointer to the current local file
+        /// </summary>
+        private StorageFile _localFile = null;
+
+        /// <summary>
         /// Initialize all of our behaviors.
         /// </summary>
         /// <param name="file"></param>
@@ -26,10 +33,17 @@ namespace IWalker.ViewModels
             _file = file;
 
             ClickedUs = ReactiveCommand.Create();
-            ClickedUs.Subscribe(u => DoIt());
+            ClickedUs
+                .Where(_ => _localFile == null)
+                .SelectMany(async _ => await _file.DownloadFile())
+                .Subscribe(f => _localFile = f);
+            ClickedUs
+                .Where(_ => _localFile != null)
+                .Select(_ => _localFile)
+                .Subscribe(f => OpenFile(f));
         }
 
-        private void DoIt()
+        private void OpenFile(StorageFile f)
         {
             throw new NotImplementedException();
         }
