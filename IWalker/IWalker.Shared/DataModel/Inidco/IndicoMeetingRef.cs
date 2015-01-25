@@ -153,22 +153,23 @@ namespace IWalker.DataModel.Inidco
 
                 // Now, see if the file exists already. If so, we can just return it.
                 var local = ApplicationData.Current.LocalFolder;
-                var indico = (await local.TryGetItemAsync("indico")) as StorageFolder;
+                var indico = await local.CreateFolderAsync("indico", CreationCollisionOption.OpenIfExists);
                 if (indico == null)
                 {
                     indico = await local.CreateFolderAsync("indico");
                 }
 
-                var file = (await indico.TryGetItemAsync(fname)) as StorageFile;
-                if (file != null)
-                {
+                StorageFile file = null;
+                try {
+                    file = await indico.GetFileAsync(fname);
                     Debug.WriteLine("  File already downloaded for {0}", _url.OriginalString);
                     return file;
+                } catch {
+
                 }
 
-                Debug.WriteLine("  Doing download for {0}", _url.OriginalString);
-
                 // Get the file, save it to the proper location, and then return it.
+                Debug.WriteLine("  Doing download for {0}", _url.OriginalString);
                 var dataStream = await _fetcher.Value.GetDataFromURL(_url);
                 var fnameTemp = fname + "-temp";
                 var tempFile = await indico.CreateFileAsync(fnameTemp, CreationCollisionOption.ReplaceExisting);
@@ -215,14 +216,17 @@ namespace IWalker.DataModel.Inidco
                 // Get the file reseting place for the file name
                 var fname = CleanFilename(_url.AbsolutePath);
                 var local = ApplicationData.Current.LocalFolder;
-                var indico = (await local.TryGetItemAsync("indico")) as StorageFolder;
-                if (indico == null)
+                try
+                {
+                    var indico = await local.GetFolderAsync("indico");
+                    var file = await indico.GetFileAsync(fname);
+                }
+                catch
                 {
                     return false;
                 }
 
-                var file = (await indico.TryGetItemAsync(fname)) as StorageFile;
-                return file != null;
+                return true;
             }
         }
 
