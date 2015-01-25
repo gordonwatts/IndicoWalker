@@ -103,10 +103,17 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="ViewModels\FileSlideListViewModel.cs" />
+    <Compile Include="Views\FileSlidesUserControl.xaml.cs">
+      <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\MeetingPage.xaml.cs">
       <DependentUpon>MeetingPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\TalkView.xaml.cs">
+      <DependentUpon>TalkView.xaml</DependentUpon>
+    </Compile>
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -159,7 +166,15 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\FileSlidesUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\MeetingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TalkView.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>
