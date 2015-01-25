@@ -10,12 +10,12 @@
     d:DesignWidth="400">
     
     <Grid x:Name="MainGrid" Margin="0 5 0 5">
-        <StackPanel Orientation="Horizontal">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 0 10 00">
-                <TextBlock x:Name="TalkTitle">hi</TextBlock>
-                <local:FileView x:Name="GoodFile" Width="100" Height="100" HorizontalAlignment="Left" Margin="10 0 0 0" />
+        <StackPanel Orientation="Vertical">
+            <TextBlock x:Name="TalkTitle" Style="{StaticResource BodyTextBlockStyle}" Margin="5 0 0 4">hi</TextBlock>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 0 10 00">
+                <local:FileView x:Name="GoodFile" Width="100" Height="100" HorizontalAlignment="Left" Margin="10 2 10 0" VerticalAlignment="Top" />
+                <local:FileSlidesUserControl x:Name="FileSlides" />
             </StackPanel>
-            <local:FileSlidesUserControl x:Name="FileSlides" />
         </StackPanel>
     </Grid>
 </UserControl>
