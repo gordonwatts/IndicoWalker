@@ -1,9 +1,6 @@
 ﻿using IWalker.DataModel.Interfaces;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.Reactive;
-using System.Text;
 using System.Reactive.Linq;
 using Windows.Storage;
 using Windows.System;

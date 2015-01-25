@@ -2,13 +2,11 @@
 using IndicoInterface.NET.SimpleAgendaDataModel;
 using IWalker.DataModel.Interfaces;
 using System;
-using System.Collections.Generic;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
-using System.IO;
-using System.Diagnostics;
 
 namespace IWalker.DataModel.Inidco
 {

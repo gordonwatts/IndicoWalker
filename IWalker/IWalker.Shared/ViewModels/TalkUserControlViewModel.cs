@@ -1,8 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Text;
 
 namespace IWalker.ViewModels
 {
