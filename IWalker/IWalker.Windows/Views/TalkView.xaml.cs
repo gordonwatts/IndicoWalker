@@ -18,7 +18,6 @@ namespace IWalker.Views
             this.OneWayBind(ViewModel, x => x.HasValidMainFile, y => y.GoodFile.Visibility);
             this.OneWayBind(ViewModel, x => x.FileSlides, y => y.FileSlides.ViewModel);
 
-            Type dummy;
             Observable.FromEventPattern(MainGrid, "SizeChanged")
                 .Select(e => e.EventArgs as SizeChangedEventArgs)
                 .Select(sg => sg.NewSize.Width)

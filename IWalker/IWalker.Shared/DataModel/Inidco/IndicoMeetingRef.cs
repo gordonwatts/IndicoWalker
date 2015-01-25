@@ -144,6 +144,7 @@ namespace IWalker.DataModel.Inidco
             /// </remarks>
             public async Task<StorageFile> DownloadFile()
             {
+                Debug.Assert(IsValid);
                 Debug.WriteLine("Entering DownloadFile {0}", _url.OriginalString);
 
                 // Get the file reseting place for the file name
@@ -211,6 +212,10 @@ namespace IWalker.DataModel.Inidco
             /// </remarks>
             public async Task<bool> IsLocal()
             {
+                // Just cut off if it isn't valid.
+                if (!IsValid)
+                    return false;
+
                 // Get the file reseting place for the file name
                 var fname = CleanFilename(_url.AbsolutePath);
                 var local = ApplicationData.Current.LocalFolder;
