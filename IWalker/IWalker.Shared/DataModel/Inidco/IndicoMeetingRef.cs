@@ -8,6 +8,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 using System.IO;
+using System.Diagnostics;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -145,6 +146,8 @@ namespace IWalker.DataModel.Inidco
             /// </remarks>
             public async Task<StorageFile> DownloadFile()
             {
+                Debug.WriteLine("Entering DownloadFile {0}", _url.OriginalString);
+
                 // Get the file reseting place for the file name
                 var fname = CleanFilename(_url.AbsolutePath);
 
@@ -158,7 +161,12 @@ namespace IWalker.DataModel.Inidco
 
                 var file = (await indico.TryGetItemAsync(fname)) as StorageFile;
                 if (file != null)
+                {
+                    Debug.WriteLine("  File already downloaded for {0}", _url.OriginalString);
                     return file;
+                }
+
+                Debug.WriteLine("  Doing download for {0}", _url.OriginalString);
 
                 // Get the file, save it to the proper location, and then return it.
                 var dataStream = await _fetcher.Value.GetDataFromURL(_url);
@@ -174,6 +182,7 @@ namespace IWalker.DataModel.Inidco
 
                 // Finally, get back the file and return it.
                 file = await indico.GetFileAsync(fname);
+                Debug.WriteLine("  Finished download of {0}", _url.OriginalString);
                 return file;
             }
 
@@ -191,6 +200,29 @@ namespace IWalker.DataModel.Inidco
                     .Replace("?", "_")
                     .Replace("=", "_")
                     .Replace("&", "_");
+            }
+
+            /// <summary>
+            /// See if the file is currently local or not.
+            /// </summary>
+            /// <returns></returns>
+            /// <remarks>
+            /// Will not create anything.
+            /// This will be deleted when we have a real backing store as well.
+            /// </remarks>
+            public async Task<bool> IsLocal()
+            {
+                // Get the file reseting place for the file name
+                var fname = CleanFilename(_url.AbsolutePath);
+                var local = ApplicationData.Current.LocalFolder;
+                var indico = (await local.TryGetItemAsync("indico")) as StorageFolder;
+                if (indico == null)
+                {
+                    return false;
+                }
+
+                var file = (await indico.TryGetItemAsync(fname)) as StorageFile;
+                return file != null;
             }
         }
 

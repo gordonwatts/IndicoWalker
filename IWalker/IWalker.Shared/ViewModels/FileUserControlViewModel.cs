@@ -33,20 +33,29 @@ namespace IWalker.ViewModels
         {
             _file = file;
 
-            ClickedUs = ReactiveCommand.Create();
+            // Get the file if it is already local.
+            var cmd = ReactiveCommand.CreateAsyncObservable(token =>
+                Observable.FromAsync(() => _file.IsLocal())
+                .Where(g => g)
+                .SelectMany(_ => _file.DownloadFile())
+                );
+            cmd.Subscribe(f => _localFile = f);
+            cmd.ExecuteAsync().Subscribe();
+
+            // Now, when the user clicks, we either download or open...
+            ClickedUs = ReactiveCommand.CreateAsyncTask(cmd.IsExecuting.Select(g => !g), token => _file.DownloadFile());
             ClickedUs
-                .Where(_ => _localFile == null)
-                .SelectMany(async _ => await _file.DownloadFile())
+                .Where(f => _localFile == null)
                 .Subscribe(f => _localFile = f);
+
             ClickedUs
-                .Where(_ => _localFile != null)
-                .Select(_ => _localFile)
-                .SelectMany(async f => Tuple.Create(await Launcher.LaunchFileAsync(f), f))
+                .Where(f => _localFile != null)
+                .SelectMany(f => Launcher.LaunchFileAsync(f))
                 .Subscribe(g =>
                 {
-                    if (!g.Item1)
+                    if (!g)
                     {
-                        throw new InvalidOperationException(string.Format("Didn't know how to open file of type {0}", g.Item2.DisplayName));
+                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _localFile.DisplayName));
                     }
                 });
         }
@@ -58,6 +67,6 @@ namespace IWalker.ViewModels
         /// If file isn't downloaded, then download the file.
         /// If file is downloaded, then open the file in another program.
         /// </remarks>
-        public ReactiveCommand<object> ClickedUs { get; private set; }
+        public ReactiveCommand<StorageFile> ClickedUs { get; private set; }
     }
 }

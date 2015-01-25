@@ -23,5 +23,10 @@ namespace IWalker.DataModel.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<StorageFile> DownloadFile();
+
+        /// <summary>
+        /// Return true if the file is local
+        /// </summary>
+        Task<bool> IsLocal();
     }
 }
