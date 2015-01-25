@@ -34,6 +34,6 @@
             <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                         IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
         </Grid>
-        <ListBox x:Name="TalkList" Grid.Row="1" Grid.Column="0"/>
+        <ItemsControl x:Name="TalkList" Grid.Row="1" Grid.Column="0" />
     </Grid>
 </Page>
