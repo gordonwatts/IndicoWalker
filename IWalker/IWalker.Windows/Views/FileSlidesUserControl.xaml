@@ -9,7 +9,13 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
     
-    <Grid Width="200" Height="300">
-        <ItemsControl x:Name="Slides"/>
+    <Grid >
+        <GridView x:Name="Slides">
+            <GridView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsWrapGrid Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </GridView.ItemsPanel>
+        </GridView>
     </Grid>
 </UserControl>

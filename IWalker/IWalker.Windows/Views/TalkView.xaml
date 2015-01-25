@@ -9,13 +9,13 @@
     d:DesignHeight="300"
     d:DesignWidth="400">
     
-    <Grid>
+    <Grid x:Name="MainGrid">
         <StackPanel Orientation="Horizontal">
-            <StackPanel Orientation="Vertical" HorizontalAlignment="Left">
+            <StackPanel Orientation="Vertical" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0 0 10 00">
                 <TextBlock x:Name="TalkTitle">hi</TextBlock>
                 <local:FileView x:Name="GoodFile" Width="100" Height="100" HorizontalAlignment="Left" Margin="10 0 0 0" />
             </StackPanel>
-            <local:FileSlidesUserControl x:Name="FileSlides" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+            <local:FileSlidesUserControl x:Name="FileSlides" />
         </StackPanel>
     </Grid>
 </UserControl>
