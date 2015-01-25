@@ -9,7 +9,7 @@
     d:DesignHeight="100"
     d:DesignWidth="100">
     
-    <Grid Width="100">
+    <Grid>
         <Image x:Name="ThumbImage"/>
     </Grid>
 </UserControl>

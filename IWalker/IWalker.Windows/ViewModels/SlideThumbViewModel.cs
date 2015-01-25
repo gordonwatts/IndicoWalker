@@ -44,7 +44,7 @@ namespace IWalker.ViewModels
         public SlideThumbViewModel(Windows.Data.Pdf.PdfPage p)
         {
             _page = p;
-            _renderWidth = 100;
+            _renderWidth = 150;
 
             // When we arrive, prep the page for rendering on a background thread
             var prepForRender = ReactiveCommand.CreateAsyncTask(_ => _page.PreparePageAsync().AsTask());
@@ -55,9 +55,9 @@ namespace IWalker.ViewModels
             var ra = ms.AsRandomAccessStream();
             this.WhenAny(x => x.RenderWidth, x => x.Value)
                 .Where(w => w > 10)
-                .SelectMany(async _ =>
+                .SelectMany(async szPixels =>
                 {
-                    await _page.RenderToStreamAsync(ra, new PdfPageRenderOptions() { DestinationWidth = 100 });
+                    await _page.RenderToStreamAsync(ra, new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels });
                     var bm = new BitmapImage();
                     await bm.SetSourceAsync(ra);
                     return bm;
