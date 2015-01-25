@@ -10,6 +10,6 @@
     d:DesignWidth="100">
     
     <Grid>
-        <Image x:Name="ThumbImage"/>
+        <Image Margin="2 2 2 2" x:Name="ThumbImage"/>
     </Grid>
 </UserControl>
