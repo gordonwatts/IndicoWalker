@@ -2,6 +2,8 @@
 using IWalker.DataModel.Interfaces;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
+using System.Linq;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
 using Windows.Storage;
@@ -22,7 +24,10 @@ namespace IWalker.ViewModels
         /// </summary>
         private ReactiveCommand<StorageFile> _renderPDF;
 
-        private uint mine;
+        /// <summary>
+        /// The list of thumbnails
+        /// </summary>
+        public ReactiveList<SlideThumbViewModel> SlideThumbnails { get; private set; }
 
         /// <summary>
         /// Setup the VM for the associated file.
@@ -30,16 +35,27 @@ namespace IWalker.ViewModels
         /// <param name="f"></param>
         public FileSlideListViewModel(IFile f)
         {
+            Debug.Assert(f != null);
+
+            // Get the object consitent.
             _file = f;
+            SlideThumbnails = new ReactiveList<SlideThumbViewModel>();
 
-            // TODO: Normally this would not kick off a download, but in this case
-            // we will until we get a real background store in there.
-
+            // Run a rendering and populate the renderpdf control with all the
+            // thumbnails we can.
             _renderPDF = ReactiveCommand.CreateAsyncTask(_ => f.DownloadFile());
             _renderPDF
                 .SelectMany(sf => PdfDocument.LoadFromFileAsync(sf))
-                .Select(pdf => pdf.PageCount)
-                .Subscribe(np => mine = np);
+                .Select(sf => Enumerable.Range(0, (int)sf.PageCount - 1)
+                                .Select(index => sf.GetPage((uint)index))
+                                .Select(p => new SlideThumbViewModel(p)))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(pages => SlideThumbnails.AddRange(pages));
+
+            // TODO: Normally this would not kick off a download, but in this case
+            // we will until we get a real background store in there. Then we can kick this
+            // off only if the file is actually downloaded.
+
             _renderPDF.ExecuteAsync().Subscribe();
         }
     }

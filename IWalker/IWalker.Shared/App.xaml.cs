@@ -42,6 +42,9 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
             Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<TalkUserControlViewModel>));
             //Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<ITalk>));
+#if WINDOWS_APP
+            Locator.CurrentMutable.Register(() => new SlideThumbUserControl(), typeof(IViewFor<SlideThumbViewModel>));
+#endif
 
             // Create the main view model, and register that.
             var r = new RoutingState();

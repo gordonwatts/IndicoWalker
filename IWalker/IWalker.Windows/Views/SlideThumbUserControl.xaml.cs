@@ -8,31 +8,32 @@ using Windows.UI.Xaml.Controls;
 namespace IWalker.Views
 {
     /// <summary>
-    /// The view for the file slides. We are mostly a list of all the slide images.
+    /// Show the image. When we are re-sized, we will cause a rendering for our image.
     /// </summary>
-    public sealed partial class FileSlidesUserControl : UserControl, IViewFor<FileSlideListViewModel>
+    public sealed partial class SlideThumbUserControl : UserControl, IViewFor<SlideThumbViewModel>
     {
-        public FileSlidesUserControl()
+        public SlideThumbUserControl()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource);
+            this.OneWayBind(ViewModel, x => x.Image, y => y.ThumbImage.Source);
+            this.Bind(ViewModel, x => x.RenderWidth, y => y.ThumbImage.Width);
         }
 
         /// <summary>
         /// Hold onto the view model, which we will need for doing all sorts of things.
         /// </summary>
-        public FileSlideListViewModel ViewModel
+        public SlideThumbViewModel ViewModel
         {
-            get { return (FileSlideListViewModel)GetValue(ViewModelProperty); }
+            get { return (SlideThumbViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(FileSlideListViewModel), typeof(FileSlidesUserControl), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(SlideThumbViewModel), typeof(SlideThumbUserControl), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
-            set { ViewModel = (FileSlideListViewModel)value; }
+            set { ViewModel = (SlideThumbViewModel)value; }
         }
     }
 }
