@@ -231,6 +231,18 @@ namespace IWalker.DataModel.Inidco
 
                 return true;
             }
+
+            /// <summary>
+            /// Return the file type based on the url.
+            /// </summary>
+            public string FileType
+            {
+                get {
+                    if (!IsValid)
+                        return "";
+                    return Path.GetExtension(_url.Segments.Last()).Substring(1);
+                }
+            }
         }
 
 

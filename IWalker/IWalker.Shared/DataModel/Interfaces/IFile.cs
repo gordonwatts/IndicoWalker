@@ -25,5 +25,12 @@ namespace IWalker.DataModel.Interfaces
         /// Return true if the file is local
         /// </summary>
         Task<bool> IsLocal();
+
+        /// <summary>
+        /// Return the file type put in lower case and without the ".".
+        /// e.g. "pdf" or "pptx" or similar.
+        /// </summary>
+        /// <returns>Lower case string indicating a valid file extension. Or blank if not known.</returns>
+        string FileType { get; }
     }
 }

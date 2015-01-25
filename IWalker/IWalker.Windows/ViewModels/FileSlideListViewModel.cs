@@ -35,7 +35,7 @@ namespace IWalker.ViewModels
             _file = f;
             SlideThumbnails = new ReactiveList<SlideThumbViewModel>();
 
-            if (_file.IsValid)
+            if (_file.IsValid && _file.FileType == "pdf")
             {
 
                 // Run a rendering and populate the renderpdf control with all the
