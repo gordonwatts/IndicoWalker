@@ -45,7 +45,7 @@ namespace IWalker.ViewModels
                 var renderPDF = ReactiveCommand.CreateAsyncTask(_ => f.DownloadFile());
                 renderPDF
                     .SelectMany(sf => PdfDocument.LoadFromFileAsync(sf))
-                    .Select(sf => Enumerable.Range(0, (int)sf.PageCount - 1)
+                    .Select(sf => Enumerable.Range(0, (int)sf.PageCount)
                                     .Select(index => sf.GetPage((uint)index))
                                     .Select(p => new SlideThumbViewModel(p)))
                     .ObserveOn(RxApp.MainThreadScheduler)
