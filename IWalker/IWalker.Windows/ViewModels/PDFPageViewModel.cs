@@ -9,6 +9,7 @@ using Windows.Data.Pdf;
 using System.Linq;
 using System.Reactive.Linq;
 using Windows.UI.Xaml.Media.Imaging;
+using System.Diagnostics;
 
 namespace IWalker.ViewModels
 {
@@ -66,7 +67,19 @@ namespace IWalker.ViewModels
         public enum RenderingDimension
         {
             Horizontal,
+            Vertical,
+            MustFit
         };
+
+        /// <summary>
+        /// Get or set the way we do the rendering.
+        /// </summary>
+        public RenderingDimension RenderingPriority
+        {
+            get { return _renderingPriority; }
+            set { this.RaiseAndSetIfChanged(ref _renderingPriority, value); }
+        }
+        private RenderingDimension _renderingPriority;
 
         /// <summary>
         /// Initialize with the page that we should track.
@@ -78,14 +91,14 @@ namespace IWalker.ViewModels
             _page = page;
 
             // Render the image at a certain width
-            this.WhenAny(x => x.RenderWidth, x => x.Value)
-                .Where(w => w > 10)
+            this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, x => x.RenderingPriority, (x, y, z) => Tuple.Create(x.Value, y.Value))
+                .Where(w => NewDimensionsOK(w))
                 .Throttle(TimeSpan.FromMilliseconds(500))
                 .SelectMany(async szPixels =>
                 {
                     var ms = new MemoryStream();
                     var ra = ms.AsRandomAccessStream();
-                    await _page.RenderToStreamAsync(ra, new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels });
+                    await _page.RenderToStreamAsync(ra, MakeRenderingOptions(szPixels));
                     return ms;
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -96,6 +109,61 @@ namespace IWalker.ViewModels
                     return bm;
                 })
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
+        }
+
+        /// <summary>
+        /// Get the rendering options given our current setup.
+        /// </summary>
+        /// <param name="szPixels"></param>
+        /// <returns></returns>
+        private PdfPageRenderOptions MakeRenderingOptions(Tuple<double, double> szPixels)
+        {
+            switch (RenderingPriority)
+            {
+                case RenderingDimension.Horizontal:
+                    return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1 };
+
+                case RenderingDimension.Vertical:
+                    return new PdfPageRenderOptions() { DestinationHeight = (uint)szPixels.Item2 };
+
+                case RenderingDimension.MustFit:
+                    return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
+
+                default:
+                    Debug.Assert(false);
+                    return null;
+
+            }
+        }
+
+        /// <summary>
+        /// Given our settings, check to see if we have reasonable dimensions.
+        /// </summary>
+        /// <param name="w">Dimensions we should be checking</param>
+        /// <returns></returns>
+        private bool NewDimensionsOK(Tuple<double, double> w)
+        {
+            switch (RenderingPriority)
+            {
+                case RenderingDimension.Horizontal:
+                    if (w.Item1 <= 0)
+                        return false;
+                    return true;
+
+                case RenderingDimension.Vertical:
+                    if (w.Item2 <= 0)
+                        return false;
+                    return true;
+
+                case RenderingDimension.MustFit:
+                    if (w.Item1 <= 0 || w.Item2 <= 0)
+                        return false;
+                    return true;
+
+                default:
+                    Debug.Assert(false);
+                    return false;
+            }
         }
     }
 }

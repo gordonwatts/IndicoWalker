@@ -11,7 +11,7 @@
     
     <Grid>
         <Border BorderThickness="4" BorderBrush="#FF66665B" Margin="2 2 2 2">
-            <local:PDFPageUserControl x:Name="PDFPageUC" Width="150" />
+            <local:PDFPageUserControl RespectRenderingDimension="Horizontal" x:Name="PDFPageUC" Width="150" />
         </Border>
     </Grid>
 </UserControl>
