@@ -50,7 +50,7 @@ namespace IWalker.ViewModels
             var prepForRender = ReactiveCommand.CreateAsyncTask(_ => _page.PreparePageAsync().AsTask());
             prepForRender.ExecuteAsync().Subscribe();
 
-            // Render the image at a certian width
+            // Render the image at a certain width
             var ms = new MemoryStream();
             var ra = ms.AsRandomAccessStream();
             this.WhenAny(x => x.RenderWidth, x => x.Value)
