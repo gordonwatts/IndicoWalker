@@ -118,22 +118,16 @@ namespace IWalker.ViewModels
         /// <returns></returns>
         private PdfPageRenderOptions MakeRenderingOptions(Tuple<double, double> szPixels)
         {
-            switch (RenderingPriority)
+            if (szPixels.Item1 == 0)
             {
-                case RenderingDimension.Horizontal:
-                    return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1 };
-
-                case RenderingDimension.Vertical:
-                    return new PdfPageRenderOptions() { DestinationHeight = (uint)szPixels.Item2 };
-
-                case RenderingDimension.MustFit:
-                    return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-
-                default:
-                    Debug.Assert(false);
-                    return null;
-
+                return new PdfPageRenderOptions() { DestinationHeight = (uint)szPixels.Item2 };
             }
+
+            if (szPixels.Item2 == 0)
+            {
+                return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1 };
+            }
+            return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
         }
 
         /// <summary>
@@ -143,27 +137,7 @@ namespace IWalker.ViewModels
         /// <returns></returns>
         private bool NewDimensionsOK(Tuple<double, double> w)
         {
-            switch (RenderingPriority)
-            {
-                case RenderingDimension.Horizontal:
-                    if (w.Item1 <= 0)
-                        return false;
-                    return true;
-
-                case RenderingDimension.Vertical:
-                    if (w.Item2 <= 0)
-                        return false;
-                    return true;
-
-                case RenderingDimension.MustFit:
-                    if (w.Item1 <= 0 || w.Item2 <= 0)
-                        return false;
-                    return true;
-
-                default:
-                    Debug.Assert(false);
-                    return false;
-            }
+            return w.Item1 != 0 || w.Item2 != 0;
         }
     }
 }
