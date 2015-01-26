@@ -8,8 +8,14 @@
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
-        <ScrollViewer VerticalScrollMode="Disabled" HorizontalScrollMode="Enabled">
-            <ItemsControl x:Name="SlideStrip"/>
+        <ScrollViewer>
+            <ItemsControl x:Name="SlideStrip">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+            </ItemsControl>
         </ScrollViewer>
     </Grid>
 </Page>
