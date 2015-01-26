@@ -104,11 +104,15 @@
   </PropertyGroup>
   <ItemGroup>
     <Compile Include="ViewModels\FileSlideListViewModel.cs" />
+    <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
     <Compile Include="ViewModels\PDFPageViewModel.cs" />
     <Compile Include="ViewModels\SlideThumbViewModel.cs" />
     <Compile Include="ViewModels\TalkAsSlidesViewModel.cs" />
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FullTalkAsStripView.xaml.cs">
+      <DependentUpon>FullTalkAsStripView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\MeetingPage.xaml.cs">
       <DependentUpon>MeetingPage.xaml</DependentUpon>
@@ -176,6 +180,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\FileSlidesUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FullTalkAsStripView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
