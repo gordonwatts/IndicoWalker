@@ -31,14 +31,14 @@ namespace IWalker.ViewModels
         {
             Debug.Assert(f != null);
 
-            // Get the object consitent.
+            // Get the object consistent.
             _file = f;
             SlideThumbnails = new ReactiveList<SlideThumbViewModel>();
 
             if (_file.IsValid && _file.FileType == "pdf")
             {
 
-                // Run a rendering and populate the renderpdf control with all the
+                // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
                 Exception userBomb;
