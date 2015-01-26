@@ -1,6 +1,7 @@
 ﻿
 using IWalker.DataModel.Interfaces;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -37,6 +38,10 @@ namespace IWalker.ViewModels
 
             if (_file.IsValid && _file.FileType == "pdf")
             {
+                // If the user clicks on a slide, we will bring up the full slide experience, with the
+                // slide they clicked on at the top.
+
+                Lazy<FullTalkAsStripViewModel> fullVM = null;
 
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
@@ -45,9 +50,10 @@ namespace IWalker.ViewModels
                 var renderPDF = ReactiveCommand.CreateAsyncTask(_ => f.DownloadFile());
                 renderPDF
                     .SelectMany(sf => PdfDocument.LoadFromFileAsync(sf))
+                    .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc)))
                     .Select(sf => Enumerable.Range(0, (int)sf.PageCount)
                                     .Select(index => sf.GetPage((uint)index))
-                                    .Select(p => new SlideThumbViewModel(p)))
+                                    .Select(p => new SlideThumbViewModel(p, fullVM)))
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(pages => SlideThumbnails.AddRange(pages),
                                ex => userBomb = ex);

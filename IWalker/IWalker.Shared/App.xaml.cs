@@ -44,6 +44,8 @@ namespace IWalker
             //Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<ITalk>));
 #if WINDOWS_APP
             Locator.CurrentMutable.Register(() => new SlideThumbUserControl(), typeof(IViewFor<SlideThumbViewModel>));
+            Locator.CurrentMutable.Register(() => new PDFPageUserControl(), typeof(IViewFor<PDFPageViewModel>));
+            Locator.CurrentMutable.Register(() => new FullTalkAsStripView(), typeof(IViewFor<FullTalkAsStripViewModel>));
 #endif
 
             // Create the main view model, and register that.

@@ -1,7 +1,11 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -16,6 +20,10 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel);
+            var pressed = Observable.FromEventPattern<PointerRoutedEventArgs>(this.PDFPageUC, "PointerPressed");
+            var released = Observable.FromEventPattern<PointerRoutedEventArgs>(this.PDFPageUC, "PointerReleased");
+            released
+                .Subscribe(e => ViewModel.OpenFullView.Execute(null));
         }
 
         /// <summary>
