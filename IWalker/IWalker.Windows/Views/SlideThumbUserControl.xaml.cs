@@ -15,8 +15,7 @@ namespace IWalker.Views
         public SlideThumbUserControl()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.Image, y => y.ThumbImage.Source);
-            this.Bind(ViewModel, x => x.RenderWidth, y => y.ThumbImage.Width);
+            this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel);
         }
 
         /// <summary>

@@ -13,56 +13,22 @@ namespace IWalker.ViewModels
     public class SlideThumbViewModel : ReactiveObject
     {
         /// <summary>
-        /// The PDF page that we are responsible for.
+        /// The internal view model for the page.
         /// </summary>
-        private PdfPage _page;
-
-        /// <summary>
-        /// The image we are going to use for the bitmap.
-        /// </summary>
-        public BitmapImage Image
-        {
-            get { return _image.Value; }
-        }
-        private ObservableAsPropertyHelper<BitmapImage> _image = null;
-
-
-        /// <summary>
-        /// Set to the the width of the control.
-        /// </summary>
-        public double RenderWidth
-        {
-            get { return _renderWidth; }
-            set { this.RaiseAndSetIfChanged(ref _renderWidth, value); }
-        }
-        private double _renderWidth;
+        public PDFPageViewModel PDFPageVM { get; private set; }
 
         /// <summary>
         /// Initialize with the page that we should track.
         /// </summary>
-        /// <param name="p"></param>
-        public SlideThumbViewModel(Windows.Data.Pdf.PdfPage p)
+        /// <param name="page">The PDF page to be rendered</param>
+        /// <remarks>We will call PeparePageAsync on the page</remarks>
+        public SlideThumbViewModel(PdfPage page)
         {
-            _page = p;
-            _renderWidth = 150;
+            PDFPageVM = new PDFPageViewModel(page);
 
-            // When we arrive, prep the page for rendering on a background thread
-            var prepForRender = ReactiveCommand.CreateAsyncTask(_ => _page.PreparePageAsync().AsTask());
+            // Prepare the slide for rendering.
+            var prepForRender = ReactiveCommand.CreateAsyncTask(_ => page.PreparePageAsync().AsTask());
             prepForRender.ExecuteAsync().Subscribe();
-
-            // Render the image at a certain width
-            var ms = new MemoryStream();
-            var ra = ms.AsRandomAccessStream();
-            this.WhenAny(x => x.RenderWidth, x => x.Value)
-                .Where(w => w > 10)
-                .SelectMany(async szPixels =>
-                {
-                    await _page.RenderToStreamAsync(ra, new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels });
-                    var bm = new BitmapImage();
-                    await bm.SetSourceAsync(ra);
-                    return bm;
-                })
-                .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
         }
     }
 }
