@@ -31,7 +31,7 @@ namespace IWalker.Views
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
 
-            // If the ESC key is hit, we want to navagate back.
+            // If the ESC key is hit, we want to navigate back.
             Observable.FromEventPattern<KeyRoutedEventArgs>(this, "KeyUp")
                 .Select(args => args.EventArgs)
                 .Where(keys => keys.Key == VirtualKey.Escape)
