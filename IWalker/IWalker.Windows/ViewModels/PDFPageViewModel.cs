@@ -39,26 +39,10 @@ namespace IWalker.ViewModels
         }
         private ObservableAsPropertyHelper<BitmapImage> _image = null;
 
-
         /// <summary>
-        /// The size of the image that we are rendering.
+        /// Fired by us at the end of the image render with the new image size.
         /// </summary>
-        public double RenderWidth
-        {
-            get { return _renderWidth; }
-            set { this.RaiseAndSetIfChanged(ref _renderWidth, value); }
-        }
-        private double _renderWidth;
-
-        /// <summary>
-        /// The size of the image that we are rendering.
-        /// </summary>
-        public double RenderHeight
-        {
-            get { return _renderHeight; }
-            set { this.RaiseAndSetIfChanged(ref _renderHeight, value); }
-        }
-        private double _renderHeight;
+        public IObservable<Tuple<int, int>> UpdateImageSize { get; private set; }
 
         /// <summary>
         /// Which dimension is important?
@@ -74,14 +58,11 @@ namespace IWalker.ViewModels
         };
 
         /// <summary>
-        /// Get or set the way we do the rendering.
+        /// This is executed in order to trigger a rendering. It should 
+        /// contain the rendering mode, along with the x and y size of the
+        /// space that we are going to render into.
         /// </summary>
-        public RenderingDimension RenderingPriority
-        {
-            get { return _renderingPriority; }
-            set { this.RaiseAndSetIfChanged(ref _renderingPriority, value); }
-        }
-        private RenderingDimension _renderingPriority;
+        public ReactiveCommand<object> RenderImage { get; private set; }
 
         /// <summary>
         /// Initialize with the page that we should track.
@@ -92,24 +73,31 @@ namespace IWalker.ViewModels
         {
             _page = page;
 
-            // If they change how we do the rendering, then we will need to alter the actual width and height of the image we
-            // are attached to.
-            var altered = this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, x => x.RenderingPriority, (x, y, z) => Tuple.Create(z.Value, x.Value, y.Value));
-            altered
+            // If there is a rendering request, create the appropriate frame given our PDF page.
+            RenderImage = ReactiveCommand.Create();
+            var doRender = RenderImage
+                .Cast<Tuple<RenderingDimension, double, double>>();
+            var hRender = doRender
                 .Where(trp => trp.Item1 == RenderingDimension.Horizontal && trp.Item2 > 0)
-                .Select(trp => _page.Size.Height / _page.Size.Width * trp.Item2)
-                .Distinct()
-                .Subscribe(newHeight => RenderHeight = newHeight);
-            altered
+                .Select(trp => Tuple.Create(trp.Item2, _page.Size.Height / _page.Size.Width * trp.Item2));
+            var vRender = doRender
                 .Where(trp => trp.Item1 == RenderingDimension.Vertical && trp.Item3 > 0)
-                .Select(trp => _page.Size.Width / _page.Size.Height * trp.Item3)
-                .Distinct()
-                .Subscribe(newWidth => RenderWidth = newWidth);
+                .Select(trp => Tuple.Create(trp.Item2, _page.Size.Width / _page.Size.Height * trp.Item3));
+            var fRender = doRender
+                .Where(trp => trp.Item1 == RenderingDimension.MustFit)
+                .Select(trp => Tuple.Create(trp.Item2, trp.Item3));
 
-            // Render the image at a certain width and height
-            this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, (x, y) => Tuple.Create(x.Value, y.Value))
-                .Where(w => w.Item1 > 0 && w.Item2 > 0)
+            // Now, make sure it is an ok rendering request.
+            var newSize = Observable.Merge(hRender, vRender, fRender)
+                .Select(trp => Tuple.Create((int) trp.Item1, (int) trp.Item2))
                 .Distinct()
+                .Where(trp => trp.Item1 > 0 && trp.Item2 > 0);
+
+            // The new size should be sent out immediately.
+            UpdateImageSize = newSize;
+
+            // Ok, rendering. We should start that only after things have settled just a little bit.
+            newSize
                 .Throttle(TimeSpan.FromMilliseconds(500))
                 .SelectMany(async szPixels =>
                 {
