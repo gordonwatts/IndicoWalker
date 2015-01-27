@@ -61,8 +61,10 @@ namespace IWalker.ViewModels
         private double _renderHeight;
 
         /// <summary>
-        /// Which way around is the important dimension? We will make sure the image in that
-        /// direction is exact, and the other dimension will be dictated by the page's aspect ratio.
+        /// Which dimension is important?
+        /// Horizontal: The height is under our control and will be set to fit (perfectly) the PDF page for each page.
+        /// Vertical: The width is under our control and will be set to fit (perfectly) the PDF page for each page.
+        /// MustFit: Neither is under our control, and is set externally. We will make sure the image renders in the control completely.
         /// </summary>
         public enum RenderingDimension
         {
@@ -90,15 +92,32 @@ namespace IWalker.ViewModels
         {
             _page = page;
 
-            // Render the image at a certain width
-            this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, x => x.RenderingPriority, (x, y, z) => Tuple.Create(x.Value, y.Value))
-                .Where(w => NewDimensionsOK(w))
+            // If they change how we do the rendering, then we will need to alter the actual width and height of the image we
+            // are attached to.
+            var altered = this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, x => x.RenderingPriority, (x, y, z) => Tuple.Create(z.Value, x.Value, y.Value));
+            altered
+                .Where(trp => trp.Item1 == RenderingDimension.Horizontal && trp.Item2 > 0)
+                .Select(trp => _page.Size.Height / _page.Size.Width * trp.Item2)
+                .Distinct()
+                .Subscribe(newHeight => RenderHeight = newHeight);
+            altered
+                .Where(trp => trp.Item1 == RenderingDimension.Vertical && trp.Item3 > 0)
+                .Select(trp => _page.Size.Width / _page.Size.Height * trp.Item3)
+                .Distinct()
+                .Subscribe(newWidth => RenderWidth = newWidth);
+
+            // Render the image at a certain width and height
+            this.WhenAny(x => x.RenderWidth, x => x.RenderHeight, (x, y) => Tuple.Create(x.Value, y.Value))
+                .Where(w => w.Item1 > 0 && w.Item2 > 0)
+                .Distinct()
                 .Throttle(TimeSpan.FromMilliseconds(500))
                 .SelectMany(async szPixels =>
                 {
                     var ms = new MemoryStream();
                     var ra = ms.AsRandomAccessStream();
-                    await _page.RenderToStreamAsync(ra, MakeRenderingOptions(szPixels));
+                    var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
+                    Debug.WriteLine("Rendering PDF page ({0} by {1})", opt.DestinationWidth, opt.DestinationHeight);
+                    await _page.RenderToStreamAsync(ra, opt);
                     return ms;
                 })
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -109,35 +128,6 @@ namespace IWalker.ViewModels
                     return bm;
                 })
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
-        }
-
-        /// <summary>
-        /// Get the rendering options given our current setup.
-        /// </summary>
-        /// <param name="szPixels"></param>
-        /// <returns></returns>
-        private PdfPageRenderOptions MakeRenderingOptions(Tuple<double, double> szPixels)
-        {
-            if (szPixels.Item1 == 0)
-            {
-                return new PdfPageRenderOptions() { DestinationHeight = (uint)szPixels.Item2 };
-            }
-
-            if (szPixels.Item2 == 0)
-            {
-                return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1 };
-            }
-            return new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-        }
-
-        /// <summary>
-        /// Given our settings, check to see if we have reasonable dimensions.
-        /// </summary>
-        /// <param name="w">Dimensions we should be checking</param>
-        /// <returns></returns>
-        private bool NewDimensionsOK(Tuple<double, double> w)
-        {
-            return w.Item1 != 0 || w.Item2 != 0;
         }
     }
 }
