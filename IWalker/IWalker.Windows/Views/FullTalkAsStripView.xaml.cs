@@ -4,9 +4,11 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
+using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Controls.Primitives;
@@ -28,6 +30,13 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
+
+            // If the ESC key is hit, we want to navagate back.
+            Observable.FromEventPattern<KeyRoutedEventArgs>(this, "KeyUp")
+                .Select(args => args.EventArgs)
+                .Where(keys => keys.Key == VirtualKey.Escape)
+                .Where(keys => ViewModel != null)
+                .Subscribe(e => ViewModel.GoBack.Execute(null));
         }
 
         /// <summary>

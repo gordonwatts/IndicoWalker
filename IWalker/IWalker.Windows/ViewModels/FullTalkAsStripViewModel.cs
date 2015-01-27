@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
+using System.Reactive;
 using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
@@ -26,6 +27,11 @@ namespace IWalker.ViewModels
         public ReactiveList<PDFPageViewModel> Pages { get; private set; }
 
         /// <summary>
+        /// Will cause us to go back on in the stack.
+        /// </summary>
+        public ReactiveCommand<Unit> GoBack { get; private set; }
+
+        /// <summary>
         /// Get everything setup to show the PDF document
         /// </summary>
         /// <param name="doc"></param>
@@ -40,6 +46,9 @@ namespace IWalker.ViewModels
             // Setup each individual page
             Pages = new ReactiveList<PDFPageViewModel>();
             Pages.AddRange(Enumerable.Range(0, (int) doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint) pageNumber))));
+
+            // The go back gets a direct connection to the "back" bit.
+            GoBack = screen.Router.NavigateBack;
         }
 
         /// <summary>
