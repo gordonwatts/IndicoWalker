@@ -1,15 +1,10 @@
 ﻿using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Data.Pdf;
-using System.Linq;
-using System.Reactive.Linq;
-using Windows.UI.Xaml.Media.Imaging;
 using System.Diagnostics;
+using System.IO;
+using System.Reactive.Linq;
+using Windows.Data.Pdf;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace IWalker.ViewModels
 {

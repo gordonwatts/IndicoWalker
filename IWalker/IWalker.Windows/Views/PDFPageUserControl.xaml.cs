@@ -28,18 +28,17 @@ namespace IWalker.Views
             // As soon as a VM is valid, subscribe to it so we can update our own image size
             this.WhenAny(x => x.ViewModel, x => x.Value)
                 .Where(vm => vm != null)
-                .Subscribe(newvm => {
+                .Subscribe(newvm =>
+                {
 
                     newvm.UpdateImageSize
                     .Subscribe(sz =>
                     {
-                        ThumbImage.Height = sz.Item1;
-                        ThumbImage.Width = sz.Item2;
+                        Width = sz.Item1;
+                        Height = sz.Item2;
                     });
                     ViewModel.RenderImage.Execute(Tuple.Create(RespectRenderingDimension, Width, Height));
-                }
-                    
-                    );
+                });
         }
 
         /// <summary>
