@@ -77,7 +77,7 @@ namespace IWalker.ViewModels
                 .Select(trp => Tuple.Create(trp.Item2, _page.Size.Height / _page.Size.Width * trp.Item2));
             var vRender = doRender
                 .Where(trp => trp.Item1 == RenderingDimension.Vertical && trp.Item3 > 0)
-                .Select(trp => Tuple.Create(trp.Item2, _page.Size.Width / _page.Size.Height * trp.Item3));
+                .Select(trp => Tuple.Create(_page.Size.Width / _page.Size.Height * trp.Item3, trp.Item3));
             var fRender = doRender
                 .Where(trp => trp.Item1 == RenderingDimension.MustFit)
                 .Select(trp => Tuple.Create(trp.Item2, trp.Item3));
