@@ -50,7 +50,7 @@ namespace IWalker.ViewModels
                 var renderPDF = ReactiveCommand.CreateAsyncTask(_ => f.DownloadFile());
                 renderPDF
                     .SelectMany(sf => PdfDocument.LoadFromFileAsync(sf))
-                    .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc)))
+                    .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc, 0)))
                     .Select(sf => Enumerable.Range(0, (int)sf.PageCount)
                                     .Select(index => sf.GetPage((uint)index))
                                     .Select(p => new SlideThumbViewModel(p, fullVM)))

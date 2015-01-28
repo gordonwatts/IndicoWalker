@@ -1,6 +1,7 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -22,12 +23,94 @@ namespace IWalker.Views
             this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
 
             // If the ESC key is hit, we want to navigate back.
-            Observable.FromEventPattern<KeyRoutedEventArgs>(this, "KeyUp")
+            var keyrelease = Observable.FromEventPattern<KeyRoutedEventArgs>(this.SlideStrip, "KeyDown")
                 .Select(args => args.EventArgs)
+                .Where(keys => ViewModel != null);
+
+            keyrelease
                 .Where(keys => keys.Key == VirtualKey.Escape)
-                .Where(keys => ViewModel != null)
                 .Do(keys => keys.Handled = true)
-                .Subscribe(e => ViewModel.GoBack.Execute(null));            
+                .Subscribe(e => ViewModel.GoBack.Execute(null));
+
+            // Forward and backwards arrows
+            keyrelease
+                .Where(keys => keys.Key == VirtualKey.Right)
+                .Do(keys => keys.Handled = true)
+                .Subscribe(e => ViewModel.PageForward.Execute(calcCurrentPage()));
+            keyrelease
+                .Where(keys => keys.Key == VirtualKey.Left)
+                .Do(keys => keys.Handled = true)
+                .Subscribe(e => ViewModel.PageBack.Execute(calcCurrentPage()));
+
+            // And when we get asked to bring a page into view...
+            this.WhenAny(x => x.ViewModel, x => x.Value)
+                .Where(x => x != null)
+                .Subscribe(vm => {
+                    vm.MoveToPage
+                        .Where(pn => SlideStrip.ContainerFromIndex(0) != null)
+                        .Select(pn => getSlideEdge(pn))
+                        .Subscribe(loc => theScrollViewer.ChangeView(loc, null, null));
+                });
+        }
+
+        /// <summary>
+        /// Keep a cache of where all the slides are so we can do this "fast"
+        /// </summary>
+        private double[] _slideStartLocations = null;
+
+        /// <summary>
+        /// Determine the current slide that is on screen.
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// This is a bit tricky. We will use the right edge of the slide to figure out where we are, relative to the left edge
+        /// of the scroll bar. We want the next slide *after* the first right edge.
+        /// </remarks>
+        private int calcCurrentPage()
+        {
+            calcSlideEdges();
+
+            // Get the current view and find where it is located. The edge cases are a little tricky!
+            var leftEdge = theScrollViewer.HorizontalOffset;
+            var slide = Enumerable.Range(0, _slideStartLocations.Length)
+                .Where(index => _slideStartLocations[index] > leftEdge)
+                .FirstOrDefault();
+            if (slide == 0)
+            {
+                return _slideStartLocations[0] >= leftEdge ? 0 : _slideStartLocations.Length - 1;
+            }
+            return slide;
+        }
+
+        /// <summary>
+        /// Setup the slide edges
+        /// </summary>
+        private void calcSlideEdges()
+        {
+            if (_slideStartLocations == null)
+            {
+                double sum = 0;
+                var widths = Enumerable.Range(0, SlideStrip.Items.Count)
+                    .Select(index => SlideStrip.ContainerFromIndex(index) as ContentPresenter)
+                    .Select(container => container.ActualWidth)
+                    .Select(w => sum += w);
+                _slideStartLocations = widths
+                    .ToArray();
+            }
+        }
+
+        /// <summary>
+        /// Return the slide location.
+        /// </summary>
+        /// <param name="slide"></param>
+        /// <returns></returns>
+        private double getSlideEdge(int slide)
+        {
+            if (slide == 0)
+                return 0;
+
+            calcSlideEdges();
+            return _slideStartLocations[slide-1];
         }
 
         /// <summary>
