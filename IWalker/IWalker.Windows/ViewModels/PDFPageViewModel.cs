@@ -85,7 +85,7 @@ namespace IWalker.ViewModels
             // Now, make sure it is an ok rendering request.
             var newSize = Observable.Merge(hRender, vRender, fRender)
                 .Select(trp => Tuple.Create((int) trp.Item1, (int) trp.Item2))
-                .Distinct()
+                .DistinctUntilChanged()
                 .Where(trp => trp.Item1 > 0 && trp.Item2 > 0);
 
             // The new size should be sent out immediately.
