@@ -62,7 +62,7 @@ namespace IWalker.ViewModels
         /// <param name="doc"></param>
         /// <param name="initialPage">The page that should be shown when we start up. Zero indexed</param>
         /// <param name="screen">The screen that hosts everything (routing!)</param>
-        public FullTalkAsStripViewModel(IScreen screen, PdfDocument doc, int initialPage)
+        public FullTalkAsStripViewModel(IScreen screen, PdfDocument doc)
         {
             Debug.Assert(doc != null);
             Debug.Assert(screen != null);
@@ -94,8 +94,6 @@ namespace IWalker.ViewModels
                 .Select(pn => pn - 1)
                 .Subscribe(pn => _moveToPage.OnNext(pn));
 
-            _moveToPage.OnNext(initialPage);
-
             // The go back gets a direct connection to the "back" bit.
             GoBack = screen.Router.NavigateBack;
         }
@@ -118,9 +116,10 @@ namespace IWalker.ViewModels
         /// Called to navigate to this page. This is a short-cut so that others
         /// who have access to us can load us without having to know the router, etc.
         /// </summary>
-        internal void LoadPage()
+        internal void LoadPage(int pageNumber)
         {
             HostScreen.Router.Navigate.Execute(this);
+            _moveToPage.OnNext(pageNumber);
         }
 
         /// <summary>

@@ -33,7 +33,7 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="page">The PDF page to be rendered</param>
         /// <remarks>We will call PeparePageAsync on the page</remarks>
-        public SlideThumbViewModel(PdfPage page, Lazy<FullTalkAsStripViewModel> fullVM)
+        public SlideThumbViewModel(PdfPage page, Lazy<FullTalkAsStripViewModel> fullVM, int pageNumber)
         {
             PDFPageVM = new PDFPageViewModel(page);
             this.fullVM = fullVM;
@@ -45,7 +45,7 @@ namespace IWalker.ViewModels
             // And the command to open up a full view of the talk, at max size.
             OpenFullView = ReactiveCommand.Create();
             OpenFullView
-                .Subscribe(_ => fullVM.Value.LoadPage());
+                .Subscribe(_ => fullVM.Value.LoadPage(pageNumber));
         }
     }
 }

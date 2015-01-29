@@ -2,13 +2,12 @@
 using ReactiveUI;
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Input;
-
-// The Blank Page item template is documented at http://go.microsoft.com/fwlink/?LinkId=234238
 
 namespace IWalker.Views
 {
@@ -42,11 +41,22 @@ namespace IWalker.Views
                 .Do(keys => keys.Handled = true)
                 .Subscribe(e => ViewModel.PageBack.Execute(calcCurrentPage()));
 
+            // We can't tell what size things are in here (which we need for scrolling, etc.) until
+            // we have a clue as to what the layout is. So, we have to wait for that to go.
+            var widthOfItemsChanged = Observable.FromEventPattern(this.SlideStrip, "LayoutUpdated")
+                .Where(args => _slideStartLocations == null)
+                .Select(args => SlideStrip.ActualWidth)
+                .Throttle(TimeSpan.FromMilliseconds(100))
+                .Select(args => Unit.Default)
+                .DistinctUntilChanged();
+
             // And when we get asked to bring a page into view...
             this.WhenAny(x => x.ViewModel, x => x.Value)
                 .Where(x => x != null)
                 .Subscribe(vm => {
                     vm.MoveToPage
+                        .CombineLatest(widthOfItemsChanged, (pn, width) => pn)
+                        .ObserveOn(RxApp.MainThreadScheduler)
                         .Where(pn => SlideStrip.ContainerFromIndex(0) != null)
                         .Select(pn => getSlideEdge(pn))
                         .Subscribe(loc => theScrollViewer.ChangeView(loc, null, null));
