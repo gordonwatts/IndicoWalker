@@ -99,7 +99,7 @@ namespace IWalker.ViewModels
                     var ms = new MemoryStream();
                     var ra = ms.AsRandomAccessStream();
                     var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-                    Debug.WriteLine("Rendering PDF page ({0} by {1})", opt.DestinationWidth, opt.DestinationHeight);
+                    Debug.WriteLine("Rendering PDF page {2} ({0} by {1})", opt.DestinationWidth, opt.DestinationHeight, _page.Index);
                     await _page.RenderToStreamAsync(ra, opt);
                     return ms;
                 })
