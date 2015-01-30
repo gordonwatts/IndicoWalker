@@ -155,6 +155,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\reactiveui-core.6.3.1\lib\Win8\ReactiveUI.dll</HintPath>
     </Reference>
+    <Reference Include="ReactiveUI.Events">
+      <HintPath>..\..\packages\reactiveui-events.6.3.1\lib\Win81\ReactiveUI.Events.dll</HintPath>
+    </Reference>
     <Reference Include="Splat, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\Splat.1.6.0\lib\NetCore45\Splat.dll</HintPath>

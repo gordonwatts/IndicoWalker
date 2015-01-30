@@ -22,8 +22,7 @@ namespace IWalker.Views
             this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
 
             // If the ESC key is hit, we want to navigate back.
-            var keyrelease = Observable.FromEventPattern<KeyRoutedEventArgs>(this.SlideStrip, "KeyDown")
-                .Select(args => args.EventArgs)
+            var keyrelease = SlideStrip.Events().KeyDown
                 .Where(keys => ViewModel != null);
 
             keyrelease
@@ -45,7 +44,7 @@ namespace IWalker.Views
 
             // We can't tell what size things are in here (which we need for scrolling, etc.) until
             // we have a clue as to what the layout is. So, we have to wait for that to go.
-            var widthOfItemsChanged = Observable.FromEventPattern(this.SlideStrip, "LayoutUpdated")
+            var widthOfItemsChanged = SlideStrip.Events().LayoutUpdated
                 .Where(args => _slideStartLocations == null)
                 .Select(args => SlideStrip.ActualWidth)
                 .Throttle(TimeSpan.FromMilliseconds(100))
@@ -65,15 +64,20 @@ namespace IWalker.Views
                 });
 
             // Make the back button visible if there is any mouse movement.
-            var makeVisible = Observable.FromEventPattern(this, "PointerMoved")
+            var buttonRelatedMovement =
+                this.Events().PointerMoved.Select(x => Unit.Default)
+                .Merge(theScrollViewer.Events().ViewChanging.Select(x => Unit.Default));
+
+            var makeVisible = buttonRelatedMovement
                 .Select(x => true);
-            var makeInvisible = Observable.FromEventPattern(this, "PointerMoved")
-                .Select(x => false)
-                .Window(TimeSpan.FromSeconds(3))
-                .SelectMany(x => x.LastOrDefaultAsync());
-            var buttonVisiblity = Observable.Merge(makeVisible, makeInvisible).ObserveOn(RxApp.MainThreadScheduler);
-            buttonVisiblity
+
+            var makeInvisible = buttonRelatedMovement
+                .Select(x => Observable.Return(false).Delay(TimeSpan.FromSeconds(3)))
+                .Switch();
+
+            Observable.Merge(makeVisible, makeInvisible)
                 .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
 
         }
