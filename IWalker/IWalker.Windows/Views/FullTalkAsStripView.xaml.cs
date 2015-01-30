@@ -31,6 +31,8 @@ namespace IWalker.Views
                 .Do(keys => keys.Handled = true)
                 .Subscribe(e => ViewModel.GoBack.Execute(null));
 
+            this.BindCommand(ViewModel, x => x.GoBack, y => y.backButton);
+
             // Forward and backwards arrows
             keyrelease
                 .Where(keys => keys.Key == VirtualKey.Right)
@@ -61,6 +63,18 @@ namespace IWalker.Views
                         .Select(pn => getSlideEdge(pn))
                         .Subscribe(loc => theScrollViewer.ChangeView(loc, null, null));
                 });
+
+            // Make the back button visible if there is any mouse movement.
+            var makeVisible = Observable.FromEventPattern(this, "PointerMoved")
+                .Select(x => true);
+            var makeInvisible = Observable.FromEventPattern(this, "PointerMoved")
+                .Select(x => false)
+                .Window(TimeSpan.FromSeconds(3))
+                .SelectMany(x => x.LastOrDefaultAsync());
+            var buttonVisiblity = Observable.Merge(makeVisible, makeInvisible).ObserveOn(RxApp.MainThreadScheduler);
+            buttonVisiblity
+                .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
+
         }
 
         /// <summary>
