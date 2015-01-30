@@ -79,6 +79,7 @@ namespace IWalker.Views
                 .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
+            backButton.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
         }
 
