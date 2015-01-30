@@ -24,6 +24,8 @@ namespace IWalker.Views
             // Now, when something about our size and rendering stuff changes, we need
             // to shoot off a rendering request.
             this.Events().SizeChanged.Select(a => RespectRenderingDimension)
+                .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
+                .Where (x => ShowPDF)
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
         }
@@ -39,6 +41,24 @@ namespace IWalker.Views
             var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
             return new Size(requestedSize.Item1, requestedSize.Item2);
         }
+
+        /// <summary>
+        /// If true, will render and show the PDF. If false, it won't be shown.
+        /// </summary>
+        /// <remarks>
+        /// - When set to true, the control will render the page and display it.
+        /// - When set to false, the image will not be displayed. And the image will be garbage collected.
+        /// In all cases the control will have the correct size.
+        /// </remarks>
+        public bool ShowPDF
+        {
+            get { return (bool)GetValue(ShowPDFProperty); }
+            set { SetValue(ShowPDFProperty, value); }
+        }
+
+        // Using a DependencyProperty as the backing store for ShowPDF.  This enables animation, styling, binding, etc...
+        public static readonly DependencyProperty ShowPDFProperty =
+            DependencyProperty.Register("ShowPDF", typeof(bool), typeof(PDFPageUserControl), new PropertyMetadata(true));
 
         /// <summary>
         /// Get/set the rendering dimension to respect.
