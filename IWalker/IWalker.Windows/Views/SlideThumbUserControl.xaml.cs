@@ -20,8 +20,8 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel);
-            var pressed = Observable.FromEventPattern<PointerRoutedEventArgs>(this.PDFPageUC, "PointerPressed");
-            var released = Observable.FromEventPattern<PointerRoutedEventArgs>(this.PDFPageUC, "PointerReleased");
+            var pressed = PDFPageUC.Events().PointerPressed;
+            var released = PDFPageUC.Events().PointerReleased;
             released
                 .Subscribe(e => ViewModel.OpenFullView.Execute(null));
         }

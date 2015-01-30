@@ -18,8 +18,7 @@ namespace IWalker.Views
             this.OneWayBind(ViewModel, x => x.HasValidMainFile, y => y.GoodFile.Visibility);
             this.OneWayBind(ViewModel, x => x.FileSlides, y => y.FileSlides.ViewModel);
 
-            Observable.FromEventPattern(MainGrid, "SizeChanged")
-                .Select(e => e.EventArgs as SizeChangedEventArgs)
+            MainGrid.Events().SizeChanged
                 .Select(sg => sg.NewSize.Width)
                 .Select(width => width - 100)
                 .Where(w => w > 10)
