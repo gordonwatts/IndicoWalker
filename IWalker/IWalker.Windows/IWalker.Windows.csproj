@@ -103,6 +103,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Utilities\OnScreenTrackingHelper.cs" />
     <Compile Include="ViewModels\FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
     <Compile Include="ViewModels\PDFPageViewModel.cs" />

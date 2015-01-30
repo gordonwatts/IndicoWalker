@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.Utilities;
+using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Linq;
@@ -81,7 +82,14 @@ namespace IWalker.Views
                 .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
             backButton.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
+            // Setup the rendering helper - it will tell our PDF guys when they are in-frame.
+            _holder = new OnScreenTrackingHelper(theScrollViewer);
         }
+
+        /// <summary>
+        /// Hold onto the scroll helper.
+        /// </summary>
+        private OnScreenTrackingHelper _holder;
 
         /// <summary>
         /// Keep a cache of where all the slides are so we can do this "fast"
@@ -153,7 +161,6 @@ namespace IWalker.Views
         }
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register("ViewModel", typeof(FullTalkAsStripViewModel), typeof(FullTalkAsStripView), new PropertyMetadata(null));
-
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
