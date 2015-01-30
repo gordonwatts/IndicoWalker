@@ -103,6 +103,7 @@ namespace IWalker.ViewModels
                 {
                     var bm = new BitmapImage();
                     await bm.SetSourceAsync(ms.AsRandomAccessStream());
+                    ms.Dispose();
                     return bm;
                 })
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
