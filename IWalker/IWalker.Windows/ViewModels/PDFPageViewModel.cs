@@ -66,24 +66,18 @@ namespace IWalker.ViewModels
         /// <remarks>We do not prepare the PDF document for rendering ahead of time (calling PreparePageAsync)</remarks>
         public PDFPageViewModel(PdfPage page)
         {
+            Debug.Assert(page != null);
             _page = page;
 
             // If there is a rendering request, create the appropriate frame given our PDF page.
             RenderImage = ReactiveCommand.Create();
             var doRender = RenderImage
-                .Cast<Tuple<RenderingDimension, double, double>>();
-            var hRender = doRender
-                .Where(trp => trp.Item1 == RenderingDimension.Horizontal && trp.Item2 > 0)
-                .Select(trp => Tuple.Create(trp.Item2, _page.Size.Height / _page.Size.Width * trp.Item2));
-            var vRender = doRender
-                .Where(trp => trp.Item1 == RenderingDimension.Vertical && trp.Item3 > 0)
-                .Select(trp => Tuple.Create(_page.Size.Width / _page.Size.Height * trp.Item3, trp.Item3));
-            var fRender = doRender
-                .Where(trp => trp.Item1 == RenderingDimension.MustFit)
-                .Select(trp => Tuple.Create(trp.Item2, trp.Item3));
+                .Cast<Tuple<RenderingDimension, double, double>>()
+                .Select(t => CalcRenderingSize(t.Item1, t.Item2, t.Item2))
+                .Where(d => d != null);
 
             // Now, make sure it is an ok rendering request.
-            var newSize = Observable.Merge(hRender, vRender, fRender)
+            var newSize = doRender
                 .Select(trp => Tuple.Create((int) trp.Item1, (int) trp.Item2))
                 .DistinctUntilChanged()
                 .Where(trp => trp.Item1 > 0 && trp.Item2 > 0);
@@ -93,6 +87,7 @@ namespace IWalker.ViewModels
 
             // Ok, rendering. We should start that only after things have settled just a little bit.
             newSize
+                .DistinctUntilChanged()
                 .Throttle(TimeSpan.FromMilliseconds(500))
                 .SelectMany(async szPixels =>
                 {
@@ -111,6 +106,38 @@ namespace IWalker.ViewModels
                     return bm;
                 })
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
+        }
+
+        /// <summary>
+        /// Calculate the size of the rendering area given the "expected" size (or room, frankly).
+        /// </summary>
+        /// <param name="orientation">Which dimension should we respect - where can we expand?</param>
+        /// <param name="width">Width of the area, or 0 or infinity</param>
+        /// <param name="height">Height of the area, or 0 or infinity</param>
+        /// <returns></returns>
+        public Tuple<int, int> CalcRenderingSize (RenderingDimension orientation, double width, double height)
+        {
+            switch (orientation)
+            {
+                case RenderingDimension.Horizontal:
+                    if (width > 0)
+                        return Tuple.Create((int) width, (int) (_page.Size.Height / _page.Size.Width * width));
+                    return null;
+
+                case RenderingDimension.Vertical:
+                    if (height > 0)
+                        return Tuple.Create((int) (_page.Size.Width / _page.Size.Height * height), (int) height);
+                    return null;
+
+                case RenderingDimension.MustFit:
+                    if (width > 0 && height > 0)
+                        return Tuple.Create((int) width, (int) height);
+                    return null;
+
+                default:
+                    Debug.Assert(false);
+                    return null;
+            }
         }
     }
 }

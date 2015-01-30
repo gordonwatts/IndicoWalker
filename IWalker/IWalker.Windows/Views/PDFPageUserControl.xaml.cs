@@ -1,7 +1,9 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
+using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -21,24 +23,21 @@ namespace IWalker.Views
 
             // Now, when something about our size and rendering stuff changes, we need
             // to shoot off a rendering request.
-            this.WhenAny(x => x.RespectRenderingDimension, x => x.Width, x => x.Height, (r, x, y) => Tuple.Create(r.Value, x.Value, y.Value))
+            this.Events().SizeChanged.Select(a => RespectRenderingDimension)
                 .Where(t => ViewModel != null)
-                .Subscribe(t => ViewModel.RenderImage.Execute(t));
+                .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
+        }
 
-            // As soon as a VM is valid, subscribe to it so we can update our own image size
-            this.WhenAny(x => x.ViewModel, x => x.Value)
-                .Where(vm => vm != null)
-                .Subscribe(newvm =>
-                {
-
-                    newvm.UpdateImageSize
-                    .Subscribe(sz =>
-                    {
-                        Width = sz.Item1;
-                        Height = sz.Item2;
-                    });
-                    ViewModel.RenderImage.Execute(Tuple.Create(RespectRenderingDimension, Width, Height));
-                });
+        /// <summary>
+        /// Depending on what mode we are operating in, determine the size, and let the layout system know what we want to be.
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            Debug.Assert(ViewModel != null);
+            var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
+            return new Size(requestedSize.Item1, requestedSize.Item2);
         }
 
         /// <summary>
