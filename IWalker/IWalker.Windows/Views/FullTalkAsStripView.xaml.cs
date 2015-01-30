@@ -73,6 +73,7 @@ namespace IWalker.Views
                 .SelectMany(x => x.LastOrDefaultAsync());
             var buttonVisiblity = Observable.Merge(makeVisible, makeInvisible).ObserveOn(RxApp.MainThreadScheduler);
             buttonVisiblity
+                .DistinctUntilChanged()
                 .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
 
         }
