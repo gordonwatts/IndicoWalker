@@ -68,7 +68,7 @@ namespace IWalker.Views
         public bool ShowPDF
         {
             get { return (bool)GetValue(ShowPDFProperty); }
-            set { Debug.WriteLine("Setting ShowPDF to {0} (hash: {1}).", value, GetHashCode()); SetValue(ShowPDFProperty, value); }
+            set { SetValue(ShowPDFProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ShowPDF.  This enables animation, styling, binding, etc...

@@ -64,7 +64,7 @@ namespace IWalker.Views
                         .Subscribe(loc => theScrollViewer.ChangeView(loc, null, null));
                 });
 
-            // Make the back button visible if there is any mouse movement.
+            // Make the back button visible if there is any movement - scrolling or otherwise.
             var buttonRelatedMovement =
                 this.Events().PointerMoved.Select(x => Unit.Default)
                 .Merge(theScrollViewer.Events().ViewChanging.Select(x => Unit.Default));

@@ -32,7 +32,11 @@ namespace IWalker.Utilities
             _host = hostScrollViewer;
             _updateFunction = updateInViewPort;
 
-            _host.ViewChanged += host_ViewChanged;
+            // When the scroller is loaded and when people scroll, we
+            // must update who is in and who is out.
+            _host.ViewChanged += (s, a) => { if (a.IsIntermediate) UpdateWhoIsInViewPort(); };
+            _host.Loaded += (s, a) => UpdateWhoIsInViewPort();
+            _host.LayoutUpdated += (s, a) => UpdateWhoIsInViewPort();
         }
 
         /// <summary>
@@ -40,7 +44,7 @@ namespace IWalker.Utilities
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        private void host_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        private void UpdateWhoIsInViewPort()
         {
             // What is the view port that is visible on the screen?
             var viewport = new Rect(new Point(0, 0), _host.RenderSize);
