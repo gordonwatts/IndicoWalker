@@ -5,6 +5,7 @@
     xmlns:local="using:IWalker.Views"
     xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    xmlns:uc="using:IWalker.Utilities"
     mc:Ignorable="d">
 
     <Grid Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
@@ -91,12 +92,16 @@
             <ItemsControl x:Name="SlideStrip">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <VirtualizingStackPanel Orientation="Horizontal"/>
+                        <StackPanel Orientation="Horizontal"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <local:PDFPageUserControl ShowPDF="False" x:Name="yo" Margin="0 0 5 0" ViewModel="{Binding}" RespectRenderingDimension="Vertical" />
+                        <local:PDFPageUserControl
+                            x:Name="yo"
+                            Margin="0 0 5 0"
+                            ViewModel="{Binding}"
+                            RespectRenderingDimension="Vertical" ShowPDF="False" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>

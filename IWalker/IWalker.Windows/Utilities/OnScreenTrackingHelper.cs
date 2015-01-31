@@ -1,31 +1,45 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using IWalker.Views;
+using System;
 using System.Diagnostics;
 using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media;
 
 namespace IWalker.Utilities
 {
     public sealed class OnScreenTrackingHelper
     {
         /// <summary>
+        /// Hold onto the host control.
+        /// </summary>
+        private ScrollViewer _host;
+
+        /// <summary>
         /// IsInViewport - true for objects that are visible in the view port.
         /// </summary>
         public static readonly DependencyProperty IsInViewportProperty =
             DependencyProperty.RegisterAttached("IsInViewport", typeof(bool), typeof(OnScreenTrackingHelper), new PropertyMetadata(false));
-        private ScrollViewer _host;
 
+        /// <summary>
+        /// Get the InViewport for a particular UI element.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <returns></returns>
         public static bool GetIsInViewport(UIElement element)
         {
             return (bool)element.GetValue(IsInViewportProperty);
         }
 
+        /// <summary>
+        /// Set the InViewport for a particular UI element.
+        /// </summary>
+        /// <param name="element"></param>
+        /// <param name="value"></param>
         public static void SetIsInViewport(UIElement element, bool value)
         {
+            Debug.WriteLine("Setting IsInViewport to {0} on {1} for hash {2}", value, element.GetType().Name, element.GetHashCode());
             element.SetValue(IsInViewportProperty, value);
         }
 
@@ -55,21 +69,30 @@ namespace IWalker.Utilities
             // What is the view port that is visible on the screen?
             var viewport = new Rect(new Point(0, 0), _host.RenderSize);
 
-            // Go through everything owned by the scroll bar's panel.
-
+            // Go through everything owned by the scroll bar's panel, and set it.
+            // Normally a content presenter holds just one item, but a DataTemplate (or other) could have multiple,
+            // so we will be sure to support all children of the content presenter.
             var itemContainer = (_host.Content as ItemsControl);
             var inframe = from index in Enumerable.Range(0, itemContainer.Items.Count)
                           let container = itemContainer.ContainerFromIndex(index) as ContentPresenter
-                          let item = itemContainer.ItemFromContainer(container)
                           let inFrame = isInFrame(viewport, container)
                           select Tuple.Create(container, inFrame);
-                //.Select(index => itemContainer.ContainerFromIndex(index) as ContentPresenter)
-                //.Select(content => Tuple.Create(content, isInFrame(viewport, content)));
 
-            foreach (var frameInfo in inframe)
+            var allToSet = from p in inframe
+                           let cnt = VisualTreeHelper.GetChildrenCount(p.Item1)
+                           from childIndex in Enumerable.Range(0, cnt)
+                           let child = VisualTreeHelper.GetChild(p.Item1, childIndex) as UIElement
+                           where (child != null)
+                           select Tuple.Create(child, p.Item2);
+
+            foreach (var frameInfo in allToSet)
             {
-                SetIsInViewport(frameInfo.Item1, frameInfo.Item2);
-            }    
+                if ((frameInfo.Item1 as PDFPageUserControl) != null)
+                {
+                    (frameInfo.Item1 as PDFPageUserControl).ShowPDF = frameInfo.Item2;
+                }
+                //SetIsInViewport(frameInfo.Item1, frameInfo.Item2);
+            }
         }
 
         /// <summary>

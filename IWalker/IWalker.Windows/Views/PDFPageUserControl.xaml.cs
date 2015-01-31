@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.Utilities;
+using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Diagnostics;
@@ -11,6 +12,8 @@ namespace IWalker.Views
 {
     /// <summary>
     /// The view for a PDF page. We are a very simple image, with a bunch of wiring behind it.
+    ///                             uc:OnScreenTrackingHelper.IsInViewport="false"
+    ///                        ShowPDF="{Binding Path=(uc:OnScreenTrackingHelper.IsInViewport), ElementName=yo}"
     /// </summary>
     public sealed partial class PDFPageUserControl : UserControl, IViewFor<PDFPageViewModel>
     {
@@ -25,9 +28,23 @@ namespace IWalker.Views
             // to shoot off a rendering request.
             this.Events().SizeChanged.Select(a => RespectRenderingDimension)
                 .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
-                .Where (x => ShowPDF)
+                .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
+                .Do(t => Debug.WriteLine("Going to ask for a render and attached property is {0} for hash {1} - showodf: {2}.", OnScreenTrackingHelper.GetIsInViewport(this), this.GetHashCode(), ShowPDF))
+                .Where(x => ShowPDF)
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
+
+            //var benow = this.GetBindingExpression(ShowPDFProperty);
+            //this.Events().Loaded
+            //    .Delay(TimeSpan.FromSeconds(10))
+            //    .ObserveOn(RxApp.MainThreadScheduler)
+            //    .Do(x => benow = this.GetBindingExpression(ShowPDFProperty))
+            //    .Subscribe(a => OnScreenTrackingHelper.SetIsInViewport(this, true));
+
+            //this.WhenAny(x => x.ShowPDF, x => x.Value)
+            //    .Do(x => benow = this.GetBindingExpression(ShowPDFProperty))
+            //    .Subscribe(v => Debug.WriteLine("ShowPDF updated to {0} on {1}", v, GetHashCode()));
+
         }
 
         /// <summary>
@@ -53,7 +70,7 @@ namespace IWalker.Views
         public bool ShowPDF
         {
             get { return (bool)GetValue(ShowPDFProperty); }
-            set { SetValue(ShowPDFProperty, value); }
+            set { Debug.WriteLine("Setting ShowPDF to {0} (hash: {1}).", value, GetHashCode()); SetValue(ShowPDFProperty, value); }
         }
 
         // Using a DependencyProperty as the backing store for ShowPDF.  This enables animation, styling, binding, etc...
