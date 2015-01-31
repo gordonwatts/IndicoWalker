@@ -1,5 +1,4 @@
-﻿using IWalker.Utilities;
-using IWalker.ViewModels;
+﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Diagnostics;
@@ -29,7 +28,6 @@ namespace IWalker.Views
             this.Events().SizeChanged.Select(a => RespectRenderingDimension)
                 .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
                 .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
-                .Do(t => Debug.WriteLine("Going to ask for a render and attached property is {0} for hash {1} - showodf: {2}.", OnScreenTrackingHelper.GetIsInViewport(this), this.GetHashCode(), ShowPDF))
                 .Where(x => ShowPDF)
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));

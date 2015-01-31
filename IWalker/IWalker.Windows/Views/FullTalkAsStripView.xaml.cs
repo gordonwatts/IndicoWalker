@@ -8,7 +8,6 @@ using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
 
 namespace IWalker.Views
 {
@@ -55,7 +54,8 @@ namespace IWalker.Views
             // And when we get asked to bring a page into view...
             this.WhenAny(x => x.ViewModel, x => x.Value)
                 .Where(x => x != null)
-                .Subscribe(vm => {
+                .Subscribe(vm =>
+                {
                     vm.MoveToPage
                         .CombineLatest(widthOfItemsChanged, (pn, width) => pn)
                         .ObserveOn(RxApp.MainThreadScheduler)
@@ -82,8 +82,18 @@ namespace IWalker.Views
                 .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
             backButton.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
 
-            // Setup the rendering helper - it will tell our PDF guys when they are in-frame.
-            _holder = new OnScreenTrackingHelper(theScrollViewer);
+            // Setup the rendering helper - when they are in frame, cause a rendering to happen. When they
+            // are out of frame, then turn off showing everything!
+            _holder = new OnScreenTrackingHelper(
+                theScrollViewer,
+                (uiElement, inViewPort) =>
+                {
+                    if (uiElement is PDFPageUserControl)
+                    {
+                        (uiElement as PDFPageUserControl).ShowPDF = inViewPort;
+                    }
+                }
+                );
         }
 
         /// <summary>
@@ -148,7 +158,7 @@ namespace IWalker.Views
                 return 0;
 
             calcSlideEdges();
-            return _slideStartLocations[slide-1];
+            return _slideStartLocations[slide - 1];
         }
 
         /// <summary>

@@ -1,5 +1,4 @@
-﻿using IWalker.Views;
-using System;
+﻿using System;
 using System.Diagnostics;
 using System.Linq;
 using Windows.Foundation;
@@ -17,55 +16,32 @@ namespace IWalker.Utilities
         private ScrollViewer _host;
 
         /// <summary>
-        /// IsInViewport - true for objects that are visible in the view port.
+        /// Hold onto the action we will perform on each UIElement.
         /// </summary>
-        public static readonly DependencyProperty IsInViewportProperty =
-            DependencyProperty.RegisterAttached("IsInViewport", typeof(bool), typeof(OnScreenTrackingHelper), new PropertyMetadata(false));
-
-        /// <summary>
-        /// Get the InViewport for a particular UI element.
-        /// </summary>
-        /// <param name="element"></param>
-        /// <returns></returns>
-        public static bool GetIsInViewport(UIElement element)
-        {
-            return (bool)element.GetValue(IsInViewportProperty);
-        }
-
-        /// <summary>
-        /// Set the InViewport for a particular UI element.
-        /// </summary>
-        /// <param name="element"></param>
-        /// <param name="value"></param>
-        public static void SetIsInViewport(UIElement element, bool value)
-        {
-            Debug.WriteLine("Setting IsInViewport to {0} on {1} for hash {2}", value, element.GetType().Name, element.GetHashCode());
-            element.SetValue(IsInViewportProperty, value);
-        }
+        private Action<UIElement, bool> _updateFunction;
 
         /// <summary>
         /// Attach ourselves to a scroll viewer.
         /// </summary>
-        /// <param name="host"></param>
-        public OnScreenTrackingHelper(ScrollViewer host)
+        /// <param name="hostScrollViewer">The ScrollViewer that we will send updates for</param>
+        /// <param name="updateInViewPort">Method will be called to turn on/off each UIElement that is part of each ContentPresenter that the ScrollViewer is holding in its ItemsControl.</param>
+        public OnScreenTrackingHelper(ScrollViewer hostScrollViewer, Action<UIElement, bool> updateInViewPort)
         {
-            Debug.Assert(host != null);
+            Debug.Assert(hostScrollViewer != null);
 
-            _host = host;
+            _host = hostScrollViewer;
+            _updateFunction = updateInViewPort;
+
             _host.ViewChanged += host_ViewChanged;
         }
 
         /// <summary>
-        /// Fired when the view has changed.
+        /// Fired when the view has changed. Update who is in and who isn't in the ViewPort.
         /// </summary>
         /// <param name="sender"></param>
         /// <param name="e"></param>
-        void host_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        private void host_ViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
         {
-            // Do nothing if this is intermediate.
-            if (e.IsIntermediate)
-                return;
-
             // What is the view port that is visible on the screen?
             var viewport = new Rect(new Point(0, 0), _host.RenderSize);
 
@@ -87,16 +63,12 @@ namespace IWalker.Utilities
 
             foreach (var frameInfo in allToSet)
             {
-                if ((frameInfo.Item1 as PDFPageUserControl) != null)
-                {
-                    (frameInfo.Item1 as PDFPageUserControl).ShowPDF = frameInfo.Item2;
-                }
-                //SetIsInViewport(frameInfo.Item1, frameInfo.Item2);
+                _updateFunction(frameInfo.Item1, frameInfo.Item2);
             }
         }
 
         /// <summary>
-        /// See if any portion of the given frame is on screen.
+        /// Helper function to see if any portion of the given frame is on screen.
         /// </summary>
         /// <param name="viewport"></param>
         /// <param name="content"></param>
@@ -108,65 +80,5 @@ namespace IWalker.Utilities
             childBounds.Intersect(viewport);
             return !childBounds.IsEmpty;
         }
-#if false
-    protected override void OnScrollChanged(ScrollChangedEventArgs e)
-    {
-        base.OnScrollChanged(e);
-
-        var panel = Content as Panel;
-        if (panel == null)
-        {
-            return;
-        }
-
-        Rect viewport = new Rect(new Point(0, 0), RenderSize);
-
-        foreach (UIElement child in panel.Children)
-        {
-            if (!child.IsVisible)
-            {
-                SetIsInViewport(child, false);
-                continue;
-            }
-
-            GeneralTransform transform = child.TransformToAncestor(this);
-            Rect childBounds = transform.TransformBounds(new Rect(new Point(0, 0), child.RenderSize));
-            SetIsInViewport(child, viewport.IntersectsWith(childBounds));
-        }
-    }
-#endif
-#if false
-        <Window x:Class="..."
-        xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-        xmlns:my="clr-namespace:...">
-
-    <Window.Resources>
-        <DataTemplate DataType="{x:Type my:MovieViewModel}">
-            <StackPanel>
-                <Image x:Name="Thumbnail" Stretch="Fill" Width="100" Height="100" />
-                <TextBlock Text="{Binding Name}" />
-            </StackPanel>
-            <DataTemplate.Triggers>
-                <DataTrigger Binding="{Binding Path=(my:MyScrollViewer.IsInViewport), RelativeSource={RelativeSource AncestorType={x:Type ListBoxItem}}}"
-                             Value="True">
-                    <Setter TargetName="Thumbnail" Property="Source" Value="{Binding Thumbnail}" />
-                </DataTrigger>
-            </DataTemplate.Triggers>
-        </DataTemplate>
-    </Window.Resources>
-
-    <ListBox ItemsSource="{Binding Movies}">
-        <ListBox.Template>
-            <ControlTemplate>
-                <my:MyScrollViewer HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
-                    <WrapPanel IsItemsHost="True" />
-                </my:MyScrollViewer>
-            </ControlTemplate>
-        </ListBox.Template>
-    </ListBox>
-
-</Window>
-#endif
     }
 }
