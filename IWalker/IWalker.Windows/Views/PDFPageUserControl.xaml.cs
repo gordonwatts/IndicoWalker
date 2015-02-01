@@ -31,6 +31,10 @@ namespace IWalker.Views
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
 
+            this.WhenAny(x => x.ShowPDF, x => x.Value)
+                .Where(x => ViewModel != null)
+                .Subscribe(x => ViewModel.AttachImage = x);
+
             //var benow = this.GetBindingExpression(ShowPDFProperty);
             //this.Events().Loaded
             //    .Delay(TimeSpan.FromSeconds(10))

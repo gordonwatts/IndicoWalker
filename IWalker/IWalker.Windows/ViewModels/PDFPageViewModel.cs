@@ -35,6 +35,13 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<BitmapImage> _image = null;
 
         /// <summary>
+        /// Hold onto a weak reference to the above image. This will enable us
+        /// to keep it even if we don't really need it but the system doesn't
+        /// want it back.
+        /// </summary>
+        private WeakReference<BitmapImage> _weakReferenceToImage = null;
+
+        /// <summary>
         /// Which dimension is important?
         /// Horizontal: The height is under our control and will be set to fit (perfectly) the PDF page for each page.
         /// Vertical: The width is under our control and will be set to fit (perfectly) the PDF page for each page.
@@ -55,6 +62,26 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> RenderImage { get; private set; }
 
         /// <summary>
+        /// Get/Set the state of the attached image. False means that the image reference is set to null, but a weak reference
+        /// will be kept (if the image was already rendered). True means the image will be rendered and kept.
+        /// </summary>
+        public bool AttachImage
+        {
+            get { return _showImage; }
+            set
+            {
+                this.RaiseAndSetIfChanged(ref _showImage, value);
+            }
+        }
+        bool _showImage = true;
+
+        /// <summary>
+        /// Hold onto the last rendered size. We will use this cache if we have to
+        /// re-render for some reason.
+        /// </summary>
+        private Tuple<int, int> _lastRequestedRenderSize;
+
+        /// <summary>
         /// Initialize with the page that we should track.
         /// </summary>
         /// <param name="page">Page to render</param>
@@ -66,20 +93,64 @@ namespace IWalker.ViewModels
 
             // If there is a rendering request, create the appropriate frame given our PDF page.
             RenderImage = ReactiveCommand.Create();
-            var doRender = RenderImage
+            var renderRequest = RenderImage
                 .Cast<Tuple<RenderingDimension, double, double>>()
                 .Select(t => CalcRenderingSize(t.Item1, t.Item2, t.Item2))
                 .Where(d => d != null);
 
             // Now, make sure it is an ok rendering request.
-            var newSize = doRender
+            var newSize = renderRequest
                 .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2))
                 .DistinctUntilChanged();
 
             // Ok, rendering. We should start that only after things have settled just a little bit.
-            newSize
+            var newRender = newSize
                 .DistinctUntilChanged()
-                .Throttle(TimeSpan.FromMilliseconds(500))
+                .Throttle(TimeSpan.FromMilliseconds(500));
+
+            // Cache the info so that if we have to re-build on the fly we can.
+            newRender
+                .Subscribe(t =>
+                {
+                    _weakReferenceToImage = null;
+                    _lastRequestedRenderSize = t;
+                });
+
+            // The weak reference logic. We need to be able to release the image when
+            // it isn't needed, and then re-use it. If the image has been garbage collected,
+            // then we also need to re-render it if we need to re-use it.
+            var reusableImage = this.WhenAny(x => x.AttachImage, x => x.Value)
+                .Where(show => show)
+                .Select(t =>
+                {
+                    BitmapImage img = null;
+                    if (_weakReferenceToImage == null || !_weakReferenceToImage.TryGetTarget(out img))
+                    {
+                        return null;
+                    }
+                    return img;
+                });
+            var resueImage = reusableImage
+                .Where(img => img != null);
+            var reRenderImage = reusableImage
+                .Where(img => img == null)
+                .Where(i => _lastRequestedRenderSize != null)
+                .Select(i => _lastRequestedRenderSize);
+            Tuple<int, int> myv;
+            reRenderImage
+                .Subscribe(t => myv = t);
+
+            // When the image isn't really needed, update as we need.
+            var eraseImage = this.WhenAny(x => x.AttachImage, x => x.Value)
+                .Where(show => !show)
+                .Do(show => Debug.WriteLine("Going to release the image link"))
+                .Select(t => (BitmapImage)null);
+
+            // Do the actual rendering.
+            // TODO: Can we clean this code up (and others places) by using Observable.Merge rather than this initial chaining? It would make the code more clear.
+            var newImage = newRender
+                .Merge(reRenderImage)
+                .Do(t => _weakReferenceToImage = null)
                 .SelectMany(async szPixels =>
                 {
                     var ms = new MemoryStream();
@@ -95,8 +166,14 @@ namespace IWalker.ViewModels
                     var bm = new BitmapImage();
                     await bm.SetSourceAsync(ms.AsRandomAccessStream());
                     ms.Dispose();
+                    _weakReferenceToImage = new WeakReference<BitmapImage>(bm);
                     return bm;
-                })
+                });
+
+            // Save all image changes so the UI knows to update!
+            newImage
+                .Merge(resueImage)
+                .Merge(eraseImage)
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
         }
 
