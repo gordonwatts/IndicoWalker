@@ -21,7 +21,7 @@ namespace IWalker.Views
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
 
-            // If the ESC key is hit, we want to navigate back.
+            // If the ESC key or backbutton is hit, we want to navigate back.
             var keyrelease = SlideStrip.Events().KeyDown
                 .Where(keys => ViewModel != null);
 
@@ -32,15 +32,30 @@ namespace IWalker.Views
 
             this.BindCommand(ViewModel, x => x.GoBack, y => y.backButton);
 
-            // Forward and backwards arrows
-            keyrelease
-                .Where(keys => keys.Key == VirtualKey.Right || keys.Key == VirtualKey.Down || keys.Key == VirtualKey.Space)
-                .Do(keys => keys.Handled = true)
-                .Subscribe(e => ViewModel.PageForward.Execute(calcCurrentPage()));
-            keyrelease
-                .Where(keys => keys.Key == VirtualKey.Left || keys.Key == VirtualKey.Up)
-                .Do(keys => keys.Handled = true)
-                .Subscribe(e => ViewModel.PageBack.Execute(calcCurrentPage()));
+            // Forward and backwards arrows.
+            // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
+            // get a scroll to the item we want. So we need to aggregate those while running.
+            var isScrollInProgress = theScrollViewer
+                .Events().ViewChanged
+                .Select(sc => sc.IsIntermediate);
+
+            var keysByScrolling = keyrelease
+                    .Select(k => Tuple.Create(k, calcKeyMoveRequest(k)))
+                    .Where(k => k.Item2 != 0)
+                    .Do(k => k.Item1.Handled = true)
+                    .Select(k => k.Item2)
+                    .BatchByStream(isScrollInProgress);
+
+            keysByScrolling
+                .Where(info => !info.Item1)
+                .Subscribe(info => info.Item2.Subscribe(delta => ViewModel.PageMove.Execute(calcCurrentPage() + delta)));
+
+            keysByScrolling
+                .Where(info => info.Item1)
+                .SelectMany(async info => await info.Item2.Sum())
+                .Where(d => d != 0)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(delta => ViewModel.PageMove.Execute(delta + calcCurrentPage()));
 
             // We can't tell what size things are in here (which we need for scrolling, etc.) until
             // we have a clue as to what the layout is. So, we have to wait for that to go.
@@ -117,6 +132,20 @@ namespace IWalker.Views
 
             // The orientation of this pannel will affect how we calc the arrow key stuff.
             _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
+        }
+
+        /// <summary>
+        /// Turn the keystrokes into a page movement
+        /// </summary>
+        /// <param name="keys"></param>
+        /// <returns></returns>
+        private int calcKeyMoveRequest(Windows.UI.Xaml.Input.KeyRoutedEventArgs keys)
+        {
+            if (keys.Key == VirtualKey.Right || keys.Key == VirtualKey.Down || keys.Key == VirtualKey.Space)
+                return +1;
+            if (keys.Key == VirtualKey.Left || keys.Key == VirtualKey.Up)
+                return -1;
+            return 0;
         }
 
         /// <summary>

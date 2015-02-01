@@ -57,6 +57,11 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> PageBack { get; private set; }
 
         /// <summary>
+        /// Move to a particular page
+        /// </summary>
+        public ReactiveCommand<object> PageMove { get; private set; }
+
+        /// <summary>
         /// Get everything setup to show the PDF document
         /// </summary>
         /// <param name="doc"></param>
@@ -73,7 +78,7 @@ namespace IWalker.ViewModels
             // Setup each individual page
             _numberPages = doc.PageCount;
             Pages = new ReactiveList<PDFPageViewModel>();
-            Pages.AddRange(Enumerable.Range(0, (int) doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint) pageNumber))));
+            Pages.AddRange(Enumerable.Range(0, (int)doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint)pageNumber))));
 
             // Page navigation. Make sure things are clean and we don't over-burden the UI before
             // we pass the info back to the UI!
@@ -86,13 +91,18 @@ namespace IWalker.ViewModels
             PageForward
                 .Cast<int>()
                 .Select(pn => pn + 1)
-                .Subscribe(pn => _moveToPage.OnNext(pn));
+                .Subscribe(_moveToPage);
 
             PageBack = ReactiveCommand.Create();
             PageBack
                 .Cast<int>()
                 .Select(pn => pn - 1)
-                .Subscribe(pn => _moveToPage.OnNext(pn));
+                .Subscribe(_moveToPage);
+
+            PageMove = ReactiveCommand.Create();
+            PageMove
+                .Cast<int>()
+                .Subscribe(_moveToPage);
 
             // The go back gets a direct connection to the "back" bit.
             GoBack = screen.Router.NavigateBack;
@@ -103,12 +113,12 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="page"></param>
         /// <returns></returns>
-        private int scrubPageIndex (int page)
+        private int scrubPageIndex(int page)
         {
             if (page < 0)
                 return 0;
             if (page >= _numberPages)
-                return (int) _numberPages - 1;
+                return (int)_numberPages - 1;
             return page;
         }
 

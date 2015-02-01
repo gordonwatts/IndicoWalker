@@ -103,6 +103,7 @@
     <Prefer32Bit>true</Prefer32Bit>
   </PropertyGroup>
   <ItemGroup>
+    <Compile Include="Util\BatchByStreamHelper.cs" />
     <Compile Include="Util\OnScreenTrackingHelper.cs" />
     <Compile Include="ViewModels\FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
