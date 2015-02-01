@@ -31,9 +31,10 @@ namespace IWalker.Views
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
 
-            this.WhenAny(x => x.ShowPDF, x => x.Value)
-                .Where(x => ViewModel != null)
-                .Subscribe(x => ViewModel.AttachImage = x);
+            // TODO: Should this be a bind?
+            this.WhenAny(x => x.ShowPDF, y => y.ViewModel, (show, vm) => Tuple.Create(show.Value, vm.Value))
+                .Where(x => x.Item2 != null)
+                .Subscribe(x => x.Item2.AttachImage = x.Item1);
 
             //var benow = this.GetBindingExpression(ShowPDFProperty);
             //this.Events().Loaded
