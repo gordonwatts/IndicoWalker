@@ -61,7 +61,17 @@ namespace IWalker.Views
                         .ObserveOn(RxApp.MainThreadScheduler)
                         .Where(pn => SlideStrip.ContainerFromIndex(0) != null)
                         .Select(pn => getSlideEdge(pn))
-                        .Subscribe(loc => theScrollViewer.ChangeView(loc, null, null));
+                        .Subscribe(loc =>
+                        {
+                            if (_orientation == FullPanelOrientation.Horizontal)
+                            {
+                                theScrollViewer.ChangeView(loc, null, null);
+                            }
+                            else
+                            {
+                                theScrollViewer.ChangeView(null, loc, null);
+                            }
+                        });
                 });
 
             // Make the back button visible if there is any movement - scrolling or otherwise.
@@ -104,7 +114,15 @@ namespace IWalker.Views
             // the focus, so grab it.
             this.Events().Loaded
                 .Subscribe(t => Focus(Windows.UI.Xaml.FocusState.Programmatic));
+
+            // The orientation of this pannel will affect how we calc the arrow key stuff.
+            _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
         }
+
+        /// <summary>
+        /// Keep track of how we are going to do the scrolling.
+        /// </summary>
+        private FullPanelOrientation _orientation;
 
         /// <summary>
         /// Hold onto the scroll helper.
@@ -129,7 +147,7 @@ namespace IWalker.Views
             calcSlideEdges();
 
             // Get the current view and find where it is located. The edge cases are a little tricky!
-            var leftEdge = theScrollViewer.HorizontalOffset;
+            var leftEdge = _orientation == FullPanelOrientation.Horizontal ? theScrollViewer.HorizontalOffset : theScrollViewer.VerticalOffset;
             var slide = Enumerable.Range(0, _slideStartLocations.Length)
                 .Where(index => _slideStartLocations[index] > leftEdge)
                 .FirstOrDefault();
@@ -150,7 +168,7 @@ namespace IWalker.Views
                 double sum = 0;
                 var widths = Enumerable.Range(0, SlideStrip.Items.Count)
                     .Select(index => SlideStrip.ContainerFromIndex(index) as ContentPresenter)
-                    .Select(container => container.ActualWidth)
+                    .Select(container => _orientation == FullPanelOrientation.Horizontal ? container.ActualWidth : container.ActualHeight)
                     .Select(w => sum += w);
                 _slideStartLocations = widths
                     .ToArray();
@@ -181,10 +199,19 @@ namespace IWalker.Views
         }
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register("ViewModel", typeof(FullTalkAsStripViewModel), typeof(FullTalkAsStripView), new PropertyMetadata(null));
+
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
             set { ViewModel = (FullTalkAsStripViewModel)value; }
+        }
+
+        /// <summary>
+        /// What orientation is this pannel?
+        /// </summary>
+        public enum FullPanelOrientation
+        {
+            Horizontal, Vertical
         }
     }
 }
