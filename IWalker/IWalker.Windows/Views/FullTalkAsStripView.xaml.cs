@@ -97,6 +97,11 @@ namespace IWalker.Views
 
             this.Events().Unloaded
                 .Subscribe(t => _holder.Unload());
+
+            // We want to capture key strokes, etc. By default we don't have
+            // the focus, so grab it.
+            this.Events().Loaded
+                .Subscribe(t => Focus(Windows.UI.Xaml.FocusState.Programmatic));
         }
 
         /// <summary>
