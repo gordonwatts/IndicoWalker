@@ -35,11 +35,6 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<BitmapImage> _image = null;
 
         /// <summary>
-        /// Fired by us at the end of the image render with the new image size.
-        /// </summary>
-        public IObservable<Tuple<int, int>> UpdateImageSize { get; private set; }
-
-        /// <summary>
         /// Which dimension is important?
         /// Horizontal: The height is under our control and will be set to fit (perfectly) the PDF page for each page.
         /// Vertical: The width is under our control and will be set to fit (perfectly) the PDF page for each page.
@@ -78,12 +73,8 @@ namespace IWalker.ViewModels
 
             // Now, make sure it is an ok rendering request.
             var newSize = doRender
-                .Select(trp => Tuple.Create((int) trp.Item1, (int) trp.Item2))
-                .DistinctUntilChanged()
-                .Where(trp => trp.Item1 > 0 && trp.Item2 > 0);
-
-            // The new size should be sent out immediately.
-            UpdateImageSize = newSize;
+                .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2))
+                .DistinctUntilChanged();
 
             // Ok, rendering. We should start that only after things have settled just a little bit.
             newSize
@@ -116,23 +107,23 @@ namespace IWalker.ViewModels
         /// <param name="width">Width of the area, or 0 or infinity</param>
         /// <param name="height">Height of the area, or 0 or infinity</param>
         /// <returns></returns>
-        public Tuple<int, int> CalcRenderingSize (RenderingDimension orientation, double width, double height)
+        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height)
         {
             switch (orientation)
             {
                 case RenderingDimension.Horizontal:
                     if (width > 0)
-                        return Tuple.Create((int) width, (int) (_page.Size.Height / _page.Size.Width * width));
+                        return Tuple.Create((int)width, (int)(_page.Size.Height / _page.Size.Width * width));
                     return null;
 
                 case RenderingDimension.Vertical:
                     if (height > 0)
-                        return Tuple.Create((int) (_page.Size.Width / _page.Size.Height * height), (int) height);
+                        return Tuple.Create((int)(_page.Size.Width / _page.Size.Height * height), (int)height);
                     return null;
 
                 case RenderingDimension.MustFit:
                     if (width > 0 && height > 0)
-                        return Tuple.Create((int) width, (int) height);
+                        return Tuple.Create((int)width, (int)height);
                     return null;
 
                 default:

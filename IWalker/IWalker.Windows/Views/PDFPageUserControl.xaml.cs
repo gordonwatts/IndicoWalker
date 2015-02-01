@@ -11,9 +11,8 @@ namespace IWalker.Views
 {
     /// <summary>
     /// The view for a PDF page. We are a very simple image, with a bunch of wiring behind it.
-    ///                             uc:OnScreenTrackingHelper.IsInViewport="false"
-    ///                        ShowPDF="{Binding Path=(uc:OnScreenTrackingHelper.IsInViewport), ElementName=yo}"
     /// </summary>
+    /// <remarks>
     public sealed partial class PDFPageUserControl : UserControl, IViewFor<PDFPageViewModel>
     {
         public PDFPageUserControl()
@@ -62,7 +61,7 @@ namespace IWalker.Views
         /// </summary>
         /// <remarks>
         /// - When set to true, the control will render the page and display it.
-        /// - When set to false, the image will not be displayed. And the image will be garbage collected.
+        /// - When set to false, the image will not be displayed. And the image can be garbage collected.
         /// In all cases the control will have the correct size.
         /// </remarks>
         public bool ShowPDF
