@@ -93,7 +93,7 @@ namespace IWalker.Views
                         (uiElement as PDFPageUserControl).ShowPDF = inViewPort;
                     }
                 }
-                );
+                ) { ItemsWaitingInTheWings = 2 };
         }
 
         /// <summary>

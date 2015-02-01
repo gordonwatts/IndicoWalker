@@ -8,6 +8,15 @@ using Windows.UI.Xaml.Media;
 
 namespace IWalker.Utilities
 {
+    /// <summary>
+    /// Helper that attaches to a ScrollViewer and sends messages to the elements in its ItemsControl indicating if their
+    /// are in or out side of the ViewPort.
+    /// </summary>
+    /// <remarks>
+    /// Use virtualization (like VirtualizingStackPanel) if you want the controls not to be created. Use this if you have
+    /// a small number of controls that hold onto very large resources when they are on screen. You can use this to tell
+    /// them to release the resources when off screen, and gather them up again when they are on screen.
+    /// </remarks>
     public sealed class OnScreenTrackingHelper
     {
         /// <summary>
@@ -21,6 +30,17 @@ namespace IWalker.Utilities
         private Action<UIElement, bool> _updateFunction;
 
         /// <summary>
+        /// Get set the number of items on either side of the visible region to set as in view port.
+        /// This makes the scrolling experience slightly more pleasent. Size will depend on
+        /// a lot of application specific things. Defaults to zero.
+        /// </summary>
+        /// <remarks>
+        /// Updating this won't cause an update immediately to the state of each item. It will be factored
+        /// in upon the next normally occuring update.
+        /// </remarks>
+        public int ItemsWaitingInTheWings { get; set; }
+
+        /// <summary>
         /// Attach ourselves to a scroll viewer.
         /// </summary>
         /// <param name="hostScrollViewer">The ScrollViewer that we will send updates for</param>
@@ -31,6 +51,9 @@ namespace IWalker.Utilities
 
             _host = hostScrollViewer;
             _updateFunction = updateInViewPort;
+
+            // By default do no buffer renderings.
+            ItemsWaitingInTheWings = 0;
 
             // When the scroller is loaded and when people scroll, we
             // must update who is in and who is out.
@@ -58,6 +81,25 @@ namespace IWalker.Utilities
                           let inFrame = isInFrame(viewport, container)
                           select Tuple.Create(container, inFrame);
 
+            // We want to turn on a few for a buffer as well.
+            var initialList = inframe.TakeWhile(t => t.Item2 == false);
+            var inViewPortList = inframe.Where(t => t.Item2);
+            var tailList = inframe.SkipWhile(t => t.Item2 == false).Where(t => t.Item2 == false);
+
+            var nbuf = initialList.Count() - ItemsWaitingInTheWings;
+            if (nbuf > 0)
+            {
+                initialList = initialList.Take(nbuf)
+                    .Concat(initialList.Skip(nbuf).Select(t => Tuple.Create(t.Item1, true)));
+            }
+
+            tailList =
+                tailList.Take(ItemsWaitingInTheWings).Select(t => Tuple.Create(t.Item1, true))
+                .Concat(tailList.Skip(ItemsWaitingInTheWings));
+
+            inframe = initialList.Concat(inViewPortList).Concat(tailList);
+
+            // Ok - and finally issue a "set" for all the visual elements in the scrolling view.
             var allToSet = from p in inframe
                            let cnt = VisualTreeHelper.GetChildrenCount(p.Item1)
                            from childIndex in Enumerable.Range(0, cnt)
