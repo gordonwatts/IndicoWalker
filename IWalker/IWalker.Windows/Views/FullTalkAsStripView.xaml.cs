@@ -94,6 +94,9 @@ namespace IWalker.Views
                     }
                 }
                 ) { ItemsWaitingInTheWings = 2 };
+
+            this.Events().Unloaded
+                .Subscribe(t => _holder.Unload());
         }
 
         /// <summary>

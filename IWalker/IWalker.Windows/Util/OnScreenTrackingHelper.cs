@@ -57,9 +57,37 @@ namespace IWalker.Util
 
             // When the scroller is loaded and when people scroll, we
             // must update who is in and who is out.
-            _host.ViewChanged += (s, a) => { if (a.IsIntermediate) UpdateWhoIsInViewPort(); };
-            _host.Loaded += (s, a) => UpdateWhoIsInViewPort();
-            _host.LayoutUpdated += (s, a) => UpdateWhoIsInViewPort();
+            _host.ViewChanged += hostViewChanged;
+            _host.Loaded += hostLoaded;
+        }
+
+        /// <summary>
+        /// Disconnect from all UI elements.
+        /// </summary>
+        public void Unload()
+        {
+            _host.ViewChanged -= hostViewChanged;
+            _host.Loaded -= hostLoaded;
+        }
+
+        /// <summary>
+        /// Called when the control is first loaded.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void hostLoaded(object sender, RoutedEventArgs e)
+        {
+            UpdateWhoIsInViewPort();
+        }
+
+        /// <summary>
+        /// Called when the view changes.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void hostViewChanged(object sender, ScrollViewerViewChangedEventArgs e)
+        {
+            if (!e.IsIntermediate) UpdateWhoIsInViewPort();
         }
 
         /// <summary>
@@ -76,7 +104,8 @@ namespace IWalker.Util
             // Normally a content presenter holds just one item, but a DataTemplate (or other) could have multiple,
             // so we will be sure to support all children of the content presenter.
             var itemContainer = (_host.Content as ItemsControl);
-            var inframe = from index in Enumerable.Range(0, itemContainer.Items.Count)
+            int itemCount = itemContainer.Items.Count;
+            var inframe = from index in Enumerable.Range(0, itemCount)
                           let container = itemContainer.ContainerFromIndex(index) as ContentPresenter
                           let inFrame = isInFrame(viewport, container)
                           select Tuple.Create(container, inFrame);
