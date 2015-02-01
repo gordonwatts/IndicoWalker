@@ -22,6 +22,9 @@ namespace IWalker.Views
             // The image source
             this.OneWayBind(ViewModel, x => x.Image, y => y.ThumbImage.Source);
 
+            // Should we allow the image to be relaxed?
+            this.Bind(ViewModel, x => x.KeepImageAttached, y => y.ShowPDF);
+
             // Now, when something about our size and rendering stuff changes, we need
             // to shoot off a rendering request.
             this.Events().SizeChanged.Select(a => RespectRenderingDimension)
@@ -30,22 +33,6 @@ namespace IWalker.Views
                 .Where(x => ShowPDF)
                 .Where(t => ViewModel != null)
                 .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
-
-            // TODO: Should this be a bind?
-            this.WhenAny(x => x.ShowPDF, y => y.ViewModel, (show, vm) => Tuple.Create(show.Value, vm.Value))
-                .Where(x => x.Item2 != null)
-                .Subscribe(x => x.Item2.AttachImage = x.Item1);
-
-            //var benow = this.GetBindingExpression(ShowPDFProperty);
-            //this.Events().Loaded
-            //    .Delay(TimeSpan.FromSeconds(10))
-            //    .ObserveOn(RxApp.MainThreadScheduler)
-            //    .Do(x => benow = this.GetBindingExpression(ShowPDFProperty))
-            //    .Subscribe(a => OnScreenTrackingHelper.SetIsInViewport(this, true));
-
-            //this.WhenAny(x => x.ShowPDF, x => x.Value)
-            //    .Do(x => benow = this.GetBindingExpression(ShowPDFProperty))
-            //    .Subscribe(v => Debug.WriteLine("ShowPDF updated to {0} on {1}", v, GetHashCode()));
 
         }
 

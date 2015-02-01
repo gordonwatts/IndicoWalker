@@ -62,10 +62,13 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> RenderImage { get; private set; }
 
         /// <summary>
-        /// Get/Set the state of the attached image. False means that the image reference is set to null, but a weak reference
+        /// Get/Set GC policy of the image. False means that the image reference is set to null, but a weak reference
         /// will be kept (if the image was already rendered). True means the image will be rendered and kept.
         /// </summary>
-        public bool AttachImage
+        /// <remarks>
+        /// Resetting it to true after it being false will cause a re-render if the image has been GC'd.
+        /// </remarks>
+        public bool KeepImageAttached
         {
             get { return _showImage; }
             set
@@ -119,7 +122,7 @@ namespace IWalker.ViewModels
             // The weak reference logic. We need to be able to release the image when
             // it isn't needed, and then re-use it. If the image has been garbage collected,
             // then we also need to re-render it if we need to re-use it.
-            var reusableImage = this.WhenAny(x => x.AttachImage, x => x.Value)
+            var reusableImage = this.WhenAny(x => x.KeepImageAttached, x => x.Value)
                 .Where(show => show)
                 .Select(t =>
                 {
@@ -141,15 +144,13 @@ namespace IWalker.ViewModels
                 .Subscribe(t => myv = t);
 
             // When the image isn't really needed, update as we need.
-            var eraseImage = this.WhenAny(x => x.AttachImage, x => x.Value)
+            var eraseImage = this.WhenAny(x => x.KeepImageAttached, x => x.Value)
                 .Where(show => !show)
                 .Do(show => Debug.WriteLine("Going to release the image link for page {0}", _page.Index))
                 .Select(t => (BitmapImage)null);
 
             // Do the actual rendering.
-            // TODO: Can we clean this code up (and others places) by using Observable.Merge rather than this initial chaining? It would make the code more clear.
-            var newImage = newRender
-                .Merge(reRenderImage)
+            var newImage = Observable.Merge(newRender, reRenderImage)
                 .Do(t => _weakReferenceToImage = null)
                 .SelectMany(async szPixels =>
                 {
@@ -171,9 +172,7 @@ namespace IWalker.ViewModels
                 });
 
             // Save all image changes so the UI knows to update!
-            newImage
-                .Merge(resueImage)
-                .Merge(eraseImage)
+            Observable.Merge(newImage, resueImage, eraseImage)
                 .ToProperty(this, x => x.Image, out _image, null, RxApp.MainThreadScheduler);
         }
 
