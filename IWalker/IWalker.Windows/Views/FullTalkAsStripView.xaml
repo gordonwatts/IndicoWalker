@@ -88,7 +88,7 @@
                 <StaticResource ResourceKey="BrillianBackButton"/>
             </Button.Style>
         </Button>
-        <ScrollViewer x:Name="theScrollViewer" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled">
+        <ScrollViewer x:Name="theScrollViewer" VerticalScrollMode="Auto" HorizontalScrollMode="Disabled" VerticalScrollBarVisibility="Auto" HorizontalScrollBarVisibility="Disabled" ZoomMode="Disabled">
             <ItemsControl x:Name="SlideStrip">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
