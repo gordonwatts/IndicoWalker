@@ -1,4 +1,4 @@
-﻿using IWalker.Utilities;
+﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;

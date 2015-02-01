@@ -6,7 +6,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media;
 
-namespace IWalker.Utilities
+namespace IWalker.Util
 {
     /// <summary>
     /// Helper that attaches to a ScrollViewer and sends messages to the elements in its ItemsControl indicating if their
