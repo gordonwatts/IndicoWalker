@@ -5,7 +5,6 @@ using System.Reactive;
 using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Input;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -20,9 +19,15 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel);
+
+            // If they mousedown or tap and release in this image, then we want to open
+            // the full screen display starting from this image.
             var pressed = PDFPageUC.Events().PointerPressed;
             var released = PDFPageUC.Events().PointerReleased;
-            released
+            var when = from pd in pressed
+                       from pu in released
+                       select Unit.Default;
+            when
                 .Subscribe(e => ViewModel.OpenFullView.Execute(null));
         }
 
