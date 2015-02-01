@@ -34,11 +34,11 @@ namespace IWalker.Views
 
             // Forward and backwards arrows
             keyrelease
-                .Where(keys => keys.Key == VirtualKey.Right)
+                .Where(keys => keys.Key == VirtualKey.Right || keys.Key == VirtualKey.Down || keys.Key == VirtualKey.Space)
                 .Do(keys => keys.Handled = true)
                 .Subscribe(e => ViewModel.PageForward.Execute(calcCurrentPage()));
             keyrelease
-                .Where(keys => keys.Key == VirtualKey.Left)
+                .Where(keys => keys.Key == VirtualKey.Left || keys.Key == VirtualKey.Up)
                 .Do(keys => keys.Handled = true)
                 .Subscribe(e => ViewModel.PageBack.Execute(calcCurrentPage()));
 
@@ -66,8 +66,10 @@ namespace IWalker.Views
 
             // Make the back button visible if there is any movement - scrolling or otherwise.
             var buttonRelatedMovement =
-                this.Events().PointerMoved.Select(x => Unit.Default)
-                .Merge(theScrollViewer.Events().ViewChanging.Select(x => Unit.Default));
+                Observable.Merge(
+                    this.Events().PointerMoved.Select(x => Unit.Default),
+                    this.Events().Tapped.Select(x => Unit.Default)
+                );
 
             var makeVisible = buttonRelatedMovement
                 .Select(x => true);
