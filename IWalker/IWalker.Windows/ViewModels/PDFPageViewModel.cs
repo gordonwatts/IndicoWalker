@@ -146,7 +146,6 @@ namespace IWalker.ViewModels
             // When the image isn't really needed, update as we need.
             var eraseImage = this.WhenAny(x => x.KeepImageAttached, x => x.Value)
                 .Where(show => !show)
-                .Do(show => Debug.WriteLine("Going to release the image link for page {0}", _page.Index))
                 .Select(t => (BitmapImage)null);
 
             // Do the actual rendering.
@@ -157,7 +156,6 @@ namespace IWalker.ViewModels
                     var ms = new MemoryStream();
                     var ra = ms.AsRandomAccessStream();
                     var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-                    Debug.WriteLine("Rendering PDF page {2} ({0} by {1})", opt.DestinationWidth, opt.DestinationHeight, _page.Index);
                     await _page.RenderToStreamAsync(ra, opt);
                     return ms;
                 })
