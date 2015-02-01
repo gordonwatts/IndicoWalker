@@ -16,6 +16,17 @@ namespace IWalker.Util
     /// Use virtualization (like VirtualizingStackPanel) if you want the controls not to be created. Use this if you have
     /// a small number of controls that hold onto very large resources when they are on screen. You can use this to tell
     /// them to release the resources when off screen, and gather them up again when they are on screen.
+    /// 
+    /// There is a seeming bug in the framework for Windows 8.1. To do the viewport calculation you have to transform
+    /// the content of the items control to the coordinate system of the scroll viewer. The esiest thing to do is
+    /// do that transformation directly (use the _host in the transform in the isInFrame method).
+    /// 
+    /// This works most of the time. However, if the system is under heavy load (e.g. spending time rendering PDF images!),
+    /// then even those the scrollviewer has finished scrolling to a new position, the transforms haven't been updated, and
+    /// it appears the scrollviewer has a different part of the view in port.
+    /// 
+    /// Fortunately, things like HorizontalOffset and VerticalOffset have been updated by the time the ViewChanged event
+    /// fires, and we can do our own transformation for that.
     /// </remarks>
     public sealed class OnScreenTrackingHelper
     {
@@ -28,6 +39,11 @@ namespace IWalker.Util
         /// Hold onto the action we will perform on each UIElement.
         /// </summary>
         private Action<UIElement, bool> _updateFunction;
+
+        /// <summary>
+        /// Hold the item container for reference to the transform.
+        /// </summary>
+        private ItemsControl _itemContainer;
 
         /// <summary>
         /// Get set the number of items on either side of the visible region to set as in view port.
@@ -97,16 +113,16 @@ namespace IWalker.Util
         /// <param name="e"></param>
         private void UpdateWhoIsInViewPort()
         {
-            // What is the view port that is visible on the screen?
-            var viewport = new Rect(new Point(0, 0), _host.RenderSize);
+            // What is the view port in the child's cooredinates.
+            var viewport = new Rect(new Point(_host.HorizontalOffset, _host.VerticalOffset), new Point(_host.HorizontalOffset + _host.RenderSize.Width, _host.VerticalOffset + _host.RenderSize.Height));
 
             // Go through everything owned by the scroll bar's panel, and set it.
             // Normally a content presenter holds just one item, but a DataTemplate (or other) could have multiple,
             // so we will be sure to support all children of the content presenter.
-            var itemContainer = (_host.Content as ItemsControl);
-            int itemCount = itemContainer.Items.Count;
+            _itemContainer = (_host.Content as ItemsControl);
+            int itemCount = _itemContainer.Items.Count;
             var inframe = from index in Enumerable.Range(0, itemCount)
-                          let container = itemContainer.ContainerFromIndex(index) as ContentPresenter
+                          let container = _itemContainer.ContainerFromIndex(index) as ContentPresenter
                           let inFrame = isInFrame(viewport, container)
                           select Tuple.Create(container, inFrame);
 
@@ -145,12 +161,12 @@ namespace IWalker.Util
         /// <summary>
         /// Helper function to see if any portion of the given frame is on screen.
         /// </summary>
-        /// <param name="viewport"></param>
-        /// <param name="content"></param>
-        /// <returns></returns>
+        /// <param name="viewport">Where the viewport currently exists, in teh child's coordinates</param>
+        /// <param name="content">The UI element of the thing we are trying to see if is in view.</param>
+        /// <returns>True if the content is in the view port of the scroll bar.</returns>
         private bool isInFrame(Rect viewport, ContentPresenter content)
         {
-            var transform = content.TransformToVisual(_host);
+            var transform = content.TransformToVisual(_itemContainer);
             var childBounds = transform.TransformBounds(new Rect(new Point(0, 0), content.RenderSize));
             childBounds.Intersect(viewport);
             return !childBounds.IsEmpty;
