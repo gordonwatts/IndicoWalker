@@ -143,7 +143,7 @@ namespace IWalker.ViewModels
             // When the image isn't really needed, update as we need.
             var eraseImage = this.WhenAny(x => x.AttachImage, x => x.Value)
                 .Where(show => !show)
-                .Do(show => Debug.WriteLine("Going to release the image link"))
+                .Do(show => Debug.WriteLine("Going to release the image link for page {0}", _page.Index))
                 .Select(t => (BitmapImage)null);
 
             // Do the actual rendering.
