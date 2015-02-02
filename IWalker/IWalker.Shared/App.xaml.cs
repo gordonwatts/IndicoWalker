@@ -52,6 +52,9 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new PDFPageUserControl(), typeof(IViewFor<PDFPageViewModel>));
             Locator.CurrentMutable.Register(() => new FullTalkAsStripView(), typeof(IViewFor<FullTalkAsStripViewModel>));
 #endif
+#if WINDOWS_PHONE_APP
+            Locator.CurrentMutable.Register(() => new BasicSettingsView(), typeof(IViewFor<BasicSettingsViewModel>));
+#endif
 
             // Create the main view model, and register that.
             var r = new RoutingState();
