@@ -5,10 +5,13 @@ using Splat;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
+using System.Reactive;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
+using Windows.UI.ApplicationSettings;
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
 
@@ -153,6 +156,21 @@ namespace IWalker
             // Ensure the current window is active
             Window.Current.Activate();
         }
+
+#if WINDOWS_APP
+        /// <summary>
+        /// When the window is created, attach items to the settings pane for the Windows Store version of this app.
+        /// </summary>
+        /// <param name="args"></param>
+        protected override void OnWindowCreated(WindowCreatedEventArgs args)
+        {
+            var sc = new SettingsCommand(new Guid(), "Basic Settings", h => new BasicSettings().Show());
+            SettingsPane.GetForCurrentView().Events().CommandsRequested
+                .Subscribe(sargs => sargs.Request.ApplicationCommands.Add(sc));
+
+            base.OnWindowCreated(args);
+        }
+#endif
 
 #if WINDOWS_PHONE_APP
         /// <summary>

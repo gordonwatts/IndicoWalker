@@ -110,6 +110,9 @@
     <Compile Include="ViewModels\PDFPageViewModel.cs" />
     <Compile Include="ViewModels\SlideThumbViewModel.cs" />
     <Compile Include="ViewModels\TalkAsSlidesViewModel.cs" />
+    <Compile Include="Views\BasicSettings.xaml.cs">
+      <DependentUpon>BasicSettings.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
     </Compile>
@@ -184,6 +187,10 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="Views\BasicSettings.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="Views\FileSlidesUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
