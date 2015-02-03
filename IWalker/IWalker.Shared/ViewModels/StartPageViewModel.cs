@@ -155,6 +155,7 @@ namespace IWalker.ViewModels
                 return op;
             });
 
+#if false
 #if WINDOWS_PHONE_APP
             setupAsk
                 .Subscribe(op => op.PickSingleFileAndContinue());
@@ -179,7 +180,7 @@ namespace IWalker.ViewModels
             var storageFile = setupAsk.SelectMany(async fp => await fp.PickSingleFileAsync());
             LoadCertIntoAppContainer(_certState, storageFile);
 #endif
-
+#endif
             // Clear out the password after we've got something loaded. Make sure it is only enabled when we want it enabled.
             var clearItOut = _certState
                 .Where(c => c == CertLoadState.Loaded)
