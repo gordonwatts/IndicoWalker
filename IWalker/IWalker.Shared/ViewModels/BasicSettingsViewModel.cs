@@ -51,7 +51,12 @@ namespace IWalker.ViewModels
             errors
                 .ToProperty(this, x => x.Error, out _error, "", RxApp.MainThreadScheduler);
 
+            // Given a file and a password, see if we can install it as a cert
+            // in our internal repository.
             LoadFiles = ReactiveCommand.Create();
+            LoadFiles
+                .Subscribe(x => errors.OnNext(""));
+
             var files = LoadFiles
                 .Cast<Tuple<IReadOnlyList<StorageFile>, string>>();
 
@@ -63,23 +68,30 @@ namespace IWalker.ViewModels
             files
                 .Where(finfo => finfo.Item1 != null && finfo.Item1.Count == 1)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .SelectMany(async f =>
+                .Select(mf =>
                 {
-                    // Work around for the TplEventListener not working correctly.
-                    // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
-                    await Task.Delay(1);
+                    // We use this double subscribe because the readBufferAsync and ImportPfxDataAsync often return exceptions.
+                    // If we let the exception bubble all the way up, it terminates the sequence. Which means if the user entered
+                    // the wrong password they wouldn't get a chance to try again!
+                    return Observable.Return(mf)
+                        .SelectMany(async f =>
+                        {
+                            // Work around for the TplEventListener not working correctly.
+                            // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
+                            await Task.Delay(1);
 
-                    var fs = f.Item1[0] as StorageFile;
-                    var buffer = await FileIO.ReadBufferAsync(fs);
-                    var cert = CryptographicBuffer.EncodeToBase64String(buffer);
+                            var fs = f.Item1[0] as StorageFile;
+                            var buffer = await FileIO.ReadBufferAsync(fs);
+                            var cert = CryptographicBuffer.EncodeToBase64String(buffer);
 
-                    await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, _cert_name);
-                    return Unit.Default;
+                            await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, _cert_name);
+                            return Unit.Default;
+                        });
                 })
-                .Subscribe(
-                    c => LookupCertStatus.ExecuteAsync(),
-                    e => errors.OnNext(string.Format("Failed: {0}", e.Message.TakeFirstLine()))
-                );
+                .Subscribe(c => c.Subscribe(
+                    g => LookupCertStatus.ExecuteAsync().Subscribe(),
+                    e => errors.OnNext(e.Message.TakeFirstLine())
+                    ));
         }
 
         /// <summary>
