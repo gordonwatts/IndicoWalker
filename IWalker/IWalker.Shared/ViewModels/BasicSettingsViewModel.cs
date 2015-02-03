@@ -10,6 +10,7 @@ using Windows.Storage;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;
 using System.Threading.Tasks;
+using IWalker.Util;
 
 namespace IWalker.ViewModels
 {
@@ -60,7 +61,7 @@ namespace IWalker.ViewModels
                 })
                 .Subscribe(
                     c => status.OnNext("New Cert Loaded"),
-                    e => errors.OnNext(string.Format("Failed: {0}", e.Message))
+                    e => errors.OnNext(string.Format("Failed: {0}", e.Message.TakeFirstLine()))
                 );
         }
 
