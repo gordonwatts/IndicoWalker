@@ -19,6 +19,13 @@ namespace IWalker.ViewModels
     /// </summary>
     public class BasicSettingsViewModel : ReactiveObject, IRoutableViewModel
     {
+        const string _cert_name = "CERNCert";
+
+        /// <summary>
+        /// Fired when the page hooks up - so we can do an init of our status.
+        /// </summary>
+        public ReactiveCommand<Certificate> LookupCertStatus { get; private set; }
+
         /// <summary>
         /// Basic settings are configured on the view that is attached to this VM.
         /// </summary>
@@ -27,14 +34,22 @@ namespace IWalker.ViewModels
         {
             HostScreen = screen;
 
+            // Look for a currently loaded cert and update the status...
+            // We can't start this b.c. the ToProperty is lazy - and it won't
+            // fire until Status is data-bound!
+            LookupCertStatus = ReactiveCommand.CreateAsyncTask(a => FindCert(_cert_name));
+            LookupCertStatus
+                .Select(c => c == null ? "No Cert Loaded" : string.Format("Loaded (expires {0})", c.ValidTo.ToLocalTime().ToString("yyyy-MM-dd HH:mm")))
+                .ToProperty(this, x => x.Status, out _status, "", RxApp.MainThreadScheduler);
+
+            LookupCertStatus
+                .ExecuteAsync()
+                .Subscribe();
+
             // Error and status messages...
             var errors = new Subject<string>();
             errors
                 .ToProperty(this, x => x.Error, out _error, "", RxApp.MainThreadScheduler);
-
-            var status = new Subject<string>();
-            status
-                .ToProperty(this, x => x.Status, out _status, "", RxApp.MainThreadScheduler);
 
             LoadFiles = ReactiveCommand.Create();
             var files = LoadFiles
@@ -50,21 +65,47 @@ namespace IWalker.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .SelectMany(async f =>
                 {
+                    // Work around for the TplEventListener not working correctly.
+                    // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
                     await Task.Delay(1);
 
                     var fs = f.Item1[0] as StorageFile;
                     var buffer = await FileIO.ReadBufferAsync(fs);
                     var cert = CryptographicBuffer.EncodeToBase64String(buffer);
 
-                    await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, "CERNCert");
+                    await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, _cert_name);
                     return Unit.Default;
                 })
                 .Subscribe(
-                    c => status.OnNext("New Cert Loaded"),
+                    c => LookupCertStatus.ExecuteAsync(),
                     e => errors.OnNext(string.Format("Failed: {0}", e.Message.TakeFirstLine()))
                 );
         }
 
+        /// <summary>
+        /// Returns a certificate with a given name
+        /// </summary>
+        /// <param name="certName">Name of cert we are going to look for</param>
+        /// <returns>null if the cert isn't there, otherwise the cert that was found.</returns>
+        private async Task<Certificate> FindCert(string certName)
+        {
+            // Work around for the TplEventListener not working correctly.
+            // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
+            await Task.Delay(1);
+
+            // Do the CERT query
+
+            var query = new CertificateQuery();
+            query.FriendlyName = certName;
+            var certificates = await CertificateStores.FindAllAsync(query);
+
+            if (certificates.Count != 1)
+            {
+                return null;
+            }
+            return certificates[0];
+        }
+        
         /// <summary>
         /// Fired from the View when we are ready to load a file. It should contain a tuple
         /// of a list of files (with a single entry) and the password (as a string).
