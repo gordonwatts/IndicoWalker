@@ -1,16 +1,14 @@
-﻿using ReactiveUI;
+﻿using IWalker.Util;
+using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Reactive.Subjects;
 using System.Reactive;
-using System;
 using System.Reactive.Linq;
-using System.Text;
-using Windows.Storage;
+using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;
-using System.Threading.Tasks;
-using IWalker.Util;
+using Windows.Storage;
 
 namespace IWalker.ViewModels
 {

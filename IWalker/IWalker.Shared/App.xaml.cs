@@ -51,6 +51,7 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new SlideThumbUserControl(), typeof(IViewFor<SlideThumbViewModel>));
             Locator.CurrentMutable.Register(() => new PDFPageUserControl(), typeof(IViewFor<PDFPageViewModel>));
             Locator.CurrentMutable.Register(() => new FullTalkAsStripView(), typeof(IViewFor<FullTalkAsStripViewModel>));
+            Locator.CurrentMutable.Register(() => new SecuritySettingsPage(), typeof(IViewFor<BasicSettingsViewModel>));
 #endif
 #if WINDOWS_PHONE_APP
             Locator.CurrentMutable.Register(() => new BasicSettingsView(), typeof(IViewFor<BasicSettingsViewModel>));
@@ -169,10 +170,14 @@ namespace IWalker
         /// <param name="args"></param>
         protected override void OnWindowCreated(WindowCreatedEventArgs args)
         {
-            var sc = new SettingsCommand(new Guid(), "Basic Settings", h => new BasicSettings().Show());
+            // Show the setting fly out. Connect a VM to it.
+            var sc = new SettingsCommand(new Guid(), "Basic Settings", h => new BasicSettingsFlyout(Locator.Current.GetService<IScreen>()).Show());
+
+            // Add it as one of the things we are going to show.
             SettingsPane.GetForCurrentView().Events().CommandsRequested
                 .Subscribe(sargs => sargs.Request.ApplicationCommands.Add(sc));
 
+            // And finally, do everything else that needs to be done.
             base.OnWindowCreated(args);
         }
 #endif

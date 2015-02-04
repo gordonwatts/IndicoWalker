@@ -1,5 +1,5 @@
 ﻿<SettingsFlyout
-    x:Class="IWalker.Views.BasicSettings"
+    x:Class="IWalker.Views.BasicSettingsFlyout"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:IWalker.Views"
@@ -19,15 +19,15 @@
         <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
 
             <!-- Section 1 header -->
-            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="CERN Security Certificate" />
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Secure Website Access" />
 
             <!-- Section 1 body -->
             <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
                 <TextBlock.Text>
-                    Click the button to load a certificate that can be used to authenticate for public meetings on the CERN indico.cern.ch site.
+                    Various indico websites require certificates to log in.
                 </TextBlock.Text>
             </TextBlock>
-            <Button Content="Load Certificate" HorizontalAlignment="Center"/>
+            <Button x:Name="OpenSecurityPage" Content="Modify Web Security" HorizontalAlignment="Right" Click="OpenSecurityPage_Click"/>
         </StackPanel>
 
         <!-- Define more Content Sections below as necessary -->

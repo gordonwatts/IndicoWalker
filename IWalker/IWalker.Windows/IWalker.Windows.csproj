@@ -110,8 +110,8 @@
     <Compile Include="ViewModels\PDFPageViewModel.cs" />
     <Compile Include="ViewModels\SlideThumbViewModel.cs" />
     <Compile Include="ViewModels\TalkAsSlidesViewModel.cs" />
-    <Compile Include="Views\BasicSettings.xaml.cs">
-      <DependentUpon>BasicSettings.xaml</DependentUpon>
+    <Compile Include="Views\BasicSettingsFlyout.xaml.cs">
+      <DependentUpon>BasicSettingsFlyout.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
@@ -125,6 +125,9 @@
     <Compile Include="Properties\AssemblyInfo.cs" />
     <Compile Include="Views\PDFPageUserControl.xaml.cs">
       <DependentUpon>PDFPageUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\SecuritySettingsPage.xaml.cs">
+      <DependentUpon>SecuritySettingsPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\SlideThumbUserControl.xaml.cs">
       <DependentUpon>SlideThumbUserControl.xaml</DependentUpon>
@@ -190,7 +193,7 @@
     </Reference>
   </ItemGroup>
   <ItemGroup>
-    <Page Include="Views\BasicSettings.xaml">
+    <Page Include="Views\BasicSettingsFlyout.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
@@ -207,6 +210,10 @@
       <SubType>Designer</SubType>
     </Page>
     <Page Include="Views\PDFPageUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\SecuritySettingsPage.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
