@@ -18,15 +18,6 @@ namespace IWalker.Views
 
             this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
-
-            // Cert stuff
-            this.BindCommand(ViewModel, x => x.LoadCert, x => x.LoadIt);
-            this.Bind(ViewModel, x => x.CertPassword, x => x.CertPassword.Text);
-            this.Bind(ViewModel, x => x.CertStateText, x => x.CertStatus.Text);
-            this.BindCommand(ViewModel, x => x.StartSequence, x => x.Start);
-            this.Bind(ViewModel, x => x.CertPasswordEnabled, x => x.CertControls.Visibility);
-            // Navigation.
-            //this.NavigationCacheMode = NavigationCacheMode.Required;
         }
 
         /// <summary>
