@@ -24,6 +24,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Files.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\SecurityUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Settings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\StringHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BasicSettingsViewModel.cs" />

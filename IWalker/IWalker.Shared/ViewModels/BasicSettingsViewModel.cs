@@ -17,8 +17,6 @@ namespace IWalker.ViewModels
     /// </summary>
     public class BasicSettingsViewModel : ReactiveObject, IRoutableViewModel
     {
-        const string _cert_name = "CERNCert";
-
         /// <summary>
         /// Fired when the page hooks up - so we can do an init of our status.
         /// </summary>
@@ -35,7 +33,7 @@ namespace IWalker.ViewModels
             // Look for a currently loaded cert and update the status...
             // We can't start this b.c. the ToProperty is lazy - and it won't
             // fire until Status is data-bound!
-            LookupCertStatus = ReactiveCommand.CreateAsyncTask(a => FindCert(_cert_name));
+            LookupCertStatus = ReactiveCommand.CreateAsyncTask(a => SecurityUtils.FindCert(SecurityUtils.CERNCertName));
             LookupCertStatus
                 .Select(c => c == null ? "No Cert Loaded" : string.Format("Loaded (expires {0})", c.ValidTo.ToLocalTime().ToString("yyyy-MM-dd HH:mm")))
                 .ToProperty(this, x => x.Status, out _status, "", RxApp.MainThreadScheduler);
@@ -82,7 +80,7 @@ namespace IWalker.ViewModels
                             var buffer = await FileIO.ReadBufferAsync(fs);
                             var cert = CryptographicBuffer.EncodeToBase64String(buffer);
 
-                            await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, _cert_name);
+                            await CertificateEnrollmentManager.ImportPfxDataAsync(cert, f.Item2, ExportOption.NotExportable, KeyProtectionLevel.NoConsent, InstallOptions.DeleteExpired, SecurityUtils.CERNCertName);
                             return Unit.Default;
                         });
                 })
@@ -90,30 +88,6 @@ namespace IWalker.ViewModels
                     g => LookupCertStatus.ExecuteAsync().Subscribe(),
                     e => errors.OnNext(e.Message.TakeFirstLine())
                     ));
-        }
-
-        /// <summary>
-        /// Returns a certificate with a given name
-        /// </summary>
-        /// <param name="certName">Name of cert we are going to look for</param>
-        /// <returns>null if the cert isn't there, otherwise the cert that was found.</returns>
-        private async Task<Certificate> FindCert(string certName)
-        {
-            // Work around for the TplEventListener not working correctly.
-            // https://social.msdn.microsoft.com/Forums/windowsapps/en-US/3e505e04-7f30-4313-aa47-275eaef333dd/systemargumentexception-use-of-undefined-keyword-value-1-for-event-taskscheduled-in-async?forum=wpdevelop
-            await Task.Delay(1);
-
-            // Do the CERT query
-
-            var query = new CertificateQuery();
-            query.FriendlyName = certName;
-            var certificates = await CertificateStores.FindAllAsync(query);
-
-            if (certificates.Count != 1)
-            {
-                return null;
-            }
-            return certificates[0];
         }
         
         /// <summary>
