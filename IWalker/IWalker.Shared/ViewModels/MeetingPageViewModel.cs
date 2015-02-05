@@ -34,6 +34,11 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.MeetingTitle, out _title, "");
 
             ldrCmd
+                .Select(m => m.StartTime)
+                .Select(dt => dt.ToString())
+                .ToProperty(this, x => x.StartTime, out _startTime, "");
+
+            ldrCmd
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0)
                 .Select(s => s[0])
@@ -67,6 +72,15 @@ namespace IWalker.ViewModels
             get { return _title.Value; }
         }
         private ObservableAsPropertyHelper<string> _title;
+
+        /// <summary>
+        /// The start time.
+        /// </summary>
+        public string StartTime
+        {
+            get { return _startTime.Value; }
+        }
+        private ObservableAsPropertyHelper<string> _startTime;
 
         /// <summary>
         /// Get the list of talks

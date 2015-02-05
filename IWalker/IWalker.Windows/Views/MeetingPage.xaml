@@ -31,8 +31,11 @@
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
-            <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
-                        IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,30,40"/>
+            <StackPanel Orientation="Vertical" Grid.Column="1" Margin="0,59,0,0">
+                <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
+                            IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+                <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Bottom" Margin="0,5,0,0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+            </StackPanel>
         </Grid>
         <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
             <ItemsControl x:Name="TalkList"/>

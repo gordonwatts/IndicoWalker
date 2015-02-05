@@ -273,6 +273,14 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
+            /// Return the date of the meeting
+            /// </summary>
+            public DateTime StartTime
+            {
+                get { return _agenda.StartDate; }
+            }
+
+            /// <summary>
             /// Get the sessions. Populate them if need be!
             /// </summary>
             public ISession[] Sessions

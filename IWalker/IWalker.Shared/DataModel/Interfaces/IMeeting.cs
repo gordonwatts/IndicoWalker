@@ -1,4 +1,5 @@
 ﻿
+using System;
 namespace IWalker.DataModel.Interfaces
 {
     /// <summary>
@@ -15,5 +16,10 @@ namespace IWalker.DataModel.Interfaces
         /// Get the list of sessions assocated with this meeting or confernece.
         /// </summary>
         ISession[] Sessions { get; }
+
+        /// <summary>
+        /// Get the start time of the meeting, including timezone information.
+        /// </summary>
+        DateTime StartTime { get; }
     }
 }
