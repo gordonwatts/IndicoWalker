@@ -11,6 +11,8 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
+using IWalker.DataModel.MRU;
+using IWalker.DataModel.Interfaces;
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
 #endif
@@ -70,6 +72,10 @@ namespace IWalker
             RxApp.SuspensionHost.CreateNewAppState = () => new MainPageViewModel(r);
             RxApp.SuspensionHost.SetupDefaultSuspendResume();
             Locator.CurrentMutable.RegisterConstant(autoSuspendHelper, typeof(IWalker.Util.AutoSuspendHelper));
+
+            // The Most Recently Used (MUR) database
+            var mruDB = new MRUDatabaseAccess();
+            Locator.CurrentMutable.RegisterConstant(mruDB, typeof(IMRUDatabase));
 
 #if WINDOWS_PHONE_APP
             // And the back button on windows phone.

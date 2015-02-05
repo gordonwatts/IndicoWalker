@@ -19,9 +19,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeeting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMRUDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ISession.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ITalk.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IFile.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\MRU\MRUDatabaseAccess.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Files.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\SecurityUtils.cs" />

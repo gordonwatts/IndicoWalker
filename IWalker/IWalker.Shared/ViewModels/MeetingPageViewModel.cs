@@ -1,6 +1,8 @@
 ﻿using IWalker.DataModel.Interfaces;
 using ReactiveUI;
+using Splat;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 
@@ -24,10 +26,10 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Given a meeting, load the info. Since this is an asynchronous command, we have to schedule stuff off it.
         /// </summary>
-        /// <param name="title"></param>
-        private void LoadMeeting(IMeetingRef title)
+        /// <param name="meeting"></param>
+        private void LoadMeeting(IMeetingRef meeting)
         {
-            var ldrCmd = ReactiveCommand.CreateAsyncTask<IMeeting>(_ => title.GetMeeting());
+            var ldrCmd = ReactiveCommand.CreateAsyncTask<IMeeting>(_ => meeting.GetMeeting());
 
             ldrCmd
                 .Select(m => m.Title)
@@ -45,6 +47,12 @@ namespace IWalker.ViewModels
                 .Where(t => t.Talks != null)
                 .Select(t => t.Talks)
                 .Subscribe(talks => SetAsTalks(talks));
+
+            // And mark this meeting as having been viewed by the user!
+            var db = Locator.Current.GetService<IMRUDatabase>();
+            Debug.Assert(db != null);
+            ldrCmd
+                .Subscribe(m => db.MarkVisitedNow(m));
 
             // Start everything off.
             ldrCmd.Execute(null);
