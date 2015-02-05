@@ -18,6 +18,7 @@ namespace IWalker.Views
 
             // Bind everything together we need.
             this.Bind(ViewModel, x => x.MeetingTitle, y => y.MeetingTitle.Text);
+            this.Bind(ViewModel, x => x.StartTime, y => y.StartTime.Text);
             this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.ItemsSource);
         }
 
