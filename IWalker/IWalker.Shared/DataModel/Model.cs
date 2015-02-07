@@ -5,7 +5,7 @@ using System;
 
 namespace IWalker
 {
-    public class SQLiteDb
+    partial class SQLiteDb
     {
         string _path;
         public SQLiteDb(string path)

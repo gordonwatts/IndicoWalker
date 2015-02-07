@@ -1,4 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
+using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
@@ -22,7 +23,6 @@ namespace IWalker.DataModel.MRU
         /// </summary>
         public MRUDatabaseAccess()
         {
-            _db = Model.DB;
         }
 
         /// <summary>
@@ -33,17 +33,47 @@ namespace IWalker.DataModel.MRU
         /// <param name="title"></param>
         public async Task MarkVisitedNow(IMeeting m)
         {
-            var c = new SQLite.SQLiteAsyncConnection("dude");
+            await CreateDBConnection();
             var mru = new IWalker.MRU()
             {
                 IDRef = "no way",
                 StartTime = m.StartTime,
                 Title = m.Title
             };
-            var r = await c.InsertAsync(mru);
+            var r = await _db.AsyncConnection.InsertAsync(mru);
+        }
 
-            await Task.Delay(100); // Simulate the write. :-)
-            Debug.WriteLine("Marking meeting {0} as being looked at", m.Title);
+        /// <summary>
+        /// Return a query of the database
+        /// </summary>
+        /// <returns></returns>
+        public async Task<AsyncTableQuery<IWalker.MRU>> QueryMRUDB()
+        {
+            await CreateDBConnection();
+            return _db.AsyncConnection.Table<IWalker.MRU>();
+        }
+
+        /// <summary>
+        /// Execute some query asynchronously.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="query"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public async Task<T> ExecuteScalarAsync<T> (string query, params object[] args)
+        {
+            await CreateDBConnection();
+            return await _db.AsyncConnection.ExecuteScalarAsync<T>(query, args);
+        }
+
+        /// <summary>
+        /// Get the db connection up and running.
+        /// </summary>
+        /// <returns></returns>
+        private async Task CreateDBConnection()
+        {
+            if (_db == null)
+                _db = await SQLiteDb.DB();
         }
     }
 }
