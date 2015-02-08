@@ -9,9 +9,18 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="140"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
             <TextBox Name="IndicoUrl" MinWidth="200"/>
             <Button Name="FindIndicoUrl" Content="Load It!"/>
         </StackPanel>
+        <Grid Grid.Row="0">
+            <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
+                        IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="50,0,0,0"/>
+        </Grid>
     </Grid>
 </Page>
