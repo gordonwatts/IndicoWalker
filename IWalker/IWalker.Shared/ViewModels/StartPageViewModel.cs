@@ -4,6 +4,7 @@ using IWalker.DataModel.Interfaces;
 using IWalker.Util;
 using ReactiveUI;
 using System;
+using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading.Tasks;
@@ -35,6 +36,11 @@ namespace IWalker.ViewModels
         private string _meetingAddress;
 
         /// <summary>
+        /// The list of recently set meetings.
+        /// </summary>
+        public List<MRU> RecentMeetings { get; private set; }
+
+        /// <summary>
         /// Setup the page
         /// </summary>
         public StartPageViewModel(IScreen screen)
@@ -54,10 +60,11 @@ namespace IWalker.ViewModels
                     HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
                 });
 
-            //var xme = new HtmlAgilityPack.HtmlDocument();
-
             // Setup the first value for the last time we ran to make life a little simpler.
             MeetingAddress = Settings.LastViewedMeeting;
+
+            // And populate the most recently viewed meeting list.
+            RecentMeetings = new List<MRU>();
         }
 
         /// <summary>

@@ -18,6 +18,8 @@ namespace IWalker.Views
 
             this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
+
+            //this.OneWayBind(ViewModel, x => x.RecentMeetings, y => y.MRUMeetings.Source);
         }
 
         /// <summary>

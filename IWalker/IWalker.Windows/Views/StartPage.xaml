@@ -8,19 +8,39 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
+    <Page.Resources>
+        <CollectionViewSource x:Name="MRUMeetings" />
+    </Page.Resources>
+    
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="140"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBox Name="IndicoUrl" MinWidth="200"/>
-            <Button Name="FindIndicoUrl" Content="Load It!"/>
-        </StackPanel>
-        <Grid Grid.Row="0">
-            <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
-                        IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="50,0,0,0"/>
-        </Grid>
+        <Hub>
+            <Hub.Header>
+                <Grid Grid.Row="0">
+                        <StackPanel Orientation="Horizontal">
+                        <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
+                                    IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0"/>
+                        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Stretch">
+                            <TextBox Name="IndicoUrl" />
+                            <Button Name="FindIndicoUrl" Content="Load It!"/>
+                        </StackPanel>
+                    </StackPanel>
+                </Grid>
+            </Hub.Header>
+            <HubSection Header="Upcoming Meetings" Width="400"/>
+            <HubSection Header="Viewed Meetings" Width="600">
+                <DataTemplate>
+                    <GridView ItemsSource="{StaticResource MRUMeetings}" Grid.Row="1" HorizontalAlignment="Stretch">
+                        <GridView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Grid.Row="2">
+                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}" TextWrapping="Wrap" />
+                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartDate}" TextWrapping="Wrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                </DataTemplate>
+            </HubSection>
+        </Hub>
     </Grid>
 </Page>
