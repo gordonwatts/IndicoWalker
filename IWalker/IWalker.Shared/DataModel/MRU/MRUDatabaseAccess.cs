@@ -38,7 +38,8 @@ namespace IWalker.DataModel.MRU
             {
                 IDRef = "no way",
                 StartTime = m.StartTime,
-                Title = m.Title
+                Title = m.Title,
+                LastLookedAt = DateTime.Now
             };
             var r = await _db.AsyncConnection.InsertAsync(mru);
         }

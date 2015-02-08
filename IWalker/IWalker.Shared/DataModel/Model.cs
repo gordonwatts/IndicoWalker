@@ -25,18 +25,22 @@ namespace IWalker
     public partial class MRU
     {
         [PrimaryKey]
-        public Int64  Id { get; set; }
+        [AutoIncrement]
+        public int Id { get; set; }
         
         [MaxLength(40)]
         [NotNull]
-        public String  Title { get; set; }
+        public String Title { get; set; }
         
         [NotNull]
-        public DateTime  StartTime { get; set; }
+        public DateTime StartTime { get; set; }
+
+        [NotNull]
+        public DateTime LastLookedAt { get; set; }
         
         [MaxLength(256)]
         [NotNull]
-        public String  IDRef { get; set; }
+        public String IDRef { get; set; }
         
     }
     
