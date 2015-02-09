@@ -5,6 +5,8 @@ using System.Text;
 using System.Threading.Tasks;
 using Windows.Storage;
 using System.Linq;
+using IndicoInterface.NET;
+using IWalker.DataModel.Interfaces;
 
 namespace IWalker
 {
@@ -101,6 +103,20 @@ namespace IWalker
 
             // Create the database.
             await _db.Value.CreateAsync();
+        }
+    }
+
+    partial class MRU
+    {
+        /// <summary>
+        /// Return a proper agenda object for this entry in the MRU.
+        /// </summary>
+        /// <returns>A agenda object that can be used with the rest of the indico system</returns>
+        /// <remarks>If and when we include more than just Indico, this will have to be improved so it can tell what sort fo thing it is!</remarks>
+        public IMeetingRef ToAgendaInfo()
+        {
+            var ai = AgendaInfo.FromShortString(IDRef);
+            return new IWalker.DataModel.Inidco.IndicoMeetingRef(ai.ConferenceUrl);
         }
     }
 }

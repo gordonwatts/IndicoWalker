@@ -34,14 +34,31 @@ namespace IWalker.DataModel.MRU
         public async Task MarkVisitedNow(IMeeting m)
         {
             await CreateDBConnection();
-            var mru = new IWalker.MRU()
+
+            // See if this meeting is already in the database. We have to
+            // use the unique string for that, sadly.
+
+            var mref = m.AsReferenceString();
+            var entry = await (_db.AsyncConnection.Table<IWalker.MRU>().Where(mt => mt.IDRef == mref).FirstOrDefaultAsync());
+
+            if (entry == null)
             {
-                IDRef = "no way",
-                StartTime = m.StartTime,
-                Title = m.Title,
-                LastLookedAt = DateTime.Now
-            };
-            var r = await _db.AsyncConnection.InsertAsync(mru);
+                // Totally new!
+                var mru = new IWalker.MRU()
+                {
+                    IDRef = mref,
+                    StartTime = m.StartTime,
+                    Title = m.Title,
+                    LastLookedAt = DateTime.Now
+                };
+                var r = await _db.AsyncConnection.InsertAsync(mru);
+            }
+            else
+            {
+                // Just update a pre-existing object.
+                entry.LastLookedAt = DateTime.Now;
+                await _db.AsyncConnection.UpdateAsync(entry);
+            }
         }
 
         /// <summary>

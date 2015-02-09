@@ -21,5 +21,12 @@ namespace IWalker.DataModel.Interfaces
         /// Get the start time of the meeting, including timezone information.
         /// </summary>
         DateTime StartTime { get; }
+
+        /// <summary>
+        /// Turn the meeting into some sort of string that we can then use to re-constitute
+        /// this IMeeting. This should be short - of order 60 characters (inital db size is 100).
+        /// </summary>
+        /// <returns></returns>
+        string AsReferenceString();
     }
 }

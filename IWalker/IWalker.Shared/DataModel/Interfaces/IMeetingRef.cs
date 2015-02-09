@@ -12,5 +12,11 @@ namespace IWalker.DataModel.Interfaces
         /// </summary>
         /// <returns></returns>
         Task<IMeeting> GetMeeting();
+
+        /// <summary>
+        /// Return a short string that represents this meeting.
+        /// </summary>
+        /// <returns></returns>
+        string AsReferenceString();
     }
 }

@@ -258,13 +258,16 @@ namespace IWalker.DataModel.Inidco
 
             private IndicoSesson[] _sessons = null;
 
+            private string _shortString;
+
             /// <summary>
             /// Start up and cache the meeting agenda.
             /// </summary>
             /// <param name="agenda"></param>
-            public IndicoMeeting(Meeting agenda)
+            public IndicoMeeting(Meeting agenda, string shortString)
             {
                 this._agenda = agenda;
+                _shortString = shortString;
             }
 
             public string Title
@@ -294,6 +297,15 @@ namespace IWalker.DataModel.Inidco
                     return _sessons;
                 }
             }
+
+            /// <summary>
+            /// Return the short flufable string.
+            /// </summary>
+            /// <returns></returns>
+            public string AsReferenceString()
+            {
+                return _shortString;
+            }
         }
 
         /// <summary>
@@ -312,7 +324,16 @@ namespace IWalker.DataModel.Inidco
             var a = new AgendaInfo(_url);
             var al = new AgendaLoader(_fetcher.Value);
             var agenda = await al.GetNormalizedConferenceData(a);
-            return new IndicoMeeting(agenda);
+            return new IndicoMeeting(agenda, a.AsShortString());
+        }
+
+        /// <summary>
+        /// Return a short string that will represent this URL.
+        /// </summary>
+        /// <returns></returns>
+        public string AsReferenceString()
+        {
+            return new AgendaInfo(_url).AsShortString();
         }
     }
 }
