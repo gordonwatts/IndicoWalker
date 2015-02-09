@@ -29,7 +29,7 @@
             <HubSection Header="Upcoming Meetings" Width="400"/>
             <HubSection Header="Viewed Meetings" Width="600">
                 <DataTemplate>
-                    <GridView ItemsSource="{StaticResource MRUMeetings}" Grid.Row="1" HorizontalAlignment="Stretch">
+                    <GridView ItemsSource="{Binding Source={StaticResource MRUMeetings}}" Grid.Row="1" HorizontalAlignment="Stretch">
                         <GridView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Grid.Row="2">
