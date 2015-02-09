@@ -26,10 +26,10 @@ namespace IWalker.DataModel
                 await f.DeleteAsync();
                 return;
             }
-            catch (FileNotFoundException e) {
+            catch (FileNotFoundException) {
                 return;
             }
-            catch (UnauthorizedAccessException e)
+            catch (UnauthorizedAccessException)
             {
             }
 
