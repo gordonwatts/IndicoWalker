@@ -26,15 +26,15 @@
                     </StackPanel>
                 </Grid>
             </Hub.Header>
-            <HubSection Header="Upcoming Meetings" Width="400"/>
-            <HubSection Header="Viewed Meetings" Width="600">
+            <HubSection Header="Upcoming Meetings" Width="600"/>
+            <HubSection Header="Viewed Meetings">
                 <DataTemplate>
-                    <GridView ItemsSource="{Binding Source={StaticResource MRUMeetings}}" Grid.Row="1" HorizontalAlignment="Stretch">
+                    <GridView ItemsSource="{Binding Source={StaticResource MRUMeetings}}" SelectionMode="None">
                         <GridView.ItemTemplate>
                             <DataTemplate>
-                                <StackPanel Orientation="Vertical" Grid.Row="2">
-                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}" TextWrapping="Wrap" />
-                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartDate}" TextWrapping="Wrap" />
+                                <StackPanel Orientation="Vertical" Width="500">
+                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="NoWrap" />
+                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
                                 </StackPanel>
                             </DataTemplate>
                         </GridView.ItemTemplate>

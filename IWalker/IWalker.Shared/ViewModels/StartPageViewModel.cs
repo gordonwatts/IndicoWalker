@@ -65,6 +65,8 @@ namespace IWalker.ViewModels
 
             // And populate the most recently viewed meeting list.
             RecentMeetings = new List<MRU>();
+            RecentMeetings.Add(new MRU() { Id = 1, LastLookedAt = DateTime.Now, StartTime = DateTime.Now, Title = "meeting number 1" });
+            RecentMeetings.Add(new MRU() { Id = 1, LastLookedAt = DateTime.Now, StartTime = DateTime.Now, Title = "meeting number 2" });
         }
 
         /// <summary>
