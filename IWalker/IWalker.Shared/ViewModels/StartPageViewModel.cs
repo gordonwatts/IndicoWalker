@@ -1,6 +1,7 @@
 ﻿using CERNSSO;
 using IWalker.DataModel.Inidco;
 using IWalker.DataModel.Interfaces;
+using IWalker.DataModel.MRU;
 using IWalker.Util;
 using ReactiveUI;
 using System;
@@ -65,8 +66,24 @@ namespace IWalker.ViewModels
 
             // And populate the most recently viewed meeting list.
             RecentMeetings = new List<MRU>();
-            RecentMeetings.Add(new MRU() { Id = 1, LastLookedAt = DateTime.Now, StartTime = DateTime.Now, Title = "meeting number 1" });
-            RecentMeetings.Add(new MRU() { Id = 1, LastLookedAt = DateTime.Now, StartTime = DateTime.Now, Title = "meeting number 2" });
+
+            var loadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
+            {
+                var m = new MRUDatabaseAccess();
+                var list = 
+                    (await m.QueryMRUDB())
+                    .OrderByDescending(mru => mru.LastLookedAt)
+                    .Take(20)
+                    .OrderByDescending(mru => mru.StartTime)
+                    .ToListAsync();
+                return await list;
+            });
+            loadRecentMeetings
+                .Subscribe(l => RecentMeetings.AddRange(l));
+
+            loadRecentMeetings
+                .ExecuteAsync()
+                .Subscribe();
         }
 
         /// <summary>
