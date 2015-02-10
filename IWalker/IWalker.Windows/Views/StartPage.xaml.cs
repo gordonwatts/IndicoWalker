@@ -1,5 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -20,6 +21,20 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
             this.OneWayBind(ViewModel, x => x.RecentMeetings, y => y.MRUMeetings.Source);
+
+            this.Loaded += StartPage_Loaded;
+        }
+
+        /// <summary>
+        /// Each time we are re-loaded, update the MRU list.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void StartPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LoadRecentMeetings
+                .ExecuteAsync()
+                .Subscribe();
         }
 
         /// <summary>

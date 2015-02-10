@@ -42,6 +42,11 @@ namespace IWalker.ViewModels
         public List<MRU> RecentMeetings { get; private set; }
 
         /// <summary>
+        /// Reload from the DB all the meetings
+        /// </summary>
+        public ReactiveCommand<List<MRU>> LoadRecentMeetings { get; private set; }
+
+        /// <summary>
         /// Setup the page
         /// </summary>
         public StartPageViewModel(IScreen screen)
@@ -67,7 +72,7 @@ namespace IWalker.ViewModels
             // And populate the most recently viewed meeting list.
             RecentMeetings = new List<MRU>();
 
-            var loadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
+            LoadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
             {
                 var m = new MRUDatabaseAccess();
                 var list = 
@@ -78,12 +83,12 @@ namespace IWalker.ViewModels
                     .ToListAsync();
                 return await list;
             });
-            loadRecentMeetings
-                .Subscribe(l => RecentMeetings.AddRange(l));
-
-            loadRecentMeetings
-                .ExecuteAsync()
-                .Subscribe();
+            LoadRecentMeetings
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(l => {
+                    RecentMeetings.Clear();
+                    RecentMeetings.AddRange(l);
+                });
         }
 
         /// <summary>
