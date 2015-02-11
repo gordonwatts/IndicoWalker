@@ -9,16 +9,14 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <Hub x:Name="MainHubView">
+        <Hub x:Name="MainHubView" HorizontalContentAlignment="Stretch">
             <Hub.Header>
-                <Grid Grid.Row="0">
-                        <StackPanel Orientation="Horizontal">
-                        <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
-                                    IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0"/>
-                        <StackPanel Orientation="Horizontal" Grid.Row="0" HorizontalAlignment="Stretch">
-                            <TextBox Name="IndicoUrl" />
-                            <Button Name="FindIndicoUrl" Content="Load It!"/>
-                        </StackPanel>
+                <Grid>
+                    <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
+                                IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBox Name="IndicoUrl" Width="300" FontSize="12" HorizontalContentAlignment="Left" Padding="0" Height="24" MinHeight="0" />
+                        <Button Name="FindIndicoUrl" Content="Load It!"/>
                     </StackPanel>
                 </Grid>
             </Hub.Header>
