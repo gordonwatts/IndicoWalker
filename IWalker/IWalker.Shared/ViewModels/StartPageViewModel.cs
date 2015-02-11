@@ -1,4 +1,5 @@
 ﻿using CERNSSO;
+using IndicoInterface.NET;
 using IWalker.DataModel.Inidco;
 using IWalker.DataModel.Interfaces;
 using IWalker.DataModel.MRU;
@@ -22,9 +23,14 @@ namespace IWalker.ViewModels
     public class StartPageViewModel :  ReactiveObject, IRoutableViewModel
     {
         /// <summary>
-        /// When clicked, it will cause the page to switch and the text to be saved.
+        /// When clicked, it will open the requested meeting in a new xaml page.
         /// </summary>
         public ReactiveCommand<object> SwitchPages { get; set; }
+
+        /// <summary>
+        /// Pass in a MRU object to have it opened in a new xaml page.
+        /// </summary>
+        public ReactiveCommand<object> OpenMRUMeeting { get; private set; }
 
         /// <summary>
         /// The meeting address (bindable).
@@ -66,6 +72,13 @@ namespace IWalker.ViewModels
                     HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
                 });
 
+            // MRU button was pressed.
+            OpenMRUMeeting = ReactiveCommand.Create();
+            OpenMRUMeeting
+                .Cast<MRU>()
+                .Select(mru => ConvertToIMeeting(mru))
+                .Subscribe(addr => HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, addr)));
+
             // Setup the first value for the last time we ran to make life a little simpler.
             MeetingAddress = Settings.LastViewedMeeting;
 
@@ -99,6 +112,17 @@ namespace IWalker.ViewModels
         private IMeetingRef ConvertToIMeeting(string addr)
         {
             return new IndicoMeetingRef(addr);
+        }
+
+        /// <summary>
+        /// Given a MRU, convert it to a meeting.
+        /// </summary>
+        /// <param name="mru">The MRU.</param>
+        /// <returns></returns>
+        private IMeetingRef ConvertToIMeeting(MRU mru)
+        {
+            var ag = AgendaInfo.FromShortString(mru.IDRef);
+            return new IndicoMeetingRef(ag);
         }
 
         /// <summary>

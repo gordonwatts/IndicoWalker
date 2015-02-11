@@ -25,7 +25,7 @@
             <HubSection Header="Upcoming Meetings" Width="600"/>
             <HubSection Header="Viewed Meetings">
                 <DataTemplate>
-                    <GridView SelectionMode="None" ItemsSource="{Binding}">
+                    <GridView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
                         <GridView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Width="500">

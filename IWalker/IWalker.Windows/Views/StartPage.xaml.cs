@@ -52,5 +52,15 @@ namespace IWalker.Views
             get { return ViewModel; }
             set { ViewModel = (StartPageViewModel)value; }
         }
+
+        /// <summary>
+        /// Something in the MRU list has been clicked.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GridView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.OpenMRUMeeting.Execute(e.ClickedItem);
+        }
     }
 }
