@@ -18,7 +18,7 @@ namespace IWalker.DataModel.Inidco
         /// <summary>
         /// The URL for this meeting.
         /// </summary>
-        private string _url;
+        private AgendaInfo _info;
 
         /// <summary>
         /// Initialize with a URL
@@ -26,7 +26,12 @@ namespace IWalker.DataModel.Inidco
         /// <param name="url"></param>
         public IndicoMeetingRef(string url)
         {
-            _url = url;
+            _info = new AgendaInfo(url);
+        }
+
+        public IndicoMeetingRef(AgendaInfo ag)
+        {
+            _info = ag;
         }
 
         /// <summary>
@@ -321,10 +326,9 @@ namespace IWalker.DataModel.Inidco
         {
             // Load up the normalized data.
 
-            var a = new AgendaInfo(_url);
             var al = new AgendaLoader(_fetcher.Value);
-            var agenda = await al.GetNormalizedConferenceData(a);
-            return new IndicoMeeting(agenda, a.AsShortString());
+            var agenda = await al.GetNormalizedConferenceData(_info);
+            return new IndicoMeeting(agenda, _info.AsShortString());
         }
 
         /// <summary>
@@ -333,7 +337,7 @@ namespace IWalker.DataModel.Inidco
         /// <returns></returns>
         public string AsReferenceString()
         {
-            return new AgendaInfo(_url).AsShortString();
+            return _info.AsShortString();
         }
     }
 }
