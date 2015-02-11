@@ -39,7 +39,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// The list of recently set meetings.
         /// </summary>
-        public List<MRU> RecentMeetings { get; private set; }
+        public ReactiveList<MRU> RecentMeetings { get; private set; }
 
         /// <summary>
         /// Reload from the DB all the meetings
@@ -70,7 +70,7 @@ namespace IWalker.ViewModels
             MeetingAddress = Settings.LastViewedMeeting;
 
             // And populate the most recently viewed meeting list.
-            RecentMeetings = new List<MRU>();
+            RecentMeetings = new ReactiveList<MRU>();
 
             LoadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
             {

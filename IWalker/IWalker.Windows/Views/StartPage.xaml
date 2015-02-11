@@ -8,12 +8,8 @@
     mc:Ignorable="d"
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
-    <Page.Resources>
-        <CollectionViewSource x:Name="MRUMeetings" />
-    </Page.Resources>
-    
     <Grid>
-        <Hub>
+        <Hub x:Name="MainHubView">
             <Hub.Header>
                 <Grid Grid.Row="0">
                         <StackPanel Orientation="Horizontal">
@@ -29,7 +25,7 @@
             <HubSection Header="Upcoming Meetings" Width="600"/>
             <HubSection Header="Viewed Meetings">
                 <DataTemplate>
-                    <GridView ItemsSource="{Binding Source={StaticResource MRUMeetings}}" SelectionMode="None">
+                    <GridView SelectionMode="None" ItemsSource="{Binding}">
                         <GridView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Width="500">
