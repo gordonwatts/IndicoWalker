@@ -7,7 +7,7 @@ using System.Threading.Tasks;
 namespace IWalker.DataModel.Inidco
 {
     /// <summary>
-    /// Fetch the indico data for us
+    /// Fetch the Indico data for us
     /// </summary>
     class IndicoDataFetcher : IUrlFetcher
     {
