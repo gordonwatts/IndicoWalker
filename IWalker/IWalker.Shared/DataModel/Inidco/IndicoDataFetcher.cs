@@ -37,7 +37,7 @@ namespace IWalker.DataModel.Inidco
                 }
             }
             
-            // Do the actual loading. Hopefully with the cern cert already in there!
+            // Do the actual loading. Hopefully with the CERN cert already in there!
 
             var r = await CERNSSO.WebAccess.GetWebResponse(uri);
             var s = await r.Content.ReadAsInputStreamAsync();

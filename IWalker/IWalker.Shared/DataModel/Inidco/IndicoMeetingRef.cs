@@ -101,7 +101,7 @@ namespace IWalker.DataModel.Inidco
             private IndicoFile _file;
 
             /// <summary>
-            /// Retrn the file associated with this talk.
+            /// Return the file associated with this talk.
             /// </summary>
             public IFile TalkFile
             {
@@ -124,7 +124,7 @@ namespace IWalker.DataModel.Inidco
             private Uri _url;
 
             /// <summary>
-            /// Initialize with the url for this talk
+            /// Initialize with the URL for this talk
             /// </summary>
             /// <param name="fileUri"></param>
             public IndicoFile(string fileUri)
@@ -152,7 +152,7 @@ namespace IWalker.DataModel.Inidco
                 Debug.Assert(IsValid);
                 Debug.WriteLine("Entering DownloadFile {0}", _url.OriginalString);
 
-                // Get the file reseting place for the file name
+                // Get the file resetting place for the file name
                 var fname = CleanFilename(_url.AbsolutePath);
 
                 // Now, see if the file exists already. If so, we can just return it.
@@ -221,7 +221,7 @@ namespace IWalker.DataModel.Inidco
                 if (!IsValid)
                     return false;
 
-                // Get the file reseting place for the file name
+                // Get the file resetting place for the file name
                 var fname = CleanFilename(_url.AbsolutePath);
                 var local = ApplicationData.Current.LocalFolder;
                 try
@@ -238,7 +238,7 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
-            /// Return the file type based on the url.
+            /// Return the file type based on the URL.
             /// </summary>
             public string FileType
             {
