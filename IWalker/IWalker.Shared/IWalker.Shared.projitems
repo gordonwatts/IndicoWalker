@@ -18,6 +18,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\DBTestHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoDataFetcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\Json.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeeting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMRUDatabase.cs" />

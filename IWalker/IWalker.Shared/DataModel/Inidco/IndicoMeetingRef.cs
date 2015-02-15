@@ -1,6 +1,7 @@
 ﻿using IndicoInterface.NET;
 using IndicoInterface.NET.SimpleAgendaDataModel;
 using IWalker.DataModel.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Diagnostics;
 using System.IO;
@@ -39,7 +40,10 @@ namespace IWalker.DataModel.Inidco
         /// </summary>
         private class IndicoSesson : ISession
         {
-            private Session _session;
+            /// <summary>
+            /// Get/Set the session. Don't touch - taken care of internally (and by the serializer).
+            /// </summary>
+            public Session aSession { get; set; }
 
             /// <summary>
             /// Cache the session for later use.
@@ -48,21 +52,22 @@ namespace IWalker.DataModel.Inidco
             public IndicoSesson(Session s)
             {
                 // TODO: Complete member initialization
-                this._session = s;
+                this.aSession = s;
             }
 
-            private IndicoTalk[] _talks = null;
+            private ITalk[] _talks = null;
 
             /// <summary>
             /// Get the talks for this meeting.
             /// </summary>
+            [JsonIgnore]
             public ITalk[] Talks
             {
                 get
                 {
                     if (_talks == null)
                     {
-                        _talks = _session.Talks.Select(t => new IndicoTalk(t)).ToArray();
+                        _talks = aSession.Talks.Select(t => new IndicoTalk(t)).ToArray();
                     }
                     return _talks;
                 }
@@ -74,28 +79,24 @@ namespace IWalker.DataModel.Inidco
         /// </summary>
         public class IndicoTalk : ITalk
         {
-            private Talk _talk;
+            /// <summary>
+            /// Get/Set the indico talk that this is associated with. Don't touch - for the serializer.
+            /// </summary>
+            public Talk aTalk { get; set; }
 
             public IndicoTalk(Talk t)
             {
                 // TODO: Complete member initialization
-                this._talk = t;
+                this.aTalk = t;
             }
-
-            /// <summary>
-            /// Get the URL for the slide
-            /// </summary>
-            //public string SlideURL
-            //{
-            //    get { return _talk.SlideURL; }
-            //}
 
             /// <summary>
             /// Get the talk title.
             /// </summary>
+            [JsonIgnore]
             public string Title
             {
-                get { return _talk.Title; }
+                get { return aTalk.Title; }
             }
 
             private IndicoFile _file;
@@ -103,13 +104,14 @@ namespace IWalker.DataModel.Inidco
             /// <summary>
             /// Return the file associated with this talk.
             /// </summary>
+            [JsonIgnore]
             public IFile TalkFile
             {
                 get
                 {
                     if (_file == null)
                     {
-                        _file = new IndicoFile(_talk.SlideURL);
+                        _file = new IndicoFile(aTalk.SlideURL);
                     }
                     return _file;
                 }
@@ -121,7 +123,10 @@ namespace IWalker.DataModel.Inidco
         /// </summary>
         public class IndicoFile : IFile
         {
-            private Uri _url;
+            /// <summary>
+            /// Get/Set the url for the file.
+            /// </summary>
+            public Uri aUrl { get; set; }
 
             /// <summary>
             /// Initialize with the URL for this talk
@@ -129,15 +134,16 @@ namespace IWalker.DataModel.Inidco
             /// <param name="fileUri"></param>
             public IndicoFile(string fileUri)
             {
-                _url = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
+                aUrl = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
             }
 
             /// <summary>
             /// Does this object have any hope of fetching a file?
             /// </summary>
+            [JsonIgnore]
             public bool IsValid
             {
-                get { return _url != null; }
+                get { return aUrl != null; }
             }
 
             /// <summary>
@@ -150,10 +156,10 @@ namespace IWalker.DataModel.Inidco
             public async Task<StorageFile> DownloadFile()
             {
                 Debug.Assert(IsValid);
-                Debug.WriteLine("Entering DownloadFile {0}", _url.OriginalString);
+                Debug.WriteLine("Entering DownloadFile {0}", aUrl.OriginalString);
 
                 // Get the file resetting place for the file name
-                var fname = CleanFilename(_url.AbsolutePath);
+                var fname = CleanFilename(aUrl.AbsolutePath);
 
                 // Now, see if the file exists already. If so, we can just return it.
                 var local = ApplicationData.Current.LocalFolder;
@@ -166,15 +172,15 @@ namespace IWalker.DataModel.Inidco
                 StorageFile file = null;
                 try {
                     file = await indico.GetFileAsync(fname);
-                    Debug.WriteLine("  File already downloaded for {0}", _url.OriginalString);
+                    Debug.WriteLine("  File already downloaded for {0}", aUrl.OriginalString);
                     return file;
                 } catch {
 
                 }
 
                 // Get the file, save it to the proper location, and then return it.
-                Debug.WriteLine("  Doing download for {0}", _url.OriginalString);
-                var dataStream = await _fetcher.Value.GetDataFromURL(_url);
+                Debug.WriteLine("  Doing download for {0}", aUrl.OriginalString);
+                var dataStream = await _fetcher.Value.GetDataFromURL(aUrl);
                 var fnameTemp = fname + "-temp";
                 var tempFile = await indico.CreateFileAsync(fnameTemp, CreationCollisionOption.ReplaceExisting);
                 var outputStream = await tempFile.OpenAsync(FileAccessMode.ReadWrite);
@@ -187,7 +193,7 @@ namespace IWalker.DataModel.Inidco
 
                 // Finally, get back the file and return it.
                 file = await indico.GetFileAsync(fname);
-                Debug.WriteLine("  Finished download of {0}", _url.OriginalString);
+                Debug.WriteLine("  Finished download of {0}", aUrl.OriginalString);
                 return file;
             }
 
@@ -222,7 +228,7 @@ namespace IWalker.DataModel.Inidco
                     return false;
 
                 // Get the file resetting place for the file name
-                var fname = CleanFilename(_url.AbsolutePath);
+                var fname = CleanFilename(aUrl.AbsolutePath);
                 var local = ApplicationData.Current.LocalFolder;
                 try
                 {
@@ -240,12 +246,13 @@ namespace IWalker.DataModel.Inidco
             /// <summary>
             /// Return the file type based on the URL.
             /// </summary>
+            [JsonIgnore]
             public string FileType
             {
                 get {
                     if (!IsValid)
                         return "";
-                    return Path.GetExtension(_url.Segments.Last()).Substring(1);
+                    return Path.GetExtension(aUrl.Segments.Last()).Substring(1);
                 }
             }
         }
@@ -254,16 +261,22 @@ namespace IWalker.DataModel.Inidco
         /// <summary>
         /// The meeting
         /// </summary>
-        private class IndicoMeeting : IMeeting
+        internal class IndicoMeeting : IMeeting
         {
             /// <summary>
             /// Hold onto a complete agenda internally.
             /// </summary>
-            private Meeting _agenda;
+            public Meeting aAgenda { get; set; }
 
+            /// <summary>
+            /// Internal cache of the sessions for this object.
+            /// </summary>
             private IndicoSesson[] _sessons = null;
 
-            private string _shortString;
+            /// <summary>
+            /// Memorize the short string for this item
+            /// </summary>
+            public string aShortString { get; set; }
 
             /// <summary>
             /// Start up and cache the meeting agenda.
@@ -271,33 +284,39 @@ namespace IWalker.DataModel.Inidco
             /// <param name="agenda"></param>
             public IndicoMeeting(Meeting agenda, string shortString)
             {
-                this._agenda = agenda;
-                _shortString = shortString;
+                this.aAgenda = agenda;
+                aShortString = shortString;
             }
 
+            /// <summary>
+            /// Get the title for this meeting.
+            /// </summary>
+            [JsonIgnore]
             public string Title
             {
-                get { return _agenda.Title; }
+                get { return aAgenda.Title; }
             }
 
             /// <summary>
             /// Return the date of the meeting
             /// </summary>
+            [JsonIgnore]
             public DateTime StartTime
             {
-                get { return _agenda.StartDate; }
+                get { return aAgenda.StartDate; }
             }
 
             /// <summary>
             /// Get the sessions. Populate them if need be!
             /// </summary>
+            [JsonIgnore]
             public ISession[] Sessions
             {
                 get
                 {
                     if (_sessons == null)
                     {
-                        _sessons = _agenda.Sessions.Select(s => new IndicoSesson(s)).ToArray();
+                        _sessons = aAgenda.Sessions.Select(s => new IndicoSesson(s)).ToArray();
                     }
                     return _sessons;
                 }
@@ -309,7 +328,7 @@ namespace IWalker.DataModel.Inidco
             /// <returns></returns>
             public string AsReferenceString()
             {
-                return _shortString;
+                return aShortString;
             }
         }
 

@@ -32,8 +32,7 @@ namespace IWalker.Views
         void StartPage_Loaded(object sender, RoutedEventArgs e)
         {
             ViewModel.LoadRecentMeetings
-                .ExecuteAsync()
-                .Subscribe();
+                .Execute(null);
         }
 
         /// <summary>

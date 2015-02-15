@@ -15,6 +15,7 @@ using IWalker.DataModel.MRU;
 using IWalker.DataModel.Interfaces;
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
+using Akavache;
 #endif
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
@@ -87,8 +88,9 @@ namespace IWalker
                     args.Handled = true;
                 }
             };
-
 #endif
+            // Setup the internal data cache
+            BlobCache.ApplicationName = "IndicoWalker";
         }
 
         /// <summary>

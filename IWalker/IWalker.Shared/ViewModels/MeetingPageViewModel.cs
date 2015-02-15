@@ -1,10 +1,13 @@
-﻿using IWalker.DataModel.Interfaces;
+﻿using Akavache;
+using IWalker.DataModel.Interfaces;
 using ReactiveUI;
 using Splat;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive;
+using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -29,32 +32,41 @@ namespace IWalker.ViewModels
         /// <param name="meeting"></param>
         private void LoadMeeting(IMeetingRef meeting)
         {
-            var ldrCmd = ReactiveCommand.CreateAsyncTask<IMeeting>(_ => meeting.GetMeeting());
+            // The blob can't deal with abstract types - needs the actual types, unfortunately. Hence the Cast below to get back into our type-independent world.
+            var ldrCmd = ReactiveCommand.Create();
+            var ldrCmdReady = ldrCmd
+                .SelectMany(_ => BlobCache.UserAccount.GetAndFetchLatest(meeting.AsReferenceString(), async () => { var x = await meeting.GetMeeting(); return x as IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoMeeting; }))
+                .Cast<IMeeting>()
+                .Publish();
 
-            ldrCmd
+            ldrCmdReady
                 .Select(m => m.Title)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.MeetingTitle, out _title, "");
 
-            ldrCmd
+            ldrCmdReady
                 .Select(m => m.StartTime)
                 .Select(dt => dt.ToString())
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.StartTime, out _startTime, "");
 
-            ldrCmd
+            ldrCmdReady
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0)
                 .Select(s => s[0])
                 .Where(t => t.Talks != null)
                 .Select(t => t.Talks)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(talks => SetAsTalks(talks));
 
             // And mark this meeting as having been viewed by the user!
             var db = Locator.Current.GetService<IMRUDatabase>();
             Debug.Assert(db != null);
-            ldrCmd
+            ldrCmdReady
                 .Subscribe(m => db.MarkVisitedNow(m));
 
             // Start everything off.
+            ldrCmdReady.Connect();
             ldrCmd.Execute(null);
         }
 

@@ -154,7 +154,7 @@ namespace IWalker.ViewModels
                 .SelectMany(async szPixels =>
                 {
                     var ms = new MemoryStream();
-                    var ra = ms.AsRandomAccessStream();
+                    var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
                     var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
                     await _page.RenderToStreamAsync(ra, opt);
                     return ms;
@@ -163,7 +163,7 @@ namespace IWalker.ViewModels
                 .SelectMany(async ms =>
                 {
                     var bm = new BitmapImage();
-                    await bm.SetSourceAsync(ms.AsRandomAccessStream());
+                    await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms));
                     ms.Dispose();
                     _weakReferenceToImage = new WeakReference<BitmapImage>(bm);
                     return bm;
