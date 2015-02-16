@@ -1,9 +1,12 @@
 ﻿using IWalker.DataModel.Interfaces;
 using ReactiveUI;
 using System;
+using System.Reactive;
+using System.Reactive.Linq;
 using System.Reactive.Linq;
 using Windows.Storage;
 using Windows.System;
+using IWalker.Util;
 
 namespace IWalker.ViewModels
 {
@@ -20,7 +23,16 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Pointer to the current local file
         /// </summary>
-        private StorageFile _localFile = null;
+        private IStorageFile _localFile = null;
+
+        /// <summary>
+        /// Command to fire when the user "clicks" on us.
+        /// </summary>
+        /// <remarks>
+        /// If file isn't downloaded, then download the file.
+        /// If file is downloaded, then open the file in another program.
+        /// </remarks>
+        public ReactiveCommand<IStorageFile> ClickedUs { get; private set; }
 
         /// <summary>
         /// Initialize all of our behaviors.
@@ -31,16 +43,15 @@ namespace IWalker.ViewModels
             _file = file;
 
             // Get the file if it is already local.
-            var cmd = ReactiveCommand.CreateAsyncObservable(token =>
-                Observable.FromAsync(() => _file.IsLocal())
-                .Where(g => g)
-                .SelectMany(_ => _file.DownloadFile())
-                );
-            cmd.Subscribe(f => _localFile = f);
+            var cmd = ReactiveCommand.CreateAsyncObservable(token => _file.GetFile(false));
+
+            cmd
+                .Where(f => f != null)
+                .Subscribe(f => _localFile = f);
             cmd.ExecuteAsync().Subscribe();
 
             // Now, when the user clicks, we either download or open...
-            ClickedUs = ReactiveCommand.CreateAsyncTask(cmd.IsExecuting.Select(g => !g), token => _file.DownloadFile());
+            ClickedUs = ReactiveCommand.CreateAsyncObservable(cmd.IsExecuting.Select(g => !g), token => _file.GetFile(true));
             ClickedUs
                 .Where(f => _localFile == null)
                 .Subscribe(f => _localFile = f);
@@ -52,18 +63,9 @@ namespace IWalker.ViewModels
                 {
                     if (!g)
                     {
-                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _localFile.DisplayName));
+                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _localFile.Name));
                     }
                 });
         }
-
-        /// <summary>
-        /// Command to fire when the user "clicks" on us.
-        /// </summary>
-        /// <remarks>
-        /// If file isn't downloaded, then download the file.
-        /// If file is downloaded, then open the file in another program.
-        /// </remarks>
-        public ReactiveCommand<StorageFile> ClickedUs { get; private set; }
     }
 }

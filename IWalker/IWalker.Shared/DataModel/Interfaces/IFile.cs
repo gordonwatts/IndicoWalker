@@ -15,18 +15,6 @@ namespace IWalker.DataModel.Interfaces
         bool IsValid { get; }
 
         /// <summary>
-        /// Return a storage file on the local system that contains the data
-        /// for this file.
-        /// </summary>
-        /// <returns></returns>
-        Task<StorageFile> DownloadFile();
-
-        /// <summary>
-        /// Return true if the file is local
-        /// </summary>
-        Task<bool> IsLocal();
-
-        /// <summary>
         /// Return the file type put in lower case and without the ".".
         /// e.g. "pdf" or "pptx" or similar.
         /// </summary>
