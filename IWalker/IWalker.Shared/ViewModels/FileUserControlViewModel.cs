@@ -1,12 +1,10 @@
 ﻿using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using ReactiveUI;
 using System;
-using System.Reactive;
-using System.Reactive.Linq;
 using System.Reactive.Linq;
 using Windows.Storage;
 using Windows.System;
-using IWalker.Util;
 
 namespace IWalker.ViewModels
 {

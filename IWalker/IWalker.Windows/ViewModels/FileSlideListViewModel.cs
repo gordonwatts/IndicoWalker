@@ -1,5 +1,6 @@
 ﻿
 using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
@@ -47,7 +48,7 @@ namespace IWalker.ViewModels
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
                 Exception userBomb;
-                var renderPDF = ReactiveCommand.CreateAsyncTask(_ => f.DownloadFile());
+                var renderPDF = ReactiveCommand.CreateAsyncObservable(_ => f.GetFile(true));
                 renderPDF
                     .SelectMany(sf => PdfDocument.LoadFromFileAsync(sf))
                     .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc)))
