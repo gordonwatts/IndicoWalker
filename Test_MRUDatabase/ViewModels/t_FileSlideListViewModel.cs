@@ -72,6 +72,39 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsTrue(allImages.Select(item => item.Result).All(itm => itm != null));
         }
 
+        [TestMethod]
+        public async Task FetchSlideOnlyOnce()
+        {
+            // Subscribe to all the slides and get back MemoryStreams for all of them
+            // to stress out the simultaneous reading of everything.
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+            var vm = new FileSlideListViewModel(df);
+
+            var list = vm.SlideThumbnails;
+            await vm.DoneBuilding.FirstAsync();
+
+            // Listen for everything to be rendered.
+            var allImages = list
+                .Select(item => item.PDFPageVM.ImageStream.Where(i => i != null))
+                .Select(strm => strm.FirstAsync())
+                .Select(async stream => await stream)
+                .ToArray();
+
+            // Fire off the rendering of everything
+            var renderOptions = Tuple.Create(PDFPageViewModel.RenderingDimension.Horizontal, (double)150, (double)150);
+            foreach (var item in list)
+            {
+                item.PDFPageVM.RenderImage.Execute(renderOptions);
+            }
+
+            // And now wait for everything.
+            Task.WaitAll(allImages);
+
+            // Make sure we had to download the file only once.
+            Assert.AreEqual(1, df.Called);
+        }
+
         // A dummy file.
         class dummmyFile : IFile
         {
