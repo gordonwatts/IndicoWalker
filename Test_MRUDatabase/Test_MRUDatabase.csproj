@@ -119,6 +119,7 @@
   <ItemGroup>
     <Compile Include="BasicUsage.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Streams.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
