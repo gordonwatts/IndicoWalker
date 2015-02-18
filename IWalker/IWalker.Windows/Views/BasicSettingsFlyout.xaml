@@ -28,6 +28,17 @@
                 </TextBlock.Text>
             </TextBlock>
             <Button x:Name="OpenSecurityPage" Content="Modify Web Security" HorizontalAlignment="Right" Click="OpenSecurityPage_Click"/>
+
+            <!-- Section 2 header -->
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Local Cache" Margin="0,10,0,0" />
+
+            <!-- Section 2 body -->
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Indico talks and agendas are cached locally to speed up access and make it possible to explore meetings offline.
+                </TextBlock.Text>
+            </TextBlock>
+            <Button x:Name="ClearCache" Content="Delete Local Cache" HorizontalAlignment="Right" Click="ClearCache_Click"/>
         </StackPanel>
 
         <!-- Define more Content Sections below as necessary -->

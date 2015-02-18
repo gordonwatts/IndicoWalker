@@ -1,4 +1,5 @@
-﻿using IWalker.Util;
+﻿using Akavache;
+using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
@@ -37,6 +38,15 @@ namespace IWalker.Views
                 .Select(a => new FileOpenPicker().ForCert())
                 .Subscribe(op => op.PickSingleFileAndContinue())
                 );
+
+            // WHen the click on delete cache clear everything out.
+
+            _ridOfMe.Add(
+                Observable.FromEventPattern(ClearCache, "Click")
+                .Subscribe(a =>
+                {
+                    BlobCache.UserAccount.InvalidateAll();
+                }));
 
             // This is Windows phone, so after the above we will have to wait until we
             // resume the app.

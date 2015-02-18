@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using Akavache;
+using IWalker.ViewModels;
 using ReactiveUI;
 using Windows.UI.Xaml.Controls;
 
@@ -24,6 +25,16 @@ namespace IWalker.Views
         private void OpenSecurityPage_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
             _screen.Router.Navigate.Execute(new BasicSettingsViewModel(_screen));
+        }
+
+        /// <summary>
+        /// Delete everything we know about the local cache when they want to delete it!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ClearCache_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            BlobCache.UserAccount.InvalidateAll();
         }
     }
 }
