@@ -97,6 +97,32 @@ namespace Test_MRUDatabase
             await CheckPDFDocument(outputFile, 10);
         }
 
+        [TestMethod]
+        public async Task CheckPDFFromFirstDownload()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f = df.GetFile(true);
+            var raStream = await f;
+            await CheckPDFDocument(raStream, 10);
+        }
+
+        [TestMethod]
+        public async Task CheckPDFFromSeconmdDownload()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f = df.GetFile(true);
+            var raStream = await f;
+            f = df.GetFile(true);
+            raStream = await f;
+            await CheckPDFDocument(raStream, 10);
+        }
+
+        private async Task CheckPDFDocument(Windows.Storage.Streams.IRandomAccessStream raStream, uint nPages)
+        {
+            var doc = await PdfDocument.LoadFromStreamAsync(raStream);
+            Assert.AreEqual(nPages, doc.PageCount);
+        }
+
         /// <summary>
         /// Check the number of pages from a storage file.
         /// </summary>
@@ -118,6 +144,19 @@ namespace Test_MRUDatabase
             var raStream1 = await f1;
 
             var f2 = df.GetFile(false);
+            var raStream = await f2;
+
+            Assert.AreEqual(1, df.Called);
+        }
+
+        [TestMethod]
+        public async Task GetFileFromCacheWithUpdate()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f1 = df.GetFile(true);
+            var raStream1 = await f1;
+
+            var f2 = df.GetFile(true);
             var raStream = await f2;
 
             Assert.AreEqual(1, df.Called);
