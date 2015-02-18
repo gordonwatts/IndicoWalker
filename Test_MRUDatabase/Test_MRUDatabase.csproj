@@ -123,6 +123,8 @@
     <Compile Include="Streams.cs" />
     <Compile Include="t_LocalTalkFileManager.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
+    <Compile Include="ViewModels\t_PDFPageViewModel.cs" />
+    <Compile Include="ViewModels\t_SlideThumbViewModel.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
