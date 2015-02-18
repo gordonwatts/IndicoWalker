@@ -1,4 +1,5 @@
-﻿using System.Threading.Tasks;
+﻿using System.IO;
+using System.Threading.Tasks;
 using Windows.Storage;
 
 namespace IWalker.DataModel.Interfaces
@@ -20,5 +21,24 @@ namespace IWalker.DataModel.Interfaces
         /// </summary>
         /// <returns>Lower case string indicating a valid file extension. Or blank if not known.</returns>
         string FileType { get; }
+
+        /// <summary>
+        /// This should produce a unique key for the file, which will remain constant. It is used as a place
+        /// to store files in the local cache, as well as put it various places. It will be turned into a hash
+        /// before written out to disk.
+        /// </summary>
+        /// <returns></returns>
+        string UniqueKey { get; }
+
+        /// <summary>
+        /// Return the stream that we can use to read the file
+        /// </summary>
+        /// <returns></returns>
+        Task<StreamReader> GetFileStream();
+
+        /// <summary>
+        /// Return the display name of a file (generally the name without the type).
+        /// </summary>
+        string DisplayName { get; }
     }
 }

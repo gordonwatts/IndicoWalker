@@ -49,10 +49,10 @@ namespace IWalker.DataModel.Inidco
             /// Cache the session for later use.
             /// </summary>
             /// <param name="s"></param>
-            public IndicoSesson(Session s)
+            public IndicoSesson(Session s, string meetingID)
             {
-                // TODO: Complete member initialization
                 this.aSession = s;
+                _key = meetingID;
             }
 
             private ITalk[] _talks = null;
@@ -67,11 +67,16 @@ namespace IWalker.DataModel.Inidco
                 {
                     if (_talks == null)
                     {
-                        _talks = aSession.Talks.Select(t => new IndicoTalk(t)).ToArray();
+                        _talks = aSession.Talks.Select(t => new IndicoTalk(t, _key)).ToArray();
                     }
                     return _talks;
                 }
             }
+
+            /// <summary>
+            /// Track the key for the meeting.
+            /// </summary>
+            public string _key { get; set; }
         }
 
         /// <summary>
@@ -84,10 +89,21 @@ namespace IWalker.DataModel.Inidco
             /// </summary>
             public Talk aTalk { get; set; }
 
-            public IndicoTalk(Talk t)
+            /// <summary>
+            /// Track the unique talk ID.
+            /// </summary>
+            /// <remarks>Public so that it can be written out.</remarks>
+            public string Key { get; set; }
+
+            /// <summary>
+            /// Init the talk with a particular meeting ID and file (s).
+            /// </summary>
+            /// <param name="t"></param>
+            /// <param name="meetingUniqueID"></param>
+            public IndicoTalk(Talk t, string meetingUniqueID)
             {
-                // TODO: Complete member initialization
                 this.aTalk = t;
+                Key = string.Format("{0}/{1}/{2}", meetingUniqueID, t.ID, t.SlideURL);
             }
 
             /// <summary>
@@ -99,6 +115,9 @@ namespace IWalker.DataModel.Inidco
                 get { return aTalk.Title; }
             }
 
+            /// <summary>
+            /// Track the indico file.
+            /// </summary>
             private IndicoFile _file;
 
             /// <summary>
@@ -111,7 +130,7 @@ namespace IWalker.DataModel.Inidco
                 {
                     if (_file == null)
                     {
-                        _file = new IndicoFile(aTalk.SlideURL);
+                        _file = new IndicoFile(aTalk.SlideURL, Key);
                     }
                     return _file;
                 }
@@ -124,17 +143,23 @@ namespace IWalker.DataModel.Inidco
         public class IndicoFile : IFile
         {
             /// <summary>
-            /// Get/Set the url for the file.
+            /// Get/Set the URL for the file.
             /// </summary>
-            public Uri aUrl { get; set; }
+            public Uri _aUrl { get; set; }
+
+            /// <summary>
+            /// Unique key that we can use to find this file.
+            /// </summary>
+            private string _key;
 
             /// <summary>
             /// Initialize with the URL for this talk
             /// </summary>
             /// <param name="fileUri"></param>
-            public IndicoFile(string fileUri)
+            public IndicoFile(string fileUri, string uniqueKey)
             {
-                aUrl = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
+                _aUrl = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
+                _key = uniqueKey;
             }
 
             /// <summary>
@@ -143,104 +168,18 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public bool IsValid
             {
-                get { return aUrl != null; }
+                get { return _aUrl != null; }
             }
 
             /// <summary>
-            /// Download the file from indico, and store it locally in some unique spot.
+            /// Return a stream that can be used to read over the net.
             /// </summary>
             /// <returns></returns>
-            /// <remarks>
-            /// This will change as we move forward to just being a stream of some sort.
-            /// </remarks>
-            public async Task<StorageFile> DownloadFile()
+            public async Task<StreamReader> GetFileStream()
             {
-                Debug.Assert(IsValid);
-                Debug.WriteLine("Entering DownloadFile {0}", aUrl.OriginalString);
-
-                // Get the file resetting place for the file name
-                var fname = CleanFilename(aUrl.AbsolutePath);
-
-                // Now, see if the file exists already. If so, we can just return it.
-                var local = ApplicationData.Current.LocalFolder;
-                var indico = await local.CreateFolderAsync("indico", CreationCollisionOption.OpenIfExists);
-                if (indico == null)
-                {
-                    indico = await local.CreateFolderAsync("indico");
-                }
-
-                StorageFile file = null;
-                try {
-                    file = await indico.GetFileAsync(fname);
-                    Debug.WriteLine("  File already downloaded for {0}", aUrl.OriginalString);
-                    return file;
-                } catch {
-
-                }
-
                 // Get the file, save it to the proper location, and then return it.
-                Debug.WriteLine("  Doing download for {0}", aUrl.OriginalString);
-                var dataStream = await _fetcher.Value.GetDataFromURL(aUrl);
-                var fnameTemp = fname + "-temp";
-                var tempFile = await indico.CreateFileAsync(fnameTemp, CreationCollisionOption.ReplaceExisting);
-                var outputStream = await tempFile.OpenAsync(FileAccessMode.ReadWrite);
-                using (var sw = outputStream.AsStreamForWrite())
-                {
-                    await dataStream.BaseStream.CopyToAsync(sw);
-                }
-
-                await tempFile.RenameAsync(fname);
-
-                // Finally, get back the file and return it.
-                file = await indico.GetFileAsync(fname);
-                Debug.WriteLine("  Finished download of {0}", aUrl.OriginalString);
-                return file;
-            }
-
-            /// <summary>
-            /// Clean up a string so it can be used as a filename.
-            /// </summary>
-            /// <param name="str"></param>
-            /// <returns></returns>
-            private string CleanFilename(string str)
-            {
-                return str
-                    .Replace("/", "_")
-                    .Replace("\\", "_")
-                    .Replace(":", "_")
-                    .Replace("?", "_")
-                    .Replace("=", "_")
-                    .Replace("&", "_");
-            }
-
-            /// <summary>
-            /// See if the file is currently local or not.
-            /// </summary>
-            /// <returns></returns>
-            /// <remarks>
-            /// Will not create anything.
-            /// This will be deleted when we have a real backing store as well.
-            /// </remarks>
-            public async Task<bool> IsLocal()
-            {
-                // Just cut off if it isn't valid.
-                if (!IsValid)
-                    return false;
-
-                // Get the file resetting place for the file name
-                var fname = CleanFilename(aUrl.AbsolutePath);
-                var local = ApplicationData.Current.LocalFolder;
-                try
-                {
-                    var indico = await local.GetFolderAsync("indico");
-                    var file = await indico.GetFileAsync(fname);
-                }
-                catch
-                {
-                    return false;
-                }
-
-                return true;
+                Debug.WriteLine("  Doing download for {0}", _aUrl.OriginalString);
+                return await _fetcher.Value.GetDataFromURL(_aUrl);
             }
 
             /// <summary>
@@ -252,11 +191,25 @@ namespace IWalker.DataModel.Inidco
                 get {
                     if (!IsValid)
                         return "";
-                    return Path.GetExtension(aUrl.Segments.Last()).Substring(1);
+                    return Path.GetExtension(_aUrl.Segments.Last()).Substring(1);
                 }
             }
-        }
 
+            /// <summary>
+            /// Return a unique key we can use to store this file.
+            /// This has to include the meeting unique thing and the actual file.
+            /// </summary>
+            public string UniqueKey
+            {
+                get { return _key; }
+                set { _key = value; }
+            }
+
+            public string DisplayName
+            {
+                get { return Path.GetFileName(_aUrl.OriginalString); }
+            }
+        }
 
         /// <summary>
         /// The meeting
@@ -316,7 +269,7 @@ namespace IWalker.DataModel.Inidco
                 {
                     if (_sessons == null)
                     {
-                        _sessons = aAgenda.Sessions.Select(s => new IndicoSesson(s)).ToArray();
+                        _sessons = aAgenda.Sessions.Select(s => new IndicoSesson(s, aShortString)).ToArray();
                     }
                     return _sessons;
                 }
