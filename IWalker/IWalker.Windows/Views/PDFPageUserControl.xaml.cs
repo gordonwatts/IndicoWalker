@@ -2,10 +2,12 @@
 using ReactiveUI;
 using System;
 using System.Diagnostics;
+using System.IO;
 using System.Reactive.Linq;
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Media.Imaging;
 
 namespace IWalker.Views
 {
@@ -20,10 +22,22 @@ namespace IWalker.Views
             this.InitializeComponent();
 
             // The image source
-            this.OneWayBind(ViewModel, x => x.Image, y => y.ThumbImage.Source);
+            //this.OneWayBind(ViewModel, x => x.ImageStream, y => y.ThumbImage.Source);
+            this.WhenAny(x => x.ViewModel, x => x.Value)
+                .Where(vm => vm != null)
+                .Subscribe(vm => vm.ImageStream
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .SelectMany(async imageStream => {
+                        var bm = new BitmapImage();
+                        await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
+                        imageStream.Dispose();
+                        return bm;
+                    })
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(image => ThumbImage.Source = image));
 
             // Should we allow the image to be relaxed?
-            this.Bind(ViewModel, x => x.KeepImageAttached, y => y.ShowPDF);
+            //this.Bind(ViewModel, x => x.KeepImageAttached, y => y.ShowPDF);
 
             // Now, when something about our size and rendering stuff changes, we need
             // to shoot off a rendering request.

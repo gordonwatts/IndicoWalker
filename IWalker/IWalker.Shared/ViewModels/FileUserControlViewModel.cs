@@ -2,8 +2,10 @@
 using IWalker.Util;
 using ReactiveUI;
 using System;
+using System.IO;
 using System.Reactive.Linq;
 using Windows.Storage;
+using Windows.Storage.Streams;
 using Windows.System;
 
 namespace IWalker.ViewModels
@@ -21,7 +23,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Pointer to the current local file
         /// </summary>
-        private IStorageFile _localFile = null;
+        private IRandomAccessStream _localFile = null;
 
         /// <summary>
         /// Command to fire when the user "clicks" on us.
@@ -30,7 +32,7 @@ namespace IWalker.ViewModels
         /// If file isn't downloaded, then download the file.
         /// If file is downloaded, then open the file in another program.
         /// </remarks>
-        public ReactiveCommand<IStorageFile> ClickedUs { get; private set; }
+        public ReactiveCommand<IRandomAccessStream> ClickedUs { get; private set; }
 
         /// <summary>
         /// Initialize all of our behaviors.
@@ -54,8 +56,10 @@ namespace IWalker.ViewModels
                 .Where(f => _localFile == null)
                 .Subscribe(f => _localFile = f);
 
+#if false
             ClickedUs
                 .Where(f => _localFile != null)
+                .Select(f => )
                 .SelectMany(f => Launcher.LaunchFileAsync(f))
                 .Subscribe(g =>
                 {
@@ -64,6 +68,7 @@ namespace IWalker.ViewModels
                         throw new InvalidOperationException(string.Format("Unable to open file {0}.", _localFile.Name));
                     }
                 });
+#endif
         }
     }
 }
