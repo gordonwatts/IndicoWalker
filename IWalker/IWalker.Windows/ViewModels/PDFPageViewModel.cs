@@ -74,9 +74,7 @@ namespace IWalker.ViewModels
                 .Cast<Tuple<RenderingDimension, double, double>>()
                 .Select(t => CalcRenderingSize(t.Item1, t.Item2, t.Item2))
                 .Where(d => d != null)
-                .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2))
-                .DistinctUntilChanged()
-                .Throttle(TimeSpan.FromMilliseconds(500));
+                .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2));
 
             // Do the actual rendering.
             var newImage = renderRequest
@@ -89,17 +87,6 @@ namespace IWalker.ViewModels
                     return ms;
                 });
 
-#if false
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .SelectMany(async ms =>
-                {
-                    var bm = new BitmapImage();
-                    await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms));
-                    ms.Dispose();
-                    _weakReferenceToImage = new WeakReference<BitmapImage>(bm);
-                    return bm;
-                });
-#endif
             // Save all image changes so the UI knows to update!
             var finalImpage = newImage.Publish();
             ImageStream = finalImpage;

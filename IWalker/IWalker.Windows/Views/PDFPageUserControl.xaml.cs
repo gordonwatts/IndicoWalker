@@ -28,6 +28,7 @@ namespace IWalker.Views
                 .Subscribe(vm => vm.ImageStream
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .SelectMany(async imageStream => {
+                        imageStream.Seek(0, SeekOrigin.Begin);
                         var bm = new BitmapImage();
                         await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
                         imageStream.Dispose();
@@ -36,17 +37,18 @@ namespace IWalker.Views
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(image => ThumbImage.Source = image));
 
-            // Should we allow the image to be relaxed?
-            //this.Bind(ViewModel, x => x.KeepImageAttached, y => y.ShowPDF);
-
             // Now, when something about our size and rendering stuff changes, we need
-            // to shoot off a rendering request.
+            // to shoot off a rendering request. Don't do it if we have already requested it, however!
             this.Events().SizeChanged.Select(a => RespectRenderingDimension)
                 .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
                 .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
                 .Where(x => ShowPDF)
                 .Where(t => ViewModel != null)
-                .Subscribe(t => ViewModel.RenderImage.Execute(Tuple.Create(t, ActualWidth, ActualHeight)));
+                .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
+                .DistinctUntilChanged()
+                .Throttle(TimeSpan.FromMilliseconds(500))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(t => ViewModel.RenderImage.Execute(t));
 
         }
 
