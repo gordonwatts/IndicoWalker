@@ -94,13 +94,17 @@ namespace Test_MRUDatabase.ViewModels
             await BlobCache.UserAccount.InsertObject(meeting.AsReferenceString(), await meeting.GetMeeting()).FirstAsync();
 
             // Go grab the meeting now. It should show up twice.
-            var mvm1 = new MeetingPageViewModel(null, meeting);
-            var s = await mvm1.Talks.Changed
-                .Skip(1)
-                .Timeout(TimeSpan.FromMilliseconds(1000), Observable.Empty<NotifyCollectionChangedEventArgs>())
-                .LastAsync();
+            var mvm = new MeetingPageViewModel(null, meeting);
 
-            Assert.AreEqual(1, mvm1.Talks.Count);
+            // CLear, and then set
+            await mvm.Talks.Changed.FirstAsync();
+            await mvm.Talks.Changed.FirstAsync();
+
+            // Clear and then set.
+            await mvm.Talks.Changed.FirstAsync();
+            await mvm.Talks.Changed.FirstAsync();
+
+            Assert.AreEqual(1, mvm.Talks.Count);
             Assert.AreEqual(2, meeting.NumberOfTimesFetched);
         }
 
