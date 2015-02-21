@@ -23,10 +23,16 @@ namespace IWalker.DataModel.Interfaces
         DateTime StartTime { get; }
 
         /// <summary>
+        /// When the meeting is scheduled to end.
+        /// </summary>
+        DateTime EndTime { get; }
+
+        /// <summary>
         /// Turn the meeting into some sort of string that we can then use to re-constitute
         /// this IMeeting. This should be short - of order 60 characters (initial db size is 100).
         /// </summary>
         /// <returns></returns>
         string AsReferenceString();
+
     }
 }

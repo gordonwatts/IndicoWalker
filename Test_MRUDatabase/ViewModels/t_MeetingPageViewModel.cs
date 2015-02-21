@@ -154,6 +154,47 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(2, mvm.Talks.Count);
         }
 
+        [TestMethod]
+        public async Task MeetingAutoUpdated()
+        {
+            // Add a new talk when we have the third look (or so).
+            var mr = new dummyMeetingChangerRef((meeting, count) =>
+            {
+                var mMod = (meeting as dummyMeeting);
+                mMod.StartTime = DateTime.Now - TimeSpan.FromMinutes(1);
+                mMod.EndTime = DateTime.Now + TimeSpan.FromMinutes(10);
+
+                return meeting;
+            });
+
+            var m = await mr.GetMeeting();
+            await BlobCache.UserAccount.InsertObject(mr.AsReferenceString(), m);
+            Assert.AreEqual(1, m.Sessions[0].Talks.Length);
+
+            // Go grab the meeting now. It should show up twice.
+            // Since we are running with the test scheduler, we need to advance things, or nothing
+            // will work!
+            var mvm = new MeetingPageViewModel(null, mr);
+
+            // First update:
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+
+            Assert.AreEqual(1, mr.Count);
+            Assert.AreEqual(1, mvm.Talks.Count);
+
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+            Debug.WriteLine("About to check the #");
+            Assert.AreEqual(2, mvm.Talks.Count);
+        }
+
         class dummyMeetingChangerRef : IMeetingRef
         {
             public dummyMeetingChangerRef(Func<IMeeting, int, IMeeting> alterMeeting)

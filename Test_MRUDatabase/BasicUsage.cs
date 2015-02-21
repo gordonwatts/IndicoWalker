@@ -191,6 +191,10 @@ namespace Test_MRUDatabase
             {
                 get { return _start; }
             }
+            public System.DateTime EndTime
+            {
+                get { return _start + TimeSpan.FromMinutes(30); }
+            }
 
 
             public string AsReferenceString()

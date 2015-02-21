@@ -34,6 +34,7 @@ namespace Test_MRUDatabase
         public ISession[] Sessions { get; set; }
 
         public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
 
         public string AsReferenceString()
         {

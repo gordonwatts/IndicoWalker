@@ -260,6 +260,15 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
+            /// Return the date when the meeting ends.
+            /// </summary>
+            [JsonIgnore]
+            public DateTime EndTime
+            {
+                get { return aAgenda.EndDate; }
+            }
+
+            /// <summary>
             /// Get the sessions. Populate them if need be!
             /// </summary>
             [JsonIgnore]
