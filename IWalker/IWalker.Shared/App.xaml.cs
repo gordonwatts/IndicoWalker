@@ -16,6 +16,7 @@ using IWalker.DataModel.Interfaces;
 using Akavache;
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
+using Newtonsoft.Json;
 #endif
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
@@ -76,6 +77,14 @@ namespace IWalker
             // The Most Recently Used (MUR) database
             var mruDB = new MRUDatabaseAccess();
             Locator.CurrentMutable.RegisterConstant(mruDB, typeof(IMRUDatabase));
+
+            // Make sure the JSON serializer for our cache can deal with interface objects:
+            Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.All,
+            }, typeof(JsonSerializerSettings), null);
 
 #if WINDOWS_PHONE_APP
             // And the back button on windows phone.
