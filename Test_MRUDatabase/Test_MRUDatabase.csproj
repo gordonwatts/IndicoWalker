@@ -123,6 +123,7 @@
     <Compile Include="Streams.cs" />
     <Compile Include="t_LocalTalkFileManager.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
+    <Compile Include="ViewModels\t_MeetingPageViewModel.cs" />
     <Compile Include="ViewModels\t_PDFPageViewModel.cs" />
     <Compile Include="ViewModels\t_SlideThumbViewModel.cs" />
   </ItemGroup>
@@ -164,13 +165,19 @@
     <Reference Include="Akavache.Sqlite3">
       <HintPath>..\packages\akavache.sqlite3.4.1.0\lib\Portable-Net45+Win8+WP8+Wpa81\Akavache.Sqlite3.dll</HintPath>
     </Reference>
+    <Reference Include="Microsoft.Reactive.Testing">
+      <HintPath>..\packages\Rx-Testing.2.2.5\lib\windows8\Microsoft.Reactive.Testing.dll</HintPath>
+    </Reference>
     <Reference Include="Newtonsoft.Json, Version=6.0.0.0, Culture=neutral, PublicKeyToken=30ad4fe6b2a6aeed, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\packages\Newtonsoft.Json.6.0.3\lib\netcore45\Newtonsoft.Json.dll</HintPath>
     </Reference>
-    <Reference Include="ReactiveUI, Version=6.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="ReactiveUI, Version=6.4.0.1, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\reactiveui-core.6.3.1\lib\Win8\ReactiveUI.dll</HintPath>
+      <HintPath>..\packages\reactiveui-core.6.4.0.1\lib\Win8\ReactiveUI.dll</HintPath>
+    </Reference>
+    <Reference Include="ReactiveUI.Testing">
+      <HintPath>..\packages\reactiveui-testing.6.4.0.1\lib\Portable-Win81+WPA81\ReactiveUI.Testing.dll</HintPath>
     </Reference>
     <Reference Include="Splat, Version=1.6.0.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
