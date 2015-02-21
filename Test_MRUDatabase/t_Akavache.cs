@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
+using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
 using Splat;
@@ -7,6 +8,7 @@ using System;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
+using ReactiveUI.Testing;
 
 namespace Test_MRUDatabase
 {
@@ -84,6 +86,34 @@ namespace Test_MRUDatabase
             Assert.IsNotNull(mtg);
             Assert.AreEqual(1, mtg.Count);
             Assert.IsNotNull(mtg.First());
+        }
+
+        [TestMethod]
+        public async Task GetAndFetchWithTestScheduler()
+        {
+            await new TestScheduler().With(async sched =>
+            {
+                var settings = Locator.Current.GetService<JsonSerializerSettings>();
+                Assert.IsNotNull(settings);
+                Assert.AreEqual(settings.TypeNameHandling, TypeNameHandling.All);
+
+                var m = new dummyMeetingRef();
+                Func<Task<IMeeting>> fetcher = async () =>
+                {
+                    var x = await m.GetMeeting();
+                    return x;
+                };
+
+                var blob = BlobCache.UserAccount.GetAndFetchLatest(m.AsReferenceString(), fetcher);
+
+                var mtg = await blob
+                    .ToList()
+                    .FirstAsync();
+
+                Assert.IsNotNull(mtg);
+                Assert.AreEqual(1, mtg.Count);
+                Assert.IsNotNull(mtg.First());
+            });
         }
 
     }
