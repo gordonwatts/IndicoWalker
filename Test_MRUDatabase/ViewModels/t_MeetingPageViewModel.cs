@@ -10,8 +10,14 @@ using System.Text;
 using ReactiveUI.Testing;
 using ReactiveUI;
 using System.Reactive.Linq;
+using System;
+using System.Reactive;
 using System.Threading.Tasks;
 using Windows.Foundation;
+using IWalker.DataModel.Inidco;
+using Splat;
+using Newtonsoft.Json;
+using System.Collections.Specialized;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -27,146 +33,71 @@ namespace Test_MRUDatabase.ViewModels
             BlobCache.ApplicationName = "Test_MRUDatabase";
             BlobCache.UserAccount.InvalidateAll();
             BlobCache.UserAccount.Flush();
+            Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.All,
+            }, typeof(JsonSerializerSettings), null);
+            Locator.CurrentMutable.RegisterConstant(new dummyMRUDB(), typeof(IMRUDatabase));
+
         }
 
         [TestMethod]
         public async Task TitleOnce()
         {
-            await TestHarness(async sched =>
-            {
-                var meeting = CreateMeeting();
-                var mvm = new MeetingPageViewModel(null, meeting);
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
 
-                string title = null;
-                mvm.WhenAny(x => x.MeetingTitle, x => x.Value)
-                    .Subscribe(t => title = t);
+            // The first value is empty as everything gets itself setup for data binding.
+            var s = await mvm.WhenAny(x => x.MeetingTitle, x => x.Value)
+                .Skip(1)
+                .FirstAsync();
 
-                await Task.Delay(10);
-                Assert.AreEqual("Meeting 1", title);
-            });
+            Assert.AreEqual(s, "Meeting1");
+        }
+
+        [TestMethod]
+        public async Task LocalMeetingFetch()
+        {
+            // Check the local test harness isn't having trouble.
+            var m = new dummyMeetingRef();
+
+            var meetingRightAway = await m.GetMeeting();
+            Assert.IsNotNull(meetingRightAway);
         }
 
         [TestMethod]
         public async Task GetMeetingOnce()
         {
-            await TestHarness(async sched => {
-                // Brand new meeting fetch
+            // Brand new meeting fetch
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
 
-                var meeting = CreateMeeting();
-                var mvm = new MeetingPageViewModel(null, meeting);
+            // Wait for something to happen to the talks...
+            var s = await mvm.Talks.Changed
+                .FirstAsync();
 
-                await Task.Delay(10);
-                Assert.AreEqual(1, mvm.Talks.Count);            
-            });
+            Assert.IsNotNull(s);
+           
+            Assert.AreEqual(1, mvm.Talks.Count);
+            Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
-
-        /// <summary>
-        /// Generate a meeting.
-        /// </summary>
-        /// <returns></returns>
-        private IMeetingRef CreateMeeting()
-        {
-            return new dummyMeetingRef();
-        }
-
-        class dummyMeeting : IMeeting
-        {
-            public string Title
-            {
-                get { return "Meeting1"; }
-            }
-
-            public ISession[] Sessions
-            {
-                get { return new ISession[] { new dummySession() }; }
-            }
-
-            public DateTime StartTime
-            {
-                get { throw new NotImplementedException(); }
-            }
-
-            public string AsReferenceString()
-            {
-                throw new NotImplementedException();
-            }
-        }
-
-        class dummySession : ISession
-        {
-            public ITalk[] Talks
-            {
-                get { return new ITalk[] { new dummyTalk() }; }
-            }
-        }
-
-        class dummyTalk : ITalk
-        {
-
-            public string Title
-            {
-                get { return "talk 1"; }
-            }
-
-            public IFile TalkFile
-            {
-                get { return new dummyFile(); }
-            }
-        }
-
-        class dummyFile : IFile
-        {
-            public bool IsValid
-            {
-                get { return true; }
-            }
-
-            public string FileType
-            {
-                get {return "pdf"; }
-            }
-
-            public string UniqueKey
-            {
-                get { return "talk1.pdf"; }
-            }
-
-            public Task<System.IO.StreamReader> GetFileStream()
-            {
-                throw new NotImplementedException();
-            }
-
-            public string DisplayName
-            {
-                get { return "talk1.pdf"; }
-            }
-        }
-
-
-
-        /// <summary>
-        /// A pretty simple dummy meeting.
-        /// </summary>
-        class dummyMeetingRef : IMeetingRef
-        {
-            public Task<IMeeting> GetMeeting()
-            {
-                return Task.Factory.StartNew(() => new dummyMeeting() as IMeeting);
-            }
-
-            public string AsReferenceString()
-            {
-                return "meeting";
-            }
-        }
-
 
         [TestMethod]
-        public void GetMeetingFromCache()
+        public async Task GetMeetingFromCache()
         {
-            // Make sure that the # of talks we get remains "good" when we
-            // get from the cache.
-            Assert.Inconclusive();
+            // Brand new meeting fetch
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
+
+            var mvm1 = new MeetingPageViewModel(null, meeting);
+            var s = await mvm1.Talks.Changed
+                .Timeout(TimeSpan.FromMilliseconds(1000), Observable.Empty<NotifyCollectionChangedEventArgs>())
+                .LastAsync();
+
+            Assert.AreEqual(1, mvm1.Talks.Count);
+            Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
 
         /// <summary>
@@ -186,9 +117,56 @@ namespace Test_MRUDatabase.ViewModels
         /// <returns></returns>
         public IAsyncAction TestHarness(Func<TestScheduler, Task> action)
         {
-            return Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () => {
-                new TestScheduler().With(sched => action(sched));
+            return Windows.ApplicationModel.Core.CoreApplication.MainView.CoreWindow.Dispatcher.RunAsync(Windows.UI.Core.CoreDispatcherPriority.Normal, () =>
+            {
+                Exception e = null;
+                var t = new TestScheduler().With(async sched =>
+                {
+                    try
+                    {
+                        await action(sched);
+                    }
+                    catch (Exception exp)
+                    {
+                        e = exp;
+                    }
+                });
+                t.Wait();
+                if (e != null)
+                    throw e;
             });
         }
+
+
+        public async Task TestHarnessNoUI(Func<TestScheduler, Task> action)
+        {
+            Exception e = null;
+            var t = new TestScheduler().With(async sched =>
+            {
+                try
+                {
+                    await action(sched);
+                }
+                catch (Exception exp)
+                {
+                    e = exp;
+                }
+            });
+            await t;
+            if (e != null)
+                throw e;
+        }
+
+        /// <summary>
+        /// Dummy DB to keep the VM happy.
+        /// </summary>
+        class dummyMRUDB : IMRUDatabase
+        {
+            public Task MarkVisitedNow(IMeeting meeting)
+            {
+                return Task.Factory.StartNew(() => { });
+            }
+        }
+
     }
 }
