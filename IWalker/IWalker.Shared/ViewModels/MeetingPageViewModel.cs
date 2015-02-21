@@ -1,13 +1,12 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
-using System.Reactive;
-using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -48,6 +47,7 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
+                .WriteLine("Got a new meeting.")
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0)
                 .Select(s => s[0])
@@ -69,12 +69,15 @@ namespace IWalker.ViewModels
 
         /// <summary>
         /// Given the talk list, make our current list look like it.
+        /// We integrate the current talks into the current list.
         /// </summary>
         /// <param name="talks"></param>
         private void SetAsTalks(ITalk[] talks)
         {
             Debug.WriteLine("Setting up display for {0} talks.", talks.Length);
+            Talks.Clear();
             Talks.AddRange(talks.Select(t => new TalkUserControlViewModel(t)));
+            Debug.WriteLine("  Display now contains {0} talks.", Talks.Count);
         }
 
         /// <summary>

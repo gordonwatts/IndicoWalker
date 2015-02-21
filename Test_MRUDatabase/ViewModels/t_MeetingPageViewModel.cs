@@ -87,17 +87,19 @@ namespace Test_MRUDatabase.ViewModels
         [TestMethod]
         public async Task GetMeetingFromCache()
         {
-            // Brand new meeting fetch
+            // Install the meeting in the cache.
             var meeting = MeetingHelpers.CreateMeeting();
-            var mvm = new MeetingPageViewModel(null, meeting);
+            await BlobCache.UserAccount.InsertObject(meeting.AsReferenceString(), await meeting.GetMeeting()).FirstAsync();
 
+            // Go grab the meeting now. It should show up twice.
             var mvm1 = new MeetingPageViewModel(null, meeting);
             var s = await mvm1.Talks.Changed
+                .Skip(1)
                 .Timeout(TimeSpan.FromMilliseconds(1000), Observable.Empty<NotifyCollectionChangedEventArgs>())
                 .LastAsync();
 
             Assert.AreEqual(1, mvm1.Talks.Count);
-            Assert.AreEqual(1, meeting.NumberOfTimesFetched);
+            Assert.AreEqual(2, meeting.NumberOfTimesFetched);
         }
 
         /// <summary>
