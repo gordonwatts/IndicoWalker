@@ -35,20 +35,17 @@ namespace IWalker.ViewModels
             // The blob can't deal with abstract types - needs the actual types, unfortunately. Hence the Cast below to get back into our type-independent world.
             var ldrCmd = ReactiveCommand.Create();
             var ldrCmdReady = ldrCmd
-                .SelectMany(_ => BlobCache.UserAccount.GetAndFetchLatest(meeting.AsReferenceString(), async () => { var x = await meeting.GetMeeting(); return x as IWalker.DataModel.Inidco.IndicoMeetingRef.IndicoMeeting; }))
-                .Cast<IMeeting>()
+                .SelectMany(_ => BlobCache.UserAccount.GetAndFetchLatest(meeting.AsReferenceString(), () => meeting.GetMeeting()))
                 .Publish();
 
             ldrCmdReady
                 .Select(m => m.Title)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToProperty(this, x => x.MeetingTitle, out _title, "");
+                .ToProperty(this, x => x.MeetingTitle, out _title, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
                 .Select(m => m.StartTime)
                 .Select(dt => dt.ToString())
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToProperty(this, x => x.StartTime, out _startTime, "");
+                .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
                 .Select(m => m.Sessions)
@@ -76,6 +73,7 @@ namespace IWalker.ViewModels
         /// <param name="talks"></param>
         private void SetAsTalks(ITalk[] talks)
         {
+            Debug.WriteLine("Setting up display for {0} talks.", talks.Length);
             Talks.AddRange(talks.Select(t => new TalkUserControlViewModel(t)));
         }
 
