@@ -22,15 +22,16 @@ namespace Test_MRUDatabase
 
     class dummyMeeting : IMeeting
     {
+        public dummyMeeting()
+        {
+            Sessions = new ISession[] { new dummySession() };
+        }
         public string Title
         {
             get { return "Meeting1"; }
         }
 
-        public ISession[] Sessions
-        {
-            get { return new ISession[] { new dummySession() }; }
-        }
+        public ISession[] Sessions { get; set; }
 
         public DateTime StartTime { get; set; }
 
@@ -40,12 +41,13 @@ namespace Test_MRUDatabase
         }
     }
 
-    class dummySession : ISession
+    public class dummySession : ISession
     {
-        public ITalk[] Talks
+        public dummySession()
         {
-            get { return new ITalk[] { new dummyTalk() }; }
+            Talks = new ITalk[] { new dummyTalk() };
         }
+        public ITalk[] Talks { get; set; }
     }
 
     class dummyTalk : ITalk
@@ -107,7 +109,7 @@ namespace Test_MRUDatabase
 
         public string AsReferenceString()
         {
-            return "meeting";
+            return "meeting1";
         }
 
         public int NumberOfTimesFetched { get; set; }

@@ -18,6 +18,8 @@ using IWalker.DataModel.Inidco;
 using Splat;
 using Newtonsoft.Json;
 using System.Collections.Specialized;
+using System.Collections;
+using System.Diagnostics;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -83,7 +85,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(1, mvm.Talks.Count);
             Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
-
+        
         [TestMethod]
         public async Task GetMeetingFromCache()
         {
@@ -100,6 +102,83 @@ namespace Test_MRUDatabase.ViewModels
 
             Assert.AreEqual(1, mvm1.Talks.Count);
             Assert.AreEqual(2, meeting.NumberOfTimesFetched);
+        }
+
+        [TestMethod]
+        public async Task MeetingUpdated()
+        {
+            // Add a new talk when we have the third look (or so).
+            var mr = new dummyMeetingChangerRef((meeting, count) =>
+            {
+                if (count > 1)
+                {
+                    var t = meeting.Sessions[0].Talks
+                        .Concat(new ITalk[] { new dummyTalk() })
+                        .ToArray();
+                    var s = (meeting as dummyMeeting).Sessions[0] as dummySession;
+                    s.Talks = t;
+                }
+
+                return meeting;
+            });
+
+            var m = await mr.GetMeeting();
+            await BlobCache.UserAccount.InsertObject(mr.AsReferenceString(), m);
+            Assert.AreEqual(1, m.Sessions[0].Talks.Length);
+
+            // Go grab the meeting now. It should show up twice.
+            // Since we are running with the test scheduler, we need to advance things, or nothing
+            // will work!
+            var mvm = new MeetingPageViewModel(null, mr);
+
+            // First update:
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+
+            Assert.AreEqual(1, mr.Count);
+            Assert.AreEqual(1, mvm.Talks.Count);
+
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+            await mvm.Talks.Changed
+                .FirstAsync();
+            Debug.WriteLine("About to check the #");
+            Assert.AreEqual(2, mvm.Talks.Count);
+        }
+
+        class dummyMeetingChangerRef : IMeetingRef
+        {
+            public dummyMeetingChangerRef(Func<IMeeting, int, IMeeting> alterMeeting)
+            {
+                _callback = alterMeeting;
+                Count = 0;
+            }
+
+            /// <summary>
+            /// Get the meeting, allow a callback to mess with it.
+            /// </summary>
+            /// <returns></returns>
+            public Task<IMeeting> GetMeeting()
+            {
+                return Task.Factory.StartNew<IMeeting>(() =>
+                {
+                    var m = new dummyMeeting();
+                    Count++;
+                    return _callback(m, Count);
+                });
+            }
+
+            public string AsReferenceString()
+            {
+                return "meeting1";
+            }
+
+            private readonly Func<IMeeting, int, IMeeting> _callback;
+            public int Count { get; set; }
         }
 
         /// <summary>
