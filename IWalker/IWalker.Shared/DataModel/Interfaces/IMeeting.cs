@@ -13,18 +13,18 @@ namespace IWalker.DataModel.Interfaces
         string Title { get; }
 
         /// <summary>
-        /// Get the list of sessions assocated with this meeting or confernece.
+        /// Get the list of sessions associated with this meeting or conference.
         /// </summary>
         ISession[] Sessions { get; }
 
         /// <summary>
-        /// Get the start time of the meeting, including timezone information.
+        /// Get the start time of the meeting, including time zone information.
         /// </summary>
         DateTime StartTime { get; }
 
         /// <summary>
         /// Turn the meeting into some sort of string that we can then use to re-constitute
-        /// this IMeeting. This should be short - of order 60 characters (inital db size is 100).
+        /// this IMeeting. This should be short - of order 60 characters (initial db size is 100).
         /// </summary>
         /// <returns></returns>
         string AsReferenceString();

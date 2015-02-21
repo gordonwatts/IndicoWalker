@@ -214,7 +214,7 @@ namespace IWalker.DataModel.Inidco
         /// <summary>
         /// The meeting
         /// </summary>
-        internal class IndicoMeeting : IMeeting
+        public class IndicoMeeting : IMeeting
         {
             /// <summary>
             /// Hold onto a complete agenda internally.
