@@ -124,6 +124,7 @@
     <Compile Include="Streams.cs" />
     <Compile Include="t_Akavache.cs" />
     <Compile Include="t_LocalTalkFileManager.cs" />
+    <Compile Include="Util\t_ListOrdering.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\t_MeetingPageViewModel.cs" />
     <Compile Include="ViewModels\t_PDFPageViewModel.cs" />

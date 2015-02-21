@@ -138,8 +138,12 @@ namespace IWalker.ViewModels
         private void SetAsTalks(ITalk[] talks)
         {
             Debug.WriteLine("Setting up display for {0} talks.", talks.Length);
+            var newTalkOrder = Talks.MakeLookLike(talks,
+                (oItem, dItem) => oItem.Talk.Equals(dItem),
+                dItem => new TalkUserControlViewModel(dItem)
+                );
             Talks.Clear();
-            Talks.AddRange(talks.Select(t => new TalkUserControlViewModel(t)));
+            Talks.AddRange(newTalkOrder);
             Debug.WriteLine("  Display now contains {0} talks.", Talks.Count);
         }
 

@@ -85,7 +85,24 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(1, mvm.Talks.Count);
             Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
-        
+
+        [TestMethod]
+        public async Task CheckMeetingAgendaCached()
+        {
+            // Brand new meeting fetch
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
+
+            // Wait for something to happen to the talks...
+            var s = await mvm.Talks.Changed
+                .FirstAsync();
+
+            var m = await BlobCache.UserAccount.GetObject<IMeeting>(meeting.AsReferenceString()).FirstAsync();
+
+            Assert.IsNotNull(m);
+            Assert.AreEqual("Meeting 1", m.Title);
+        }
+
         [TestMethod]
         public async Task GetMeetingFromCache()
         {

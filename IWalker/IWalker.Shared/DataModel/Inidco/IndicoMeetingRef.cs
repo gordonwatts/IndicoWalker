@@ -135,6 +135,25 @@ namespace IWalker.DataModel.Inidco
                     return _file;
                 }
             }
+
+            /// <summary>
+            /// Is this talk the same as that other talk?
+            /// </summary>
+            /// <param name="other"></param>
+            /// <returns></returns>
+            public bool Equals(ITalk other)
+            {
+                var italk = other as IndicoTalk;
+                if (italk == null)
+                    return false;
+
+                if (italk.aTalk.ID != aTalk.ID)
+                    return false;
+
+                // Next, there are other minor things that might get updated that will require us to re-do this talk.
+
+                return true;
+            }
         }
 
         /// <summary>

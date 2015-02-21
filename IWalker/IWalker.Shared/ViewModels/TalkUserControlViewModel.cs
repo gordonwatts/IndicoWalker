@@ -12,7 +12,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Hold onto the talk we need
         /// </summary>
-        private ITalk _talk;
+        public ITalk Talk { get; set; }
 
         /// <summary>
         /// Init with the various items for a talk.
@@ -20,7 +20,7 @@ namespace IWalker.ViewModels
         /// <param name="t"></param>
         public TalkUserControlViewModel(ITalk t)
         {
-            this._talk = t;
+            this.Talk = t;
 #if WINDOWS_APP
             _fileSlides = new Lazy<FileSlideListViewModel>(() => new FileSlideListViewModel(t.TalkFile));
 #endif
@@ -29,12 +29,12 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get the title (for the UI).
         /// </summary>
-        public string Title { get { return _talk.Title; } }
+        public string Title { get { return Talk.Title; } }
 
         /// <summary>
         /// The talk file
         /// </summary>
-        public FileUserControlViewModel File { get { return new FileUserControlViewModel(_talk.TalkFile); } }
+        public FileUserControlViewModel File { get { return new FileUserControlViewModel(Talk.TalkFile); } }
 
         /// <summary>
         /// True if the file should be visible
@@ -43,7 +43,7 @@ namespace IWalker.ViewModels
         {
             get
             {
-                return _talk.TalkFile.IsValid;
+                return Talk.TalkFile.IsValid;
             }
         }
 

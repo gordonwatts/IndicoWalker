@@ -1,7 +1,8 @@
 ﻿
+using System;
 namespace IWalker.DataModel.Interfaces
 {
-    public interface ITalk
+    public interface ITalk : IEquatable<ITalk>
     {
         /// <summary>
         /// Get the title of this talk
