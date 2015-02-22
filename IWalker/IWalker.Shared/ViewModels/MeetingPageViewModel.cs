@@ -138,12 +138,15 @@ namespace IWalker.ViewModels
         private void SetAsTalks(ITalk[] talks)
         {
             Debug.WriteLine("Setting up display for {0} talks.", talks.Length);
-            var newTalkOrder = Talks.MakeLookLike(talks,
-                (oItem, dItem) => oItem.Talk.Equals(dItem),
-                dItem => new TalkUserControlViewModel(dItem)
-                );
-            Talks.Clear();
-            Talks.AddRange(newTalkOrder);
+            // Normally, we'd want to use this. However, this causes a total list reset,
+            // and often the below code will not touch the list at all.
+            //using (Talks.SuppressChangeNotifications())
+            {
+                Talks.MakeListLookLike(talks,
+                    (oItem, dItem) => oItem.Talk.Equals(dItem),
+                    dItem => new TalkUserControlViewModel(dItem)
+                    );
+            }
             Debug.WriteLine("  Display now contains {0} talks.", Talks.Count);
         }
 

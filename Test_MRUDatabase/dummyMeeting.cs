@@ -63,6 +63,11 @@ namespace Test_MRUDatabase
         {
             get { return new dummyFile(); }
         }
+
+        public bool Equals(ITalk other)
+        {
+            throw new NotImplementedException();
+        }
     }
 
     class dummyFile : IFile
