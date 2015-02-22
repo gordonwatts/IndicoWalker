@@ -228,6 +228,18 @@ namespace IWalker.DataModel.Inidco
             {
                 get { return Path.GetFileName(_aUrl.OriginalString); }
             }
+
+            /// <summary>
+            /// Given the URL, get the header info.
+            /// </summary>
+            /// <returns></returns>
+            public async Task<string> GetFileDate()
+            {
+                var headers = await _fetcher.Value.GetContentHeadersFromUrl(_aUrl);
+                if (!headers.LastModified.HasValue)
+                    return "";
+                return headers.LastModified.Value.ToString();
+            }
         }
 
         /// <summary>

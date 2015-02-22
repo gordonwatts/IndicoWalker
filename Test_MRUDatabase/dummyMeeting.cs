@@ -96,6 +96,12 @@ namespace Test_MRUDatabase
         {
             get { return "talk1.pdf"; }
         }
+
+
+        public Task<string> GetFileDate()
+        {
+            throw new NotImplementedException();
+        }
     }
 
     /// <summary>

@@ -40,5 +40,12 @@ namespace IWalker.DataModel.Interfaces
         /// Return the display name of a file (generally the name without the type).
         /// </summary>
         string DisplayName { get; }
+
+        /// <summary>
+        /// Return the date from the remote storage location of the last
+        /// update. Return as a string (a != comparison will be done).
+        /// </summary>
+        /// <returns></returns>
+        Task<string> GetFileDate();
     }
 }
