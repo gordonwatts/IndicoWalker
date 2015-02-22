@@ -10,16 +10,12 @@ using Windows.Data.Pdf;
 namespace IWalker.ViewModels
 {
     /// <summary>
-    /// The VM for a full talk as a view model. We have a list of slides,
-    /// which are shown at full screen and scrollable, etc.
+    /// The VM for a talk shown as a slide-show. We have a list of slides,
+    /// which are shown at full screen and scrollable, etc., and you can move
+    /// around via keys and other things that are input.
     /// </summary>
     public class FullTalkAsStripViewModel : ReactiveObject, IRoutableViewModel
     {
-        /// <summary>
-        /// Our cache of the PDF document
-        /// </summary>
-        private PdfDocument _doc;
-
         /// <summary>
         /// The list of PDF pages that we are showing
         /// </summary>
@@ -64,21 +60,26 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get everything setup to show the PDF document
         /// </summary>
-        /// <param name="doc"></param>
+        /// <param name="docSequence"></param>
         /// <param name="initialPage">The page that should be shown when we start up. Zero indexed</param>
         /// <param name="screen">The screen that hosts everything (routing!)</param>
-        public FullTalkAsStripViewModel(IScreen screen, PdfDocument doc)
+        public FullTalkAsStripViewModel(IScreen screen, IObservable<PdfDocument> docSequence)
         {
-            Debug.Assert(doc != null);
+            Debug.Assert(docSequence != null);
             Debug.Assert(screen != null);
 
-            _doc = doc;
             HostScreen = screen;
 
-            // Setup each individual page
-            _numberPages = doc.PageCount;
+            // We basically re-set each time a new file comes down from the top.
+
             Pages = new ReactiveList<PDFPageViewModel>();
-            Pages.AddRange(Enumerable.Range(0, (int)doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint)pageNumber))));
+            docSequence
+                .Subscribe(doc =>
+                {
+                    _numberPages = doc.PageCount;
+                    Pages.Clear();
+                    Pages.AddRange(Enumerable.Range(0, (int)doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint)pageNumber))));
+                });
 
             // Page navigation. Make sure things are clean and we don't over-burden the UI before
             // we pass the info back to the UI!

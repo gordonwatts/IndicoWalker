@@ -4,13 +4,14 @@ using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
-using System.IO;
 using System.Diagnostics;
+using System.IO;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using Windows.Data.Pdf;
 using Windows.Storage;
-using System.Reactive;
 using Windows.Storage.Streams;
 namespace IWalker.ViewModels
 {
@@ -52,9 +53,10 @@ namespace IWalker.ViewModels
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
-                Lazy<FullTalkAsStripViewModel> fullVM = null;
                 var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileOnce());
-                var pages = renderPDF
+
+                // Change them into files
+                var files = renderPDF
                     .SelectMany(async sf =>
                     {
                         try
@@ -66,10 +68,15 @@ namespace IWalker.ViewModels
                         {
                             //TODO surface these errors?
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
-                            return (PdfDocument) null;
+                            return (PdfDocument)null;
                         }
-                    })
-                    .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc)))
+                    }).Multicast(new ReplaySubject<PdfDocument>()).RefCount();
+
+                // The files are used to go after the items we display
+                var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), files));
+
+                // The pages now must be changed into thumb-nails for display.
+                var pages = files
                     .Select(sf => Enumerable.Range(0, (int)sf.PageCount)
                                     .Select(index => Tuple.Create(index, sf.GetPage((uint)index)))
                                     .Select(p => new SlideThumbViewModel(p.Item2, fullVM, p.Item1)))
@@ -78,11 +85,17 @@ namespace IWalker.ViewModels
                 Exception userBomb;
                 pages
                     .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(pgs => SlideThumbnails.AddRange(pgs),
+                    .Subscribe(pgs =>
+                    {
+                        SlideThumbnails.Clear();
+                        SlideThumbnails.AddRange(pgs);
+                    },
                                ex => userBomb = ex);
 
+                // And we should let any testing stuff going know we are done.
                 DoneBuilding = pages.Select(_ => Unit.Default);
 
+                // Wire it up!
                 pages.Connect();
 
                 // TODO: Normally this would not kick off a download, but in this case

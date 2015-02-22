@@ -43,7 +43,7 @@ namespace IWalker.ViewModels
             _file = file;
 
             // Get the file if it is already local.
-            var cmd = ReactiveCommand.CreateAsyncObservable(token => _file.GetFile(false));
+            var cmd = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
 
             cmd
                 .Where(f => f != null)
@@ -51,7 +51,7 @@ namespace IWalker.ViewModels
             cmd.ExecuteAsync().Subscribe();
 
             // Now, when the user clicks, we either download or open...
-            ClickedUs = ReactiveCommand.CreateAsyncObservable(cmd.IsExecuting.Select(g => !g), token => _file.GetFile(true));
+            ClickedUs = ReactiveCommand.CreateAsyncObservable(cmd.IsExecuting.Select(g => !g), token => _file.GetAndUpdateFileOnce());
             ClickedUs
                 .Where(f => _localFile == null)
                 .Subscribe(f => _localFile = f);
