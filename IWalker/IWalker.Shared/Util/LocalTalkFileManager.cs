@@ -23,7 +23,7 @@ namespace IWalker.Util
         /// Download a file to a local memory buffer. Save it locally when done as well.
         /// </summary>
         /// <param name="file"></param>
-        private static async Task<IRandomAccessStream> Download (this IFile file)
+        private static async Task<Tuple<string,byte[]>> Download (this IFile file)
         {
             // Get the file stream, and write it out.
             var ms = new MemoryStream();
@@ -32,39 +32,66 @@ namespace IWalker.Util
                 await dataStream.BaseStream.CopyToAsync(ms);
             }
 
-            // First, get the place we are going to cache this file in the local database.
-            var key = file.UniqueKey;
+            // Get the date from the header that we will need to stash
+            var timeStamp = await file.GetFileDate();
+
+            // This is what needs to be cached.
             var ar = ms.ToArray();
-            Debug.WriteLine("Downloaded file of {0} bytes", ar.Length);
-            await BlobCache.UserAccount.Insert(key, ar);
-            return ar.AsRORAByteStream();
+            return Tuple.Create(timeStamp, ar);
         }
 
         /// <summary>
-        /// This will return a pointer to a file. If the file is in local storage, it will return that.
-        /// If it isn't in local storage, it will fetch the file as long as checkForUpdates is true.
+        /// Return the key we will use to lookup to see if the file has been downloaded recently.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private static string FileDateKey(this IFile file)
+        {
+            return string.Format("{0}-file-date", file.UniqueKey);
+        }
+
+        /// <summary>
+        /// Check a file to see if it needs to be re-downloaded.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="lastUpdated">The time our cache entry was created at</param>
+        /// <returns>True once if we need to update again.</returns>
+        /// <remarks>
+        /// We use the date from the headers of the file to understand if we need to update. That way we don't have to deal
+        /// with translating time-zones, and anything funny from indico.
+        /// </remarks>
+        private static IObservable<bool> CheckForUpdate(this IFile file)
+        {
+            return BlobCache.UserAccount.GetObject<Tuple<string,byte[]>>(file.UniqueKey)
+                .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate);
+        }
+
+        /// <summary>
+        /// This will return a pointer to a data stream representing the file, from cache. If there is nothing in cache, the empty
+        /// sequence is returned.
         /// </summary>
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
-        /// <param name="checkForUpdates">If the file isn't present in local storage, get it from the IFile (remote resource)</param>
-        public static IObservable<IRandomAccessStream> GetFile(this IFile file, bool checkForUpdates)
+        public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file)
         {
-            // Get it out of the local cache.
-            var local = BlobCache.UserAccount.Get(file.UniqueKey)
-                .Do(by => Debug.WriteLine("Got a file from cache of size {0} bytes", by.Length))
-                .Select(by => by.AsRORAByteStream());
+            return BlobCache.UserAccount.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
+                    .Do(by => Debug.WriteLine("Got a file from cache of size {0} bytes", by.Item2.Length))
+                    .Select(by => by.Item2.AsRORAByteStream())
+                    .Catch<IRandomAccessStream, KeyNotFoundException>(e => Observable.Empty<IRandomAccessStream>());
+        }
 
-            // If it isn't there, then we should try to download it.
-            var theFile = local
-                .Catch<IRandomAccessStream, KeyNotFoundException>(e =>
-                {
-                    if (checkForUpdates) {
-                        return Observable.FromAsync(_ => file.Download());
-                    } else {
-                        return Observable.Empty<IRandomAccessStream>();
-                    }
-                });
-
-            return theFile;
+        /// <summary>
+        /// This will return a pointer to a data stream representing the file. If the file is available in the cache, that
+        /// will be returned first. It will then check to see if the file has been updated on the net. If so, it will download
+        /// and re-cache that, and return a pointer to a data stream for the updated (or new) file.
+        /// 
+        /// In short, you can get anywhere between zero and two items in this sequence, depending on the
+        /// arguments and the up-to-datedness of the file in the cache.
+        /// </summary>
+        /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
+        public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file)
+        {
+            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate())
+                .Select(a => a.Item2.AsRORAByteStream());
         }
     }
 }
