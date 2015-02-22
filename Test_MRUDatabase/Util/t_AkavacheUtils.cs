@@ -26,7 +26,7 @@ namespace Test_MRUDatabase.Util
 
             // We should have gotten it back
             Assert.IsNotNull(rtn);
-            Assert.AreEqual(1, rtn.Count);
+            Assert.AreEqual(2, rtn.Count);
             Assert.AreEqual("hi there", rtn[0]);
 
             // It should be in the cache.
@@ -65,6 +65,46 @@ namespace Test_MRUDatabase.Util
             Assert.IsNotNull(rtn);
             Assert.AreEqual(2, rtn.Count);
             Assert.AreEqual("this is one", rtn[0]);
+            Assert.AreEqual("hi there", rtn[1]);
+
+            // It should be in the cache.
+            Assert.AreEqual("hi there", await BlobCache.UserAccount.GetObject<string>("key"));
+        }
+
+        [TestMethod]
+        public async Task GetCachedValueFetchMultiTrue()
+        {
+            // Value is in the cache, and we need to update it too.
+
+            await BlobCache.UserAccount.InsertObject("key", "this is one");
+
+            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => new bool[] { true, true }.ToObservable())
+                .ToList()
+                .FirstAsync();
+
+            // We should have gotten it back
+            Assert.IsNotNull(rtn);
+            Assert.AreEqual(3, rtn.Count);
+            Assert.AreEqual("this is one", rtn[0]);
+            Assert.AreEqual("hi there", rtn[1]);
+
+            // It should be in the cache.
+            Assert.AreEqual("hi there", await BlobCache.UserAccount.GetObject<string>("key"));
+        }
+
+        [TestMethod]
+        public async Task GetNewValueFetchMultiTrue()
+        {
+            // Value is in the cache, and we need to update it too.
+
+            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => new bool[] { true, true }.ToObservable())
+                .ToList()
+                .FirstAsync();
+
+            // We should have gotten it back
+            Assert.IsNotNull(rtn);
+            Assert.AreEqual(3, rtn.Count);
+            Assert.AreEqual("hi there", rtn[0]);
             Assert.AreEqual("hi there", rtn[1]);
 
             // It should be in the cache.

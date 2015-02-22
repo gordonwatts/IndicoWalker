@@ -15,8 +15,11 @@ namespace IWalker.Util
         /// This method attempts to returned a cached value, and fetch one from
         /// the web.
         /// 
-        /// If the cached value doesn't exist, then it must be supplied from
-        /// the web.
+        /// If the cached value doesn't exist, then it must be supplied by the
+        /// fetchFunc. Once that is done, the fetchPredicate will be run, and
+        /// if it returns true in its sequence another fetch will be done. This means
+        /// that if you ask for an unmatched key and your fetchPredicate does an
+        /// Observable.Return(true), you'll end up with two fetches in rapid succession.
         /// 
         /// If the value does exist, a separate check function will be called
         /// to re-fetch from the web.
@@ -55,7 +58,7 @@ namespace IWalker.Util
             // If we have nothing cached, then we will run the fetch directly. Otherwise we will run the
             // fetch sequence.
 
-            var getOldKey = Observable.Defer(() => This.GetObjectCreatedAt<T>(key));
+            var getOldKey = This.GetObjectCreatedAt<T>(key);
 
             var refetchIfNeeded = getOldKey
                 .Where(dt => dt != null && dt.HasValue && dt.Value != null)
@@ -67,12 +70,19 @@ namespace IWalker.Util
                 .Where(dt => dt == null || !dt.HasValue || dt.Value == null)
                 .Select(_ => default(Unit));
 
+            var fetchAfterRequired = fetchRequired
+                .SelectMany(_ => This.GetObjectCreatedAt<T>(key))
+                .Where(dt => dt != null && dt.HasValue && dt.Value != null)
+                .SelectMany(dt => fetchPredicate(dt.Value))
+                .Where(doit => doit == true)
+                .Select(_ => default(Unit));
+
             // Next, get the item...
 
             var fetchFromCache = Observable.Defer(() => This.GetObject<T>(key))
                 .Catch<T, KeyNotFoundException>(_ => Observable.Empty<T>());
 
-            var fetchFromRemote = refetchIfNeeded.Concat(fetchRequired)
+            var fetchFromRemote = fetchRequired.Concat(fetchAfterRequired).Concat(refetchIfNeeded)
                 .SelectMany(_ => fetchFunc())
                 .SelectMany(x => This.InsertObject<T>(key, x).Select(_ => x));
 
