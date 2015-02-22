@@ -3,23 +3,16 @@ using IWalker.DataModel.Interfaces;
 using IWalker.ViewModels;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using ReactiveUI.Testing;
+using Newtonsoft.Json;
 using ReactiveUI;
-using System.Reactive.Linq;
+using ReactiveUI.Testing;
+using Splat;
 using System;
-using System.Reactive;
+using System.Diagnostics;
+using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
-using IWalker.DataModel.Inidco;
-using Splat;
-using Newtonsoft.Json;
-using System.Collections.Specialized;
-using System.Collections;
-using System.Diagnostics;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -42,7 +35,6 @@ namespace Test_MRUDatabase.ViewModels
                 TypeNameHandling = TypeNameHandling.All,
             }, typeof(JsonSerializerSettings), null);
             Locator.CurrentMutable.RegisterConstant(new dummyMRUDB(), typeof(IMRUDatabase));
-
         }
 
         [TestMethod]
