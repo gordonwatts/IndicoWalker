@@ -35,7 +35,10 @@ namespace Test_MRUDatabase.ViewModels
         {
             await RunOnUI(async () =>
             {
-                var b = new BitmapImage();
+                await Task.Factory.StartNew(() =>
+                {
+                    var b = new BitmapImage();
+                });
             });
         }
 
