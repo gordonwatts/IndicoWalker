@@ -11,10 +11,12 @@ using System.Reactive.Linq;
 using Windows.Data.Pdf;
 using Windows.Storage;
 using System.Reactive;
+using Windows.Storage.Streams;
 namespace IWalker.ViewModels
 {
     /// <summary>
-    /// Control to render slides in PDF.
+    /// This ViewModel renders the slides as a list of thumb nails (each thumb is managed by SlideThumbViewModel).
+    /// It is usually viewed in the on the main app's meeting page, listing all the slide images one after the other.
     /// </summary>
     public class FileSlideListViewModel : ReactiveObject
     {
@@ -34,7 +36,7 @@ namespace IWalker.ViewModels
         public IObservable<Unit> DoneBuilding { get; private set; }
 
         /// <summary>
-        /// Setup the VM for the associated file.
+        /// Setup the VM for the file.
         /// </summary>
         /// <param name="f"></param>
         public FileSlideListViewModel(IFile f)
@@ -47,16 +49,11 @@ namespace IWalker.ViewModels
 
             if (_file.IsValid && _file.FileType == "pdf")
             {
-                // If the user clicks on a slide, we will bring up the full slide experience, with the
-                // slide they clicked on at the top.
-
-                Lazy<FullTalkAsStripViewModel> fullVM = null;
-
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
-                Exception userBomb;
-                var renderPDF = ReactiveCommand.CreateAsyncObservable(_ => f.GetFile(true));
+                Lazy<FullTalkAsStripViewModel> fullVM = null;
+                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileOnce());
                 var pages = renderPDF
                     .SelectMany(async sf =>
                     {
@@ -69,7 +66,7 @@ namespace IWalker.ViewModels
                         {
                             //TODO surface these errors?
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
-                            return null;
+                            return (PdfDocument) null;
                         }
                     })
                     .Do(doc => fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), doc)))
@@ -78,6 +75,7 @@ namespace IWalker.ViewModels
                                     .Select(p => new SlideThumbViewModel(p.Item2, fullVM, p.Item1)))
                     .Publish();
 
+                Exception userBomb;
                 pages
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(pgs => SlideThumbnails.AddRange(pgs),

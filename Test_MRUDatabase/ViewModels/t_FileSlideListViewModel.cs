@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.Collections.Generic;
@@ -38,6 +39,52 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.FirstAsync();
 
             Assert.AreEqual(10, list.Count);
+            Assert.AreEqual(1, df.Called);
+        }
+
+        [TestMethod]
+        public async Task TestFileUpdated()
+        {
+            // First, we need to get the file into the cache. Use the infrastructure to do that.
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+            await df.GetAndUpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+
+            // Now, we are going to update the cache, and see if it gets re-read.
+            df.DateToReturn = "this is the second one";
+            var vm = new FileSlideListViewModel(df);
+
+            var list = vm.SlideThumbnails;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(0, list.Count);
+
+            await vm.DoneBuilding.FirstAsync();
+            await vm.DoneBuilding.FirstAsync();
+
+            Assert.AreEqual(2, df.Called);
+        }
+
+        [TestMethod]
+        public async Task TestFileNotUpdated()
+        {
+            // First, we need to get the file into the cache. Use the infrastructure to do that.
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+            await df.GetAndUpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+
+            // Now, we are going to update the cache, and see if it gets re-read.
+            var vm = new FileSlideListViewModel(df);
+
+            var list = vm.SlideThumbnails;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(0, list.Count);
+
+            await vm.DoneBuilding.FirstAsync();
+
             Assert.AreEqual(1, df.Called);
         }
 
@@ -116,6 +163,7 @@ namespace Test_MRUDatabase.ViewModels
                 _name = name;
                 _url = url;
                 Called = 0;
+                DateToReturn = "this is the first";
             }
 
             public bool IsValid { get { return true; } }
@@ -133,6 +181,15 @@ namespace Test_MRUDatabase.ViewModels
             }
 
             public string DisplayName { get { return _name; } }
+
+            /// <summary>
+            /// Date stamp to return.
+            /// </summary>
+            public string DateToReturn { get; set; }
+            public Task<string> GetFileDate()
+            {
+                return Task.Factory.StartNew(() => DateToReturn);
+            }
         }
     }
 }
