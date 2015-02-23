@@ -3,6 +3,8 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System.Reactive.Linq;
 using IWalker.Util;
 using System.Threading.Tasks;
+using System;
+using System.Reactive;
 
 namespace Test_MRUDatabase.Util
 {
@@ -26,7 +28,7 @@ namespace Test_MRUDatabase.Util
 
             // We should have gotten it back
             Assert.IsNotNull(rtn);
-            Assert.AreEqual(2, rtn.Count);
+            Assert.AreEqual(1, rtn.Count);
             Assert.AreEqual("hi there", rtn[0]);
 
             // It should be in the cache.
@@ -78,15 +80,17 @@ namespace Test_MRUDatabase.Util
 
             await BlobCache.UserAccount.InsertObject("key", "this is one");
 
-            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => new bool[] { true, true }.ToObservable())
+            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), _ => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
                 .ToList()
                 .FirstAsync();
 
             // We should have gotten it back
             Assert.IsNotNull(rtn);
-            Assert.AreEqual(3, rtn.Count);
+            Assert.AreEqual(4, rtn.Count);
             Assert.AreEqual("this is one", rtn[0]);
             Assert.AreEqual("hi there", rtn[1]);
+            Assert.AreEqual("hi there", rtn[2]);
+            Assert.AreEqual("hi there", rtn[3]);
 
             // It should be in the cache.
             Assert.AreEqual("hi there", await BlobCache.UserAccount.GetObject<string>("key"));
@@ -97,7 +101,7 @@ namespace Test_MRUDatabase.Util
         {
             // Value is in the cache, and we need to update it too.
 
-            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => new bool[] { true, true }.ToObservable())
+            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
                 .ToList()
                 .FirstAsync();
 
@@ -106,6 +110,27 @@ namespace Test_MRUDatabase.Util
             Assert.AreEqual(3, rtn.Count);
             Assert.AreEqual("hi there", rtn[0]);
             Assert.AreEqual("hi there", rtn[1]);
+            Assert.AreEqual("hi there", rtn[2]);
+
+            // It should be in the cache.
+            Assert.AreEqual("hi there", await BlobCache.UserAccount.GetObject<string>("key"));
+        }
+
+        [TestMethod]
+        public async Task GetNewValueWithDelayFetchMultiTrue()
+        {
+            // Value is in the cache, and we need to update it too.
+
+            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there").Delay(TimeSpan.FromMilliseconds(10)), dt => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
+                .ToList()
+                .FirstAsync();
+
+            // We should have gotten it back
+            Assert.IsNotNull(rtn);
+            Assert.AreEqual(3, rtn.Count);
+            Assert.AreEqual("hi there", rtn[0]);
+            Assert.AreEqual("hi there", rtn[1]);
+            Assert.AreEqual("hi there", rtn[2]);
 
             // It should be in the cache.
             Assert.AreEqual("hi there", await BlobCache.UserAccount.GetObject<string>("key"));

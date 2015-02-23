@@ -13,41 +13,36 @@ namespace IWalker.Util
     {
         /// <summary>
         /// This method attempts to returned a cached value, and fetch one from
-        /// the web.
+        /// the web. Optionally, it can continue to query to see if an update is required.
         /// 
-        /// If the cached value doesn't exist, then it must be supplied by the
-        /// fetchFunc. Once that is done, the fetchPredicate will be run, and
-        /// if it returns true in its sequence another fetch will be done. This means
-        /// that if you ask for an unmatched key and your fetchPredicate does an
-        /// Observable.Return(true), you'll end up with two fetches in rapid succession.
+        /// If the cached value exists, it is returned. Then the predicate is queried to see
+        /// if the remote value should be refreshed.
         /// 
-        /// If the value does exist, a separate check function will be called
-        /// to re-fetch from the web.
+        /// If there is no cached value, then the value is fetched.
         /// 
-        /// This method returns an IObservable that may return more than one result
-        /// (first the cached data, then the latest data, and if your fetchPredicate
-        /// returns multiple values). Therefore, it's
-        /// important for UI applications that in your Subscribe method, you
-        /// write the code to merge the second result when it comes in.
-        ///
+        /// Once the above is done, as the retrySequence comes in, the predicate will
+        /// be called to see if a refresh is needed. If so, the data will be re-fetched.
+        /// 
+        /// In all cases any remotely fetched data is cached.
+        /// 
         /// This also means that await'ing this method is a Bad Idea(tm), always
-        /// use Subscribe.
+        /// use Subscribe. 1-infinity values can be returned depending on the arguments.
         /// </summary>
         /// <param name="key">The key to store the returned result under.</param>
         /// <param name="fetchFunc">A sequence that will return the new values of the data</param>
         /// <param name="fetchPredicate">A Func to determine whether
-        /// the updated item should be fetched. If the cached version isn't found,
-        /// this parameter is ignored and the item is always fetched. It is possible to return multiple
-        /// items in this sequence, in which case the fetch will repeat multiple times.</param>
-        /// <param name="absoluteExpiration">An optional expiration date.</param>
-        /// <param name="shouldInvalidateOnError">If this is true, the cache will
-        /// be cleared when an exception occurs in fetchFunc</param>
-        /// <returns>An Observable stream containing either one or two
-        /// results (possibly a cached version, then the latest version)</returns>
+        /// the updated item should be fetched. Only called once a cached version exists.</param>
+        /// <param name="retrySequence">Sequence that will trigger a predicate call followed by
+        /// a fetch call if the predicate indicates so.</param>
+        /// <param name="This">The blob cache against which we operate</param>
+        /// <returns>An Observable stream containing one or more
+        /// results (possibly a cached version, then the latest version(s))</returns>
         public static IObservable<T> GetAndFetchLatest<T>(this IBlobCache This,
             string key,
             Func<IObservable<T>> fetchFunc,
-            Func<DateTimeOffset, IObservable<bool>> fetchPredicate)
+            Func<DateTimeOffset, IObservable<bool>> fetchPredicate,
+            IObservable<Unit> retrySequence = null
+            )
         {
             if (fetchPredicate == null)
                 throw new ArgumentException("fetchPredicate");
@@ -70,23 +65,30 @@ namespace IWalker.Util
                 .Where(dt => dt == null || !dt.HasValue || dt.Value == null)
                 .Select(_ => default(Unit));
 
-            var fetchAfterRequired = fetchRequired
-                .SelectMany(_ => This.GetObjectCreatedAt<T>(key))
-                .Where(dt => dt != null && dt.HasValue && dt.Value != null)
-                .SelectMany(dt => fetchPredicate(dt.Value))
-                .Where(doit => doit == true)
-                .Select(_ => default(Unit));
-
             // Next, get the item...
 
             var fetchFromCache = Observable.Defer(() => This.GetObject<T>(key))
                 .Catch<T, KeyNotFoundException>(_ => Observable.Empty<T>());
 
-            var fetchFromRemote = fetchRequired.Concat(fetchAfterRequired).Concat(refetchIfNeeded)
+            var fetchFromRemote = fetchRequired.Concat(refetchIfNeeded)
                 .SelectMany(_ => fetchFunc())
                 .SelectMany(x => This.InsertObject<T>(key, x).Select(_ => x));
 
-            return fetchFromCache.Concat(fetchFromRemote).Multicast(new ReplaySubject<T>()).RefCount();
+            var items = fetchFromCache.Concat(fetchFromRemote).Multicast(new ReplaySubject<T>()).RefCount();
+
+            // Once we have these, we also have to kick off a second set of fetches for our retry sequence.
+            if (retrySequence == null)
+                return items;
+
+            var getAfter = retrySequence
+                .SelectMany(_ => This.GetObjectCreatedAt<T>(key))
+                .SelectMany(dt => fetchPredicate(dt.Value))
+                .Where(doit => doit == true)
+                .SelectMany(_ => fetchFunc())
+                .SelectMany(x => This.InsertObject<T>(key, x).Select(_ => x));
+
+            return items.Concat(getAfter);
+
         }
     }
 }
