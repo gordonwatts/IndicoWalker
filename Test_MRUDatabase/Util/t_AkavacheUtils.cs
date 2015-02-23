@@ -58,7 +58,7 @@ namespace Test_MRUDatabase.Util
         {
             // Value is in the cache, and we need to update it too.
 
-            await BlobCache.UserAccount.InsertObject("key", "this is one");
+            await Blobs.LocalStorage.InsertObject("key", "this is one");
 
             var rtn = await Blobs.LocalStorage.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => Observable.Return(true))
                 .ToList()
@@ -79,7 +79,7 @@ namespace Test_MRUDatabase.Util
         {
             // Value is in the cache, and we need to update it too.
 
-            await BlobCache.UserAccount.InsertObject("key", "this is one");
+            await Blobs.LocalStorage.InsertObject("key", "this is one");
 
             var rtn = await Blobs.LocalStorage.GetAndFetchLatest("key", () => Observable.Return("hi there"), _ => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
                 .ToList()
@@ -122,7 +122,7 @@ namespace Test_MRUDatabase.Util
         {
             // Value is in the cache, and we need to update it too.
 
-            var rtn = await BlobCache.UserAccount.GetAndFetchLatest("key", () => Observable.Return("hi there").Delay(TimeSpan.FromMilliseconds(10)), dt => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
+            var rtn = await Blobs.LocalStorage.GetAndFetchLatest("key", () => Observable.Return("hi there").Delay(TimeSpan.FromMilliseconds(10)), dt => Observable.Return(true), new Unit[] { default(Unit), default(Unit) }.ToObservable())
                 .ToList()
                 .FirstAsync();
 
@@ -140,9 +140,9 @@ namespace Test_MRUDatabase.Util
         [TestMethod]
         public async Task GetCachedValueFetchFalse()
         {
-            // Value is in the cache, and we need to update it too.
+            // Value is in the cache, and we need to update it too, but we shouldn't since the fetch function returns false.
 
-            await BlobCache.UserAccount.InsertObject("key", "this is one");
+            await Blobs.LocalStorage.InsertObject("key", "this is one");
 
             var rtn = await Blobs.LocalStorage.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => Observable.Return(false))
                 .ToList()
