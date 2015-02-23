@@ -1,5 +1,6 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using IWalker.ViewModels;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
@@ -23,11 +24,11 @@ namespace Test_MRUDatabase.ViewModels
     public class t_MeetingPageViewModel
     {
         [TestInitialize]
-        public void Setup()
+        public async Task Setup()
         {
             BlobCache.ApplicationName = "Test_MRUDatabase";
-            BlobCache.UserAccount.InvalidateAll();
-            BlobCache.UserAccount.Flush();
+            await Blobs.LocalStorage.InvalidateAll();
+            await Blobs.LocalStorage.Flush();
             Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
             {
                 ObjectCreationHandling = ObjectCreationHandling.Replace,
@@ -89,7 +90,7 @@ namespace Test_MRUDatabase.ViewModels
             var s = await mvm.Talks.Changed
                 .FirstAsync();
 
-            var m = await BlobCache.UserAccount.GetObject<IMeeting>(meeting.AsReferenceString()).FirstAsync();
+            var m = await Blobs.LocalStorage.GetObject<IMeeting>(meeting.AsReferenceString()).FirstAsync();
 
             Assert.IsNotNull(m);
             Assert.AreEqual("Meeting 1", m.Title);
@@ -100,7 +101,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             // Install the meeting in the cache.
             var meeting = MeetingHelpers.CreateMeeting();
-            await BlobCache.UserAccount.InsertObject(meeting.AsReferenceString(), await meeting.GetMeeting()).FirstAsync();
+            await Blobs.LocalStorage.InsertObject(meeting.AsReferenceString(), await meeting.GetMeeting()).FirstAsync();
 
             // Go grab the meeting now. It should show up twice.
             var mvm = new MeetingPageViewModel(null, meeting);
@@ -136,7 +137,7 @@ namespace Test_MRUDatabase.ViewModels
             });
 
             var m = await mr.GetMeeting();
-            await BlobCache.UserAccount.InsertObject(mr.AsReferenceString(), m);
+            await Blobs.LocalStorage.InsertObject(mr.AsReferenceString(), m);
             Assert.AreEqual(1, m.Sessions[0].Talks.Length);
 
             // Go grab the meeting now. It should show up twice.
@@ -177,7 +178,7 @@ namespace Test_MRUDatabase.ViewModels
             });
 
             var m = await mr.GetMeeting();
-            await BlobCache.UserAccount.InsertObject(mr.AsReferenceString(), m);
+            await Blobs.LocalStorage.InsertObject(mr.AsReferenceString(), m);
             Assert.AreEqual(1, m.Sessions[0].Talks.Length);
 
             // Go grab the meeting now. It should show up twice.

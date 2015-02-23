@@ -18,11 +18,11 @@ namespace Test_MRUDatabase.ViewModels
     public class t_FileSlideListViewModel
     {
         [TestInitialize]
-        public void Setup()
+        public async Task Setup()
         {
             BlobCache.ApplicationName="Test_MRUDatabase";
-            BlobCache.UserAccount.InvalidateAll();
-            BlobCache.UserAccount.Flush();
+            await Blobs.LocalStorage.InvalidateAll();
+            await Blobs.LocalStorage.Flush();
         }
 
         [TestMethod]

@@ -62,7 +62,7 @@ namespace IWalker.Util
         /// </remarks>
         private static IObservable<bool> CheckForUpdate(this IFile file)
         {
-            return BlobCache.UserAccount.GetObject<Tuple<string,byte[]>>(file.UniqueKey)
+            return Blobs.LocalStorage.GetObject<Tuple<string,byte[]>>(file.UniqueKey)
                 .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate);
         }
 
@@ -73,7 +73,7 @@ namespace IWalker.Util
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
         public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file)
         {
-            return BlobCache.UserAccount.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
+            return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
                     .Do(by => Debug.WriteLine("Got a file from cache of size {0} bytes", by.Item2.Length))
                     .Select(by => by.Item2.AsRORAByteStream())
                     .Catch<IRandomAccessStream, KeyNotFoundException>(e => Observable.Empty<IRandomAccessStream>());
@@ -91,7 +91,7 @@ namespace IWalker.Util
         /// <param name="requests">Each time this sequence fires, the file will be checked for a remote update and re-downloaded if it has been updated.</param>
         public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file, IObservable<Unit> requests = null)
         {
-            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
+            return Blobs.LocalStorage.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
                 .Select(a => a.Item2.AsRORAByteStream());
         }
     }

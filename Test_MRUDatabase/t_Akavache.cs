@@ -9,6 +9,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using ReactiveUI.Testing;
+using IWalker.Util;
 
 namespace Test_MRUDatabase
 {
@@ -21,11 +22,11 @@ namespace Test_MRUDatabase
     public class t_Akavache
     {
         [TestInitialize]
-        public void Setup()
+        public async Task Setup()
         {
             BlobCache.ApplicationName = "Test_MRUDatabase";
-            BlobCache.UserAccount.InvalidateAll();
-            BlobCache.UserAccount.Flush();
+            await Blobs.LocalStorage.InvalidateAll();
+            await Blobs.LocalStorage.Flush();
             Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
             {
                 ObjectCreationHandling = ObjectCreationHandling.Replace,
@@ -49,9 +50,9 @@ namespace Test_MRUDatabase
                 return x;
             };
 
-            await BlobCache.UserAccount.InsertObject(m.AsReferenceString(), await m.GetMeeting());
+            await Blobs.LocalStorage.InsertObject(m.AsReferenceString(), await m.GetMeeting());
 
-            var blob = BlobCache.UserAccount.GetAndFetchLatest(m.AsReferenceString(), fetcher);
+            var blob = Blobs.LocalStorage.GetAndFetchLatest(m.AsReferenceString(), fetcher);
 
             var mtg = await blob
                 .ToList()
@@ -77,7 +78,7 @@ namespace Test_MRUDatabase
                 return x;
             };
 
-            var blob = BlobCache.UserAccount.GetAndFetchLatest(m.AsReferenceString(), fetcher);
+            var blob = Blobs.LocalStorage.GetAndFetchLatest(m.AsReferenceString(), fetcher);
 
             var mtg = await blob
                 .ToList()
@@ -104,7 +105,7 @@ namespace Test_MRUDatabase
                     return x;
                 };
 
-                var blob = BlobCache.UserAccount.GetAndFetchLatest(m.AsReferenceString(), fetcher);
+                var blob = Blobs.LocalStorage.GetAndFetchLatest(m.AsReferenceString(), fetcher);
 
                 var mtg = await blob
                     .ToList()

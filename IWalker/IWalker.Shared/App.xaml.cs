@@ -11,10 +11,15 @@ using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Media.Animation;
-using Windows.UI.Xaml.Navigation;
+using System.Reactive.Linq;
+using IWalker.Util;
+
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
+#endif
+#if WINDOWS_PHONE_APP
+using Windows.UI.Xaml.Media.Animation;
+using Windows.UI.Xaml.Navigation;
 #endif
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
@@ -97,6 +102,7 @@ namespace IWalker
 #endif
             // Setup the internal data cache
             BlobCache.ApplicationName = "IndicoWalker";
+            Blobs.Register();
 
             // Get all background tasks setup.
             IWalker.Util.BackgroundTasks.Register();
@@ -223,6 +229,8 @@ namespace IWalker
         private void OnSuspending(object sender, SuspendingEventArgs e)
         {
             var deferral = e.SuspendingOperation.GetDeferral();
+
+            Blobs.LocalStorage.Flush().FirstAsync().Wait();
 
             // TODO: Save application state and stop any background activity
             deferral.Complete();

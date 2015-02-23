@@ -4,8 +4,6 @@ using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace IWalker.Util
 {
@@ -91,5 +89,6 @@ namespace IWalker.Util
             return items.Concat(getAfter);
 
         }
+
     }
 }

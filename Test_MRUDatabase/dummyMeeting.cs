@@ -1,4 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
@@ -69,12 +70,13 @@ namespace Test_MRUDatabase
             throw new NotImplementedException();
         }
 
-
+        [JsonIgnore]
         public DateTime StartTime
         {
             get { throw new NotImplementedException(); }
         }
 
+        [JsonIgnore]
         public DateTime EndTime
         {
             get { throw new NotImplementedException(); }

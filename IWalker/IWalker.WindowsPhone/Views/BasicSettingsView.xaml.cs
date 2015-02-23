@@ -45,7 +45,7 @@ namespace IWalker.Views
                 Observable.FromEventPattern(ClearCache, "Click")
                 .Subscribe(a =>
                 {
-                    BlobCache.UserAccount.InvalidateAll();
+                    Blobs.LocalStorage.InvalidateAll();
                 }));
 
             // This is Windows phone, so after the above we will have to wait until we

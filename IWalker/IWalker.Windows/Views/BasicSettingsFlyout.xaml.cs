@@ -77,7 +77,7 @@ namespace IWalker.Views
         /// <param name="e"></param>
         private void ClearCache_Click(object sender, Windows.UI.Xaml.RoutedEventArgs e)
         {
-            BlobCache.UserAccount.InvalidateAll();
+            Blobs.LocalStorage.InvalidateAll();
         }
 
         /// <summary>

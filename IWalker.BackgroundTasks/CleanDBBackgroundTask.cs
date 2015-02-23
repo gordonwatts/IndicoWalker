@@ -19,7 +19,7 @@ namespace IWalker.BackgroundTasks
         /// <param name="taskInstance"></param>
         public void Run(IBackgroundTaskInstance taskInstance)
         {
-            BlobCache.UserAccount.Vacuum().FirstAsync().Wait();
+            Blobs.LocalStorage.Vacuum().FirstAsync().Wait();
         }
     }
 }

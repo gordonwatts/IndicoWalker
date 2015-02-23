@@ -97,7 +97,7 @@ namespace IWalker.ViewModels
             // The blob can't deal with abstract types - needs the actual types, unfortunately. Hence the Cast below to get back into our type-independent world.
             var ldrCmd = ReactiveCommand.Create();
             var ldrCmdReady = ldrCmd
-                .SelectMany(_ => BlobCache.UserAccount.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
+                .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
                 .Publish();
 
             ldrCmdReady
