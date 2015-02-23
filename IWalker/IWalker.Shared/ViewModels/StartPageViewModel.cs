@@ -6,6 +6,7 @@ using IWalker.DataModel.MRU;
 using IWalker.Util;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
@@ -88,13 +89,14 @@ namespace IWalker.ViewModels
             LoadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
             {
                 var m = new MRUDatabaseAccess();
-                var list = 
+                var mruMeetings = 
                     (await m.QueryMRUDB())
                     .OrderByDescending(mru => mru.LastLookedAt)
                     .Take(20)
-                    .OrderByDescending(mru => mru.StartTime)
                     .ToListAsync();
-                return await list;
+                return (await mruMeetings)
+                    .OrderByDescending(mru => mru.StartTime)
+                    .ToList();
             });
             LoadRecentMeetings
                 .ObserveOn(RxApp.MainThreadScheduler)
