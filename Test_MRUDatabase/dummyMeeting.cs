@@ -68,6 +68,17 @@ namespace Test_MRUDatabase
         {
             throw new NotImplementedException();
         }
+
+
+        public DateTime StartTime
+        {
+            get { throw new NotImplementedException(); }
+        }
+
+        public DateTime EndTime
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 
     class dummyFile : IFile

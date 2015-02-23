@@ -30,7 +30,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             // Make sure the # of times a file is loaded from disk is reasonable.
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df);
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -54,7 +54,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df);
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -77,7 +77,7 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read.
-            var vm = new FileSlideListViewModel(df);
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -95,7 +95,7 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df);
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             await vm.DoneBuilding.FirstAsync();
@@ -126,7 +126,7 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df);
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             await vm.DoneBuilding.FirstAsync();
