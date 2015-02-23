@@ -41,7 +41,8 @@ namespace IWalker.Util
             string key,
             Func<IObservable<T>> fetchFunc,
             Func<DateTimeOffset, IObservable<bool>> fetchPredicate,
-            IObservable<Unit> retrySequence = null
+            IObservable<Unit> retrySequence = null,
+            DateTimeOffset? absoluteExpiration = null
             )
         {
             if (fetchPredicate == null)
@@ -72,7 +73,7 @@ namespace IWalker.Util
 
             var fetchFromRemote = fetchRequired.Concat(refetchIfNeeded)
                 .SelectMany(_ => fetchFunc())
-                .SelectMany(x => This.InsertObject<T>(key, x).Select(_ => x));
+                .SelectMany(x => This.InsertObject<T>(key, x, absoluteExpiration).Select(_ => x));
 
             var items = fetchFromCache.Concat(fetchFromRemote).Multicast(new ReplaySubject<T>()).RefCount();
 
@@ -85,7 +86,7 @@ namespace IWalker.Util
                 .SelectMany(dt => fetchPredicate(dt.Value))
                 .Where(doit => doit == true)
                 .SelectMany(_ => fetchFunc())
-                .SelectMany(x => This.InsertObject<T>(key, x).Select(_ => x));
+                .SelectMany(x => This.InsertObject<T>(key, x, absoluteExpiration).Select(_ => x));
 
             return items.Concat(getAfter);
 

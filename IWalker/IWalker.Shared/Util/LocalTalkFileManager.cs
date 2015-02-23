@@ -91,7 +91,7 @@ namespace IWalker.Util
         /// <param name="requests">Each time this sequence fires, the file will be checked for a remote update and re-downloaded if it has been updated.</param>
         public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file, IObservable<Unit> requests = null)
         {
-            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests)
+            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
                 .Select(a => a.Item2.AsRORAByteStream());
         }
     }
