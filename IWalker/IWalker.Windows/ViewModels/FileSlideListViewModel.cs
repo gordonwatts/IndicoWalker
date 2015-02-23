@@ -39,8 +39,9 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Setup the VM for the file.
         /// </summary>
-        /// <param name="f"></param>
-        public FileSlideListViewModel(IFile f)
+        /// <param name="f">The file we are to display</param>
+        /// <param name="talkTime">The time that this guy is relevant</param>
+        public FileSlideListViewModel(IFile f, TimePeriod talkTime)
         {
             Debug.Assert(f != null);
 
@@ -50,10 +51,28 @@ namespace IWalker.ViewModels
 
             if (_file.IsValid && _file.FileType == "pdf")
             {
+                // We will want to refresh the view of this file depending on how close we are to the actual
+                // meeting time.
+
+                var innerBuffer = new TimePeriod(talkTime);
+                innerBuffer.StartTime -= TimeSpan.FromMinutes(30);
+                innerBuffer.EndTime += TimeSpan.FromHours(2);
+
+                IObservable<Unit> updateTalkFile = null;
+                if (innerBuffer.Contains(DateTime.Now))
+                {
+                    // Fire every 15 minutes, but only while in the proper time.
+                    // Because we will check right after we start up, no need to look right away (skip).
+                    updateTalkFile = Observable.Interval(TimeSpan.FromMinutes(15))
+                        .Skip(1)
+                        .Where(_ => innerBuffer.Contains(DateTime.Now))
+                        .Select(_ => default(Unit));
+                }
+                
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
-                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileOnce());
+                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileOnce(updateTalkFile));
 
                 // Change them into files
                 var files = renderPDF

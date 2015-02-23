@@ -154,6 +154,18 @@ namespace IWalker.DataModel.Inidco
 
                 return true;
             }
+
+            /// <summary>
+            /// Start time of the talk
+            /// </summary>
+            [JsonIgnore]
+            public DateTime StartTime { get { return aTalk.StartDate; } }
+
+            /// <summary>
+            /// End time of the talk
+            /// </summary>
+            [JsonIgnore]
+            public DateTime EndTime { get { return aTalk.EndDate; } }
         }
 
         /// <summary>

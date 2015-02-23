@@ -1,4 +1,5 @@
 ﻿using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using ReactiveUI;
 using System;
 
@@ -22,7 +23,8 @@ namespace IWalker.ViewModels
         {
             this.Talk = t;
 #if WINDOWS_APP
-            _fileSlides = new Lazy<FileSlideListViewModel>(() => new FileSlideListViewModel(t.TalkFile));
+            var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
+            _fileSlides = new Lazy<FileSlideListViewModel>(() => new FileSlideListViewModel(t.TalkFile, timeSpan));
 #endif
         }
 

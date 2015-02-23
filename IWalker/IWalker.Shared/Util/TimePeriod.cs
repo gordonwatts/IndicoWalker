@@ -16,6 +16,16 @@ namespace IWalker.Util
         }
 
         /// <summary>
+        /// Copy constructor
+        /// </summary>
+        /// <param name="talkTime"></param>
+        public TimePeriod(TimePeriod talkTime)
+        {
+            StartTime = talkTime.StartTime;
+            EndTime = talkTime.EndTime;
+        }
+
+        /// <summary>
         /// Returns true if it contains the time.
         /// </summary>
         /// <param name="t"></param>
