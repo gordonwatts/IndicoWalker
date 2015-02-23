@@ -97,6 +97,9 @@ namespace IWalker
 #endif
             // Setup the internal data cache
             BlobCache.ApplicationName = "IndicoWalker";
+
+            // Get all background tasks setup.
+            IWalker.Util.BackgroundTasks.Register();
         }
 
         /// <summary>
