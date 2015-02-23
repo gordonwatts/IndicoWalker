@@ -4,6 +4,7 @@ using IWalker.Util;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
@@ -151,6 +152,35 @@ namespace Test_MRUDatabase
                 .FirstAsync();
 
             Assert.AreEqual(2, f.Count);
+        }
+
+        [TestMethod]
+        public async Task UpdateSequenceNoChanges()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f = await df.GetAndUpdateFileOnce(new Unit[] {default(Unit), default(Unit)}.ToObservable())
+                .ToList()
+                .FirstAsync();
+
+            Assert.AreEqual(1, f.Count);
+        }
+
+        [TestMethod]
+        public async Task UpdateSequenceWithChanges()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var seq = new string[] { "1", "2" }
+                .ToObservable()
+                .Delay(TimeSpan.FromMilliseconds(1000))
+                .Do(s => df.SetDate(s))
+                .Select(_ => default(Unit));
+
+
+            var f = await df.GetAndUpdateFileOnce(seq)
+                .ToList()
+                .FirstAsync();
+
+            Assert.AreEqual(3, f.Count);
         }
 
         [TestMethod]

@@ -88,9 +88,10 @@ namespace IWalker.Util
         /// arguments and the up-to-datedness of the file in the cache.
         /// </summary>
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
-        public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file)
+        /// <param name="requests">Each time this sequence fires, the file will be checked for a remote update and re-downloaded if it has been updated.</param>
+        public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file, IObservable<Unit> requests = null)
         {
-            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate())
+            return BlobCache.UserAccount.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests)
                 .Select(a => a.Item2.AsRORAByteStream());
         }
     }
