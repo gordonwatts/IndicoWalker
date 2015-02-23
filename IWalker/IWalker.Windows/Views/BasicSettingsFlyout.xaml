@@ -9,8 +9,8 @@
     IconSource="Assets/SmallLogo.png"
     Title="Basic Settings"
     d:DesignWidth="346">
-
-    <!-- This StackPanel acts as a root panel for vertical layout of the content sections -->
+                        
+            <!-- This StackPanel acts as a root panel for vertical layout of the content sections -->
     <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
 
         <!-- The StackPanel(s) below define individual content sections -->
@@ -39,6 +39,21 @@
                 </TextBlock.Text>
             </TextBlock>
             <Button x:Name="ClearCache" Content="Delete Local Cache" HorizontalAlignment="Right" Click="ClearCache_Click"/>
+            
+            <!-- Section 3 body -->
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    The agenda data is cached locally to make it availible offline and to make display quick even when online. It is refreshed when you look at a meeting. How long should it be kept?
+                </TextBlock.Text>
+            </TextBlock>
+            <ComboBox x:Name="ClearCacheAgenda" HorizontalAlignment="Right" SelectionChanged="ClearCacheAgenda_SelectionChanged"/>
+
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Talk files are cached locally to make them availible offline and to make display quick even when online (and are considerably larger than the agendas). They are monitored for updates. How long should the files be kept?
+                </TextBlock.Text>
+            </TextBlock>
+            <ComboBox x:Name="ClearCacheTalkFiles" HorizontalAlignment="Right" SelectionChanged="ClearCacheTalkFiles_SelectionChanged"/>
         </StackPanel>
 
         <!-- Define more Content Sections below as necessary -->
