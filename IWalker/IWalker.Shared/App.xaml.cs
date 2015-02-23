@@ -1,22 +1,20 @@
-﻿using IWalker.ViewModels;
+﻿using Akavache;
+using IWalker.DataModel.Interfaces;
+using IWalker.DataModel.MRU;
+using IWalker.ViewModels;
 using IWalker.Views;
+using Newtonsoft.Json;
 using ReactiveUI;
 using Splat;
 using System;
 using Windows.ApplicationModel;
 using Windows.ApplicationModel.Activation;
-using System.Reactive;
-using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Animation;
 using Windows.UI.Xaml.Navigation;
-using IWalker.DataModel.MRU;
-using IWalker.DataModel.Interfaces;
-using Akavache;
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
-using Newtonsoft.Json;
 #endif
 
 // The Blank Application template is documented at http://go.microsoft.com/fwlink/?LinkId=234227
