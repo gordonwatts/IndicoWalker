@@ -179,18 +179,13 @@ namespace IWalker.DataModel.Inidco
             public Uri _aUrl { get; set; }
 
             /// <summary>
-            /// Unique key that we can use to find this file.
-            /// </summary>
-            private string _key;
-
-            /// <summary>
             /// Initialize with the URL for this talk
             /// </summary>
             /// <param name="fileUri"></param>
             public IndicoFile(string fileUri, string uniqueKey)
             {
                 _aUrl = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
-                _key = uniqueKey;
+                UniqueKey = uniqueKey;
             }
 
             /// <summary>
@@ -227,15 +222,14 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
-            /// Return a unique key we can use to store this file.
-            /// This has to include the meeting unique thing and the actual file.
+            /// Unique key that we can use to find this file.
             /// </summary>
-            public string UniqueKey
-            {
-                get { return _key; }
-                set { _key = value; }
-            }
+            public string UniqueKey { get; set; }
 
+            /// <summary>
+            /// The display name we can use
+            /// </summary>
+            [JsonIgnore]
             public string DisplayName
             {
                 get { return Path.GetFileName(_aUrl.OriginalString); }
@@ -262,6 +256,7 @@ namespace IWalker.DataModel.Inidco
             /// <summary>
             /// Hold onto a complete agenda internally.
             /// </summary>
+            /// <remarks>Public so the serializer works properly.</remarks>
             public Meeting aAgenda { get; set; }
 
             /// <summary>
