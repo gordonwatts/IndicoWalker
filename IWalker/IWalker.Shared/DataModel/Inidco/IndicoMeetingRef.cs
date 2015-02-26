@@ -150,6 +150,18 @@ namespace IWalker.DataModel.Inidco
                 if (italk.aTalk.ID != aTalk.ID)
                     return false;
 
+                if (italk.aTalk.Title != aTalk.Title)
+                    return false;
+
+                if (italk.aTalk.StartDate != aTalk.StartDate)
+                    return false;
+
+                if (italk.aTalk.EndDate != aTalk.EndDate)
+                    return false;
+
+                if (italk.aTalk.SlideURL != aTalk.SlideURL)
+                    return false;
+
                 // Next, there are other minor things that might get updated that will require us to re-do this talk.
 
                 return true;
