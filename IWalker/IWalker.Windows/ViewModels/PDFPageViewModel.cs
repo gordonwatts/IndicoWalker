@@ -1,10 +1,13 @@
-﻿using ReactiveUI;
+﻿using IWalker.Util;
+using ReactiveUI;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
 using Windows.UI.Xaml.Media.Imaging;
+using Akavache;
+using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -60,8 +63,9 @@ namespace IWalker.ViewModels
         /// Initialize with the page that we should track.
         /// </summary>
         /// <param name="page">Page to render</param>
+        /// <param name="cacheTag">The extra tag to add to images we cache (like the date of file creation)</param>
         /// <remarks>We do not prepare the PDF document for rendering ahead of time (calling PreparePageAsync)</remarks>
-        public PDFPageViewModel(PdfPage page)
+        public PDFPageViewModel(PdfPage page, string cacheTag)
         {
             Debug.Assert(page != null);
             _page = page;
@@ -76,21 +80,38 @@ namespace IWalker.ViewModels
                 .Where(d => d != null)
                 .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2));
 
-            // Do the actual rendering.
+            // Look the render up in the cache. If miss, then do the render
             var newImage = renderRequest
-                .SelectMany(async szPixels =>
-                {
-                    var ms = new MemoryStream();
-                    var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
-                    var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-                    await _page.RenderToStreamAsync(ra, opt);
-                    return ms;
-                });
+                .SelectMany(szPixels => Blobs.LocalStorage.GetOrFetchObject<byte[]>(MakeCacheKey(page.Index, szPixels.Item1, szPixels.Item2, cacheTag),
+                    async () =>
+                    {
+                        var ms = new MemoryStream();
+                        var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
+                        var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
+                        await _page.RenderToStreamAsync(ra, opt);
+                        return ms.ToArray();
+                    },
+                    DateTime.Now + Settings.PageCacheTime))
+                .Select(bytes => new MemoryStream(bytes));
 
             // Save all image changes so the UI knows to update!
             var finalImpage = newImage.Publish();
             ImageStream = finalImpage;
             finalImpage.Connect();
+        }
+
+        /// <summary>
+        /// Generate the cache key from the data. This should be unique enough such that
+        /// when the file changes or similar the cache hit will fail.
+        /// </summary>
+        /// <param name="pageNumber"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="cacheTag"></param>
+        /// <returns></returns>
+        private string MakeCacheKey(uint pageNumber, int width, int height, string cacheTag)
+        {
+            return string.Format("{0}-{1}-{2}x{3}", cacheTag, pageNumber, width, height);
         }
 
         /// <summary>

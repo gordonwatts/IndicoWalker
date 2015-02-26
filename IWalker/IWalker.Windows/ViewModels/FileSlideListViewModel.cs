@@ -81,24 +81,25 @@ namespace IWalker.ViewModels
                         try
                         {
                             var d = await PdfDocument.LoadFromStreamAsync(sf);
-                            return d;
+                            var key = string.Format("{0}-{1}", f.UniqueKey, (await f.GetCacheCreateTime()).ToString());
+                            return Tuple.Create(key, d);
                         }
                         catch (Exception e)
                         {
                             //TODO surface these errors?
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
-                            return (PdfDocument)null;
+                            return Tuple.Create((string)null, (PdfDocument) null);
                         }
-                    }).Multicast(new ReplaySubject<PdfDocument>()).RefCount();
+                    }).Multicast(new ReplaySubject<Tuple<string, PdfDocument>>()).RefCount();
 
                 // The files are used to go after the items we display
                 var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), files));
 
                 // The pages now must be changed into thumb-nails for display.
                 var pages = files
-                    .Select(sf => Enumerable.Range(0, (int)sf.PageCount)
-                                    .Select(index => Tuple.Create(index, sf.GetPage((uint)index)))
-                                    .Select(p => new SlideThumbViewModel(p.Item2, fullVM, p.Item1)))
+                    .Select(sf => Enumerable.Range(0, (int)sf.Item2.PageCount)
+                                    .Select(index => Tuple.Create(index, sf.Item2.GetPage((uint)index)))
+                                    .Select(p => new SlideThumbViewModel(p.Item2, fullVM, p.Item1, sf.Item1)))
                     .Publish();
 
                 Exception userBomb;

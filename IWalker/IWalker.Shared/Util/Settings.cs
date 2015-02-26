@@ -61,5 +61,13 @@ namespace IWalker.Util
                 ApplicationData.Current.LocalSettings.Values["CacheFilesTime"] = value;
             }
         }
+
+        /// <summary>
+        /// Get the amount of time that PDF pages are allowed to remain in the cache
+        /// </summary>
+        public static TimeSpan PageCacheTime
+        {
+            get { return TimeSpan.FromDays(3); }
+        }
     }
 }

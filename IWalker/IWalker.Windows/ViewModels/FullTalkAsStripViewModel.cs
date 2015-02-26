@@ -63,7 +63,7 @@ namespace IWalker.ViewModels
         /// <param name="docSequence"></param>
         /// <param name="initialPage">The page that should be shown when we start up. Zero indexed</param>
         /// <param name="screen">The screen that hosts everything (routing!)</param>
-        public FullTalkAsStripViewModel(IScreen screen, IObservable<PdfDocument> docSequence)
+        public FullTalkAsStripViewModel(IScreen screen, IObservable<Tuple<string, PdfDocument>> docSequence)
         {
             Debug.Assert(docSequence != null);
             Debug.Assert(screen != null);
@@ -76,9 +76,9 @@ namespace IWalker.ViewModels
             docSequence
                 .Subscribe(doc =>
                 {
-                    _numberPages = doc.PageCount;
+                    _numberPages = doc.Item2.PageCount;
                     Pages.Clear();
-                    Pages.AddRange(Enumerable.Range(0, (int)doc.PageCount).Select(pageNumber => new PDFPageViewModel(doc.GetPage((uint)pageNumber))));
+                    Pages.AddRange(Enumerable.Range(0, (int)doc.Item2.PageCount).Select(pageNumber => new PDFPageViewModel(doc.Item2.GetPage((uint)pageNumber), doc.Item1)));
                 });
 
             // Page navigation. Make sure things are clean and we don't over-burden the UI before

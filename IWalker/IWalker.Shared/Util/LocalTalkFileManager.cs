@@ -94,5 +94,15 @@ namespace IWalker.Util
             return Blobs.LocalStorage.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
                 .Select(a => a.Item2.AsRORAByteStream());
         }
+
+        /// <summary>
+        /// Returns the time that this particular objectw as put into the cache.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file)
+        {
+            return Blobs.LocalStorage.GetObjectCreatedAt<IRandomAccessStream>(file.UniqueKey);
+        }
     }
 }

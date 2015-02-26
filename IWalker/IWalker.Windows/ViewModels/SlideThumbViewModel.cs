@@ -33,9 +33,9 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="page">The PDF page to be rendered</param>
         /// <remarks>We will call PeparePageAsync on the page</remarks>
-        public SlideThumbViewModel(PdfPage page, Lazy<FullTalkAsStripViewModel> fullVM, int pageNumber)
+        public SlideThumbViewModel(PdfPage page, Lazy<FullTalkAsStripViewModel> fullVM, int pageNumber, string cacheTag)
         {
-            PDFPageVM = new PDFPageViewModel(page);
+            PDFPageVM = new PDFPageViewModel(page, cacheTag);
             this.fullVM = fullVM;
 
             // Prepare the slide for rendering.
