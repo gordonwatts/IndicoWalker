@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using Windows.UI.Popups;
 
 namespace IWalker.ViewModels
 {
@@ -43,12 +44,13 @@ namespace IWalker.ViewModels
         /// </remarks>
         private IObservable<IMeeting> MeetingLoader(IMeetingRef meeting)
         {
-            // Get the first copy of the meeting. We both feed that into the system and
-            // use it to drive further (possible) updates.
+            // Get the first copy of the meeting.
+            // We are careful on exceptions. If we can't find it from the cache or online, then
+            // we are in some trouble: we can't load the meeting. So we need to surface an error
+            // to be reported to the user.
             var firstMeeting = Observable.FromAsync(() => meeting.GetMeeting())
                 .Catch(
                     Blobs.LocalStorage.GetObject<IMeeting>(meeting.AsReferenceString())
-                    .Catch<IMeeting, KeyNotFoundException>(_ => Observable.Empty<IMeeting>())
                     )
                 .Publish();
 
@@ -104,6 +106,7 @@ namespace IWalker.ViewModels
             var ldrCmd = ReactiveCommand.Create();
             var ldrCmdReady = ldrCmd
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
+                .Catch(MeetingLoadFailed(meeting))
                 .Publish();
 
             ldrCmdReady
@@ -134,6 +137,20 @@ namespace IWalker.ViewModels
             // Start everything off.
             ldrCmdReady.Connect();
             ldrCmd.Execute(null);
+        }
+
+        /// <summary>
+        /// The meeting load failed for some reason. Offline and no cache, most likely. So we need to display something.
+        /// </summary>
+        /// <param name="meeting"></param>
+        /// <returns></returns>
+        private IObservable<IMeeting> MeetingLoadFailed(IMeetingRef meeting)
+        {
+            var d = new MessageDialog("Unable to contact the meeting server. Either you are offline, or it doesn't exist.");
+            return Observable.FromAsync(_ => d.ShowAsync().AsTask())
+                .Do(_ => HostScreen.Router.NavigateBack.Execute(null))
+                .Where(_ => false)
+                .Select(_ => (IMeeting)null);
         }
 
         /// <summary>
