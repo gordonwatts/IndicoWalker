@@ -22,11 +22,6 @@ namespace IWalker.ViewModels
         private IFile _file;
 
         /// <summary>
-        /// Pointer to the current local file
-        /// </summary>
-        private IRandomAccessStream _localFile = null;
-
-        /// <summary>
         /// Returns true if the file is cached locally
         /// </summary>
         public bool HaveFileCached { get { return _haveFileCached.Value; } }

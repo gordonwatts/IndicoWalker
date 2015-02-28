@@ -4,6 +4,7 @@ using System.Text;
 using Windows.Storage.Pickers;
 using Windows.Storage.Streams;
 using System.Runtime.InteropServices.WindowsRuntime;
+using System.Threading.Tasks;
 
 namespace IWalker.Util
 {
@@ -135,16 +136,19 @@ namespace IWalker.Util
                 var goodCount = (int) Math.Min(DistTillEnd(), (ulong) count);
                 return AsyncInfo.Run<IBuffer, uint>(async (token, progress) =>
                 {
-                    if (goodCount == 0)
-                        return null;
-                    using (var dw = new DataWriter())
+                    return await Task.Factory.StartNew(() =>
                     {
-                        var b = _buffer.AsBuffer((int) _position, goodCount);
-                        dw.WriteBuffer(b);
-                        var result = dw.DetachBuffer();
-                        _position += (ulong) goodCount;
-                        return result;
-                    }
+                        if (goodCount == 0)
+                            return null;
+                        using (var dw = new DataWriter())
+                        {
+                            var b = _buffer.AsBuffer((int)_position, goodCount);
+                            dw.WriteBuffer(b);
+                            var result = dw.DetachBuffer();
+                            _position += (ulong)goodCount;
+                            return result;
+                        }
+                    });
                 });
             }
 

@@ -1,13 +1,11 @@
-﻿using IWalker.Util;
+﻿using Akavache;
+using IWalker.Util;
 using ReactiveUI;
 using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
-using Windows.UI.Xaml.Media.Imaging;
-using Akavache;
-using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -52,12 +50,6 @@ namespace IWalker.ViewModels
         /// space that we are going to render into.
         /// </summary>
         public ReactiveCommand<object> RenderImage { get; private set; }
-
-        /// <summary>
-        /// Hold onto the last rendered size. We will use this cache if we have to
-        /// re-render for some reason.
-        /// </summary>
-        private Tuple<int, int> _lastRequestedRenderSize;
 
         /// <summary>
         /// Initialize with the page that we should track.
