@@ -147,7 +147,9 @@ namespace IWalker.ViewModels
         private IObservable<IMeeting> MeetingLoadFailed(IMeetingRef meeting)
         {
             var d = new MessageDialog("Unable to contact the meeting server. Either you are offline, or it doesn't exist.");
-            return Observable.FromAsync(_ => d.ShowAsync().AsTask())
+            return Observable.Return(true)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .SelectMany(_ => d.ShowAsync())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Do(_ => HostScreen.Router.NavigateBack.Execute(null))
                 .Where(_ => false)
