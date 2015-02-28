@@ -53,17 +53,19 @@ namespace IWalker.Util
         /// <summary>
         /// Check a file to see if it needs to be re-downloaded.
         /// </summary>
-        /// <param name="file"></param>
-        /// <param name="lastUpdated">The time our cache entry was created at</param>
+        /// <param name="file">The file to look at for updates, which must already exist in the blob cache</param>
         /// <returns>True once if we need to update again.</returns>
         /// <remarks>
         /// We use the date from the headers of the file to understand if we need to update. That way we don't have to deal
         /// with translating time-zones, and anything funny from indico.
+        /// 
+        /// If something goes wrong (e.g. we are offline), the also return false.
         /// </remarks>
         private static IObservable<bool> CheckForUpdate(this IFile file)
         {
-            return Blobs.LocalStorage.GetObject<Tuple<string,byte[]>>(file.UniqueKey)
-                .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate);
+            return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
+                .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+                .Catch(Observable.Return(false));
         }
 
         /// <summary>

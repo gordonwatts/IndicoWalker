@@ -4,6 +4,7 @@ using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
@@ -45,6 +46,10 @@ namespace IWalker.ViewModels
             // Get the first copy of the meeting. We both feed that into the system and
             // use it to drive further (possible) updates.
             var firstMeeting = Observable.FromAsync(() => meeting.GetMeeting())
+                .Catch(
+                    Blobs.LocalStorage.GetObject<IMeeting>(meeting.AsReferenceString())
+                    .Catch<IMeeting, KeyNotFoundException>(_ => Observable.Empty<IMeeting>())
+                    )
                 .Publish();
 
             // Determine the two buffer times for this meeting, and create a "pulse" that will
@@ -80,7 +85,7 @@ namespace IWalker.ViewModels
 
                     // Now, use it to trigger the meetings.
                     return reloadPulse
-                        .SelectMany(_ => meeting.GetMeeting());
+                        .SelectMany(_ => Observable.FromAsync(() => meeting.GetMeeting()).Catch(Observable.Empty<IMeeting>()));
                 });
 
             var meetingSequence = Observable.Merge(firstMeeting, bufferTimes);
@@ -94,7 +99,8 @@ namespace IWalker.ViewModels
         /// <param name="meeting"></param>
         private void LoadMeeting(IMeetingRef meeting)
         {
-            // The blob can't deal with abstract types - needs the actual types, unfortunately. Hence the Cast below to get back into our type-independent world.
+            // Fetch the guy from the local cache. MeetingLoader will actually return a continuous stream
+            // of updates (when there is a difference) if we are close to the meeting time.
             var ldrCmd = ReactiveCommand.Create();
             var ldrCmdReady = ldrCmd
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
