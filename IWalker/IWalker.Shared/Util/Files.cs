@@ -168,6 +168,17 @@ namespace IWalker.Util
             }
         }
 
+        /// <summary>
+        /// Clean up a string to make into a legal filename.
+        /// </summary>
+        /// <param name="original"></param>
+        /// <returns></returns>
+        public static string CleanFilename(this string original)
+        {
+            return original.Replace(":", "_")
+                .Replace("/", "_")
+                .Replace("\\", "_");
+        }
 
     }
 }

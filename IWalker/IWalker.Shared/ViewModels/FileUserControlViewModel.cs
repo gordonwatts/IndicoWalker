@@ -4,6 +4,7 @@ using ReactiveUI;
 using System;
 using System.IO;
 using System.Reactive.Linq;
+using System.Reactive;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
@@ -26,13 +27,19 @@ namespace IWalker.ViewModels
         private IRandomAccessStream _localFile = null;
 
         /// <summary>
+        /// Returns true if the file is cached locally
+        /// </summary>
+        public bool HaveFileCached { get { return _haveFileCached.Value; } }
+        private ObservableAsPropertyHelper<bool> _haveFileCached;
+
+        /// <summary>
         /// Command to fire when the user "clicks" on us.
         /// </summary>
         /// <remarks>
         /// If file isn't downloaded, then download the file.
         /// If file is downloaded, then open the file in another program.
         /// </remarks>
-        public ReactiveCommand<IRandomAccessStream> ClickedUs { get; private set; }
+        public ReactiveCommand<object> ClickedUs { get; private set; }
 
         /// <summary>
         /// Initialize all of our behaviors.
@@ -42,33 +49,44 @@ namespace IWalker.ViewModels
         {
             _file = file;
 
-            // Get the file if it is already local.
-            var cmd = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
+            // Extract from cache or download it.
+            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
+            var cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.GetAndUpdateFileOnce());
 
-            cmd
-                .Where(f => f != null)
-                .Subscribe(f => _localFile = f);
-            cmd.ExecuteAsync().Subscribe();
+            var initiallyCached = cmdLookAtCache.Merge(cmdDownloadNow)
+                .Select(f => f != null)
+                .ToProperty(this, x => x.HaveFileCached, out _haveFileCached, false);
 
-            // Now, when the user clicks, we either download or open...
-            ClickedUs = ReactiveCommand.CreateAsyncObservable(cmd.IsExecuting.Select(g => !g), token => _file.GetAndUpdateFileOnce());
+            // Lets see if they want to download the file.
+            ClickedUs = ReactiveCommand.Create();
+
             ClickedUs
-                .Where(f => _localFile == null)
-                .Subscribe(f => _localFile = f);
+                .Where(_ => _haveFileCached.Value == false)
+                .Subscribe(_ => cmdDownloadNow.Execute(null));
 
-#if false
+            // Opening the file is a bit more complex
             ClickedUs
-                .Where(f => _localFile != null)
-                .Select(f => )
+                .Where(_ => _haveFileCached.Value == true)
+                .SelectMany(_ => _file.GetFileFromCache())
+                .SelectMany(async stream =>
+                {
+                    var fname = string.Format("{1}-{0}.{2}", await _file.GetCacheCreateTime(), _file.DisplayName, _file.FileType).CleanFilename();
+                    var f = await Windows.Storage.ApplicationData.Current.TemporaryFolder.CreateFileAsync(fname, CreationCollisionOption.FailIfExists);
+                    var fstream = await f.OpenStreamForWriteAsync();
+                    await stream.AsStreamForRead().CopyToAsync(fstream);
+                    return f;
+                })
                 .SelectMany(f => Launcher.LaunchFileAsync(f))
                 .Subscribe(g =>
                 {
                     if (!g)
                     {
-                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _localFile.Name));
+                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName));
                     }
                 });
-#endif
+
+            // Init the UI from the cache
+            cmdLookAtCache.ExecuteAsync().Subscribe();
         }
     }
 }
