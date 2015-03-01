@@ -244,7 +244,7 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public string DisplayName
             {
-                get { return Path.GetFileName(_aUrl.OriginalString); }
+                get { return Path.GetFileNameWithoutExtension(_aUrl.OriginalString); }
             }
 
             /// <summary>
