@@ -1,16 +1,13 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
-using IWalker.Util;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
-using System.Text;
-using System.Threading.Tasks;
-using Windows.Storage;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Windows.Storage.Streams;
-using System.Diagnostics;
 
 namespace IWalker.Util
 {
@@ -23,7 +20,7 @@ namespace IWalker.Util
         /// Download a file to a local memory buffer. Save it locally when done as well.
         /// </summary>
         /// <param name="file"></param>
-        private static async Task<Tuple<string,byte[]>> Download (this IFile file)
+        private static async Task<Tuple<string, byte[]>> Download(this IFile file)
         {
             // Get the file stream, and write it out.
             var ms = new MemoryStream();
@@ -60,11 +57,13 @@ namespace IWalker.Util
         /// with translating time-zones, and anything funny from indico.
         /// 
         /// If something goes wrong (e.g. we are offline), the also return false.
+        /// If the cache is missing the item, then we need to update.
         /// </remarks>
         private static IObservable<bool> CheckForUpdate(this IFile file)
         {
             return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
                 .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+                .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
         }
 
@@ -93,7 +92,7 @@ namespace IWalker.Util
         /// <param name="requests">Each time this sequence fires, the file will be checked for a remote update and re-downloaded if it has been updated.</param>
         public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file, IObservable<Unit> requests = null)
         {
-            return Blobs.LocalStorage.GetAndFetchLatest(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
+            return Blobs.LocalStorage.GetAndRequestFetch(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
                 .Select(a => a.Item2.AsRORAByteStream());
         }
 

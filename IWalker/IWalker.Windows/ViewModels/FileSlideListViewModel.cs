@@ -5,13 +5,11 @@ using ReactiveUI;
 using Splat;
 using System;
 using System.Diagnostics;
-using System.IO;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using Windows.Data.Pdf;
-using Windows.Storage;
 using Windows.Storage.Streams;
 namespace IWalker.ViewModels
 {
@@ -58,17 +56,26 @@ namespace IWalker.ViewModels
                 innerBuffer.StartTime -= TimeSpan.FromMinutes(30);
                 innerBuffer.EndTime += TimeSpan.FromHours(2);
 
-                IObservable<Unit> updateTalkFile = null;
+                var updateTalkFile = Observable.Empty<Unit>();
                 if (innerBuffer.Contains(DateTime.Now))
                 {
                     // Fire every 15 minutes, but only while in the proper time.
                     // Because we will check right after we start up, no need to look right away (skip).
                     updateTalkFile = Observable.Interval(TimeSpan.FromMinutes(15))
                         .Skip(1)
+                        .Where(_ => Settings.AutoDownloadNewMeeting)
                         .Where(_ => innerBuffer.Contains(DateTime.Now))
                         .Select(_ => default(Unit));
+
                 }
-                
+
+                // If we are doing auto-download, then we need to re-download the file no matter
+                // what.
+                if (Settings.AutoDownloadNewMeeting)
+                {
+                    updateTalkFile = Observable.Return(default(Unit)).Concat(updateTalkFile);
+                }
+
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
@@ -88,7 +95,7 @@ namespace IWalker.ViewModels
                         {
                             //TODO surface these errors?
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
-                            return Tuple.Create((string)null, (PdfDocument) null);
+                            return Tuple.Create((string)null, (PdfDocument)null);
                         }
                     }).Multicast(new ReplaySubject<Tuple<string, PdfDocument>>()).RefCount();
 

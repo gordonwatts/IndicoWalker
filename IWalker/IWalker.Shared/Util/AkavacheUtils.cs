@@ -90,5 +90,45 @@ namespace IWalker.Util
 
         }
 
+        public static IObservable<T> GetAndRequestFetch<T>(this IBlobCache This,
+            string key,
+            Func<IObservable<T>> fetchFunc,
+            Func<DateTimeOffset?, IObservable<bool>> fetchPredicate,
+            IObservable<Unit> requestSequence = null,
+            DateTimeOffset? absoluteExpiration = null
+            )
+        {
+            if (fetchPredicate == null)
+                throw new ArgumentException("fetchPredicate");
+            if (fetchFunc == null)
+                throw new ArgumentException("fetchFunc");
+
+            // We are going to get the cache value if we can. And then we will run updates after that.
+            // If we have nothing cached, then we will run the fetch directly. Otherwise we will run the
+            // fetch sequence.
+
+            var getOldKey = This.GetObjectCreatedAt<T>(key);
+
+            // Next, get the item...
+
+            var fetchFromCache = Observable.Defer(() => This.GetObject<T>(key))
+                .Catch<T, KeyNotFoundException>(_ => Observable.Empty<T>());
+
+            var items = fetchFromCache.Multicast(new ReplaySubject<T>()).RefCount();
+
+            // Once we have these, we also have to kick off a second set of fetches for our retry sequence.
+            if (requestSequence == null)
+                return items;
+
+            var getAfter = requestSequence
+                .SelectMany(_ => This.GetObjectCreatedAt<T>(key))
+                .SelectMany(dt => fetchPredicate(dt))
+                .Where(doit => doit == true)
+                .SelectMany(_ => fetchFunc())
+                .SelectMany(x => This.InsertObject<T>(key, x, absoluteExpiration).Select(_ => x));
+
+            return items.Concat(getAfter);
+
+        }
     }
 }
