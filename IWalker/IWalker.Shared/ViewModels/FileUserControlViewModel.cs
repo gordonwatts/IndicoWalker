@@ -73,11 +73,10 @@ namespace IWalker.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
-#if false
-
-            // Opening the file is a bit more complex
+            // Opening the file is a bit more complex. It happens only when the user clicks the button a second time.
+            // Requires us to write a file to the local cache.
             ClickedUs
-                .Where(_ => _haveFileCached.Value == true)
+                .Where(_ => _fileNotCached.Value == false)
                 .SelectMany(_ => _file.GetFileFromCache())
                 .SelectMany(async stream =>
                 {
@@ -110,7 +109,7 @@ namespace IWalker.ViewModels
                     g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
                     e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName), e); }
                 );
-#endif
+
             // Init the UI from the cache
             cmdLookAtCache.ExecuteAsync().Subscribe();
         }
