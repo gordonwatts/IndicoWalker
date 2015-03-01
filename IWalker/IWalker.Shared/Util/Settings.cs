@@ -6,7 +6,7 @@ namespace IWalker.Util
     /// <summary>
     /// Store settings...
     /// </summary>
-    class Settings
+    public class Settings
     {
         public static string LastViewedMeeting
         {

@@ -3,6 +3,7 @@ using IWalker.DataModel.Interfaces;
 using IWalker.Util;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -19,7 +20,7 @@ namespace Test_MRUDatabase
         [TestInitialize]
         public async Task Setup()
         {
-            BlobCache.ApplicationName="Test_MRUDatabase";
+            BlobCache.ApplicationName = "Test_MRUDatabase";
             await Blobs.LocalStorage.InvalidateAll();
             await Blobs.LocalStorage.Flush();
         }
@@ -81,7 +82,7 @@ namespace Test_MRUDatabase
                 .FirstAsync();
 
             var raStream = await f2;
-            
+
             var ms = new MemoryStream();
             await raStream[0].AsStream().CopyToAsync(ms);
 
@@ -158,7 +159,9 @@ namespace Test_MRUDatabase
         public async Task UpdateSequenceNoChanges()
         {
             var df = new dummmyFile("test.pdf", "test");
-            var f = await df.GetAndUpdateFileOnce(new Unit[] {default(Unit), default(Unit)}.ToObservable())
+            // There is a race condition in the Akavache - when the requests come too fast, the SQL insertion can't keep up.
+            // Not obvious how to "lock things out".
+            var f = await df.GetAndUpdateFileUponRequest(Observable.Interval(TimeSpan.FromMilliseconds(300)).Take(2).Select(_ => default(Unit)))
                 .ToList()
                 .FirstAsync();
 
@@ -169,18 +172,20 @@ namespace Test_MRUDatabase
         public async Task UpdateSequenceWithChanges()
         {
             var df = new dummmyFile("test.pdf", "test");
-            var seq = new string[] { "1", "2" }
-                .ToObservable()
-                .Delay(TimeSpan.FromMilliseconds(1000))
+            var seq = Observable.Interval(TimeSpan.FromSeconds(1))
+                .Select(_ => 1)
+                .Take(2)
+                .Scan((a, b) => a + b)
+                .Select(index => new string[] { "1", "2" }[index - 1])
                 .Do(s => df.SetDate(s))
                 .Select(_ => default(Unit));
 
 
-            var f = await df.GetAndUpdateFileOnce(seq)
+            var f = await df.GetAndUpdateFileUponRequest(seq)
                 .ToList()
                 .FirstAsync();
 
-            Assert.AreEqual(3, f.Count);
+            Assert.AreEqual(2, f.Count);
         }
 
         [TestMethod]
@@ -243,11 +248,29 @@ namespace Test_MRUDatabase
             Assert.AreEqual(1, df.Called);
         }
 
+        [TestMethod]
+        public async Task CreationTimeNothingCreated()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var r = await df.GetCacheCreateTime();
+            Assert.IsNull(r);
+        }
+
+        [TestMethod]
+        public async Task CreatingTimeAfterCache()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f1 = await df.GetAndUpdateFileOnce();
+
+            var r = await df.GetCacheCreateTime();
+            Assert.IsNotNull(r);
+        }
+
         class dummmyFile : IFile
         {
             public int Called { get; private set; }
-            private  string _name;
-            private  string _url;
+            private string _name;
+            private string _url;
             public dummmyFile(string url, string name)
             {
                 _name = name;
@@ -259,11 +282,12 @@ namespace Test_MRUDatabase
 
             public string FileType { get { return "pdf"; } }
 
-            public string UniqueKey { get { return _name;  } }
+            public string UniqueKey { get { return _name; } }
 
             public async Task<StreamReader> GetFileStream()
             {
                 Called++;
+                Debug.WriteLine("Doing download at {0}", DateTime.Now);
                 var f = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url);
                 var reader = await f.OpenStreamForReadAsync();
                 return new StreamReader(reader);

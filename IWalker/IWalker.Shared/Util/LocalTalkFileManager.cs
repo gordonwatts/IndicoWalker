@@ -90,7 +90,19 @@ namespace IWalker.Util
         /// </summary>
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
         /// <param name="requests">Each time this sequence fires, the file will be checked for a remote update and re-downloaded if it has been updated.</param>
-        public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file, IObservable<Unit> requests = null)
+        public static IObservable<IRandomAccessStream> GetAndUpdateFileOnce(this IFile file)
+        {
+            return Blobs.LocalStorage.GetAndRequestFetch(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), Observable.Return(default(Unit)), DateTime.Now + Settings.CacheFilesTime)
+                .Select(a => a.Item2.AsRORAByteStream());
+        }
+
+        /// <summary>
+        /// If the file is present in the cache, return it right away. If not, wait until requests fires, and use that to update. A full update only happens if the file claims it is out of date.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="requests"></param>
+        /// <returns></returns>
+        public static IObservable<IRandomAccessStream> GetAndUpdateFileUponRequest(this IFile file, IObservable<Unit> requests)
         {
             return Blobs.LocalStorage.GetAndRequestFetch(file.UniqueKey, () => Observable.FromAsync(() => file.Download()), dt => file.CheckForUpdate(), requests, DateTime.Now + Settings.CacheFilesTime)
                 .Select(a => a.Item2.AsRORAByteStream());
@@ -103,7 +115,7 @@ namespace IWalker.Util
         /// <returns></returns>
         public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file)
         {
-            return Blobs.LocalStorage.GetObjectCreatedAt<IRandomAccessStream>(file.UniqueKey);
+            return Blobs.LocalStorage.GetObjectCreatedAt<Tuple<string,byte[]>>(file.UniqueKey);
         }
     }
 }

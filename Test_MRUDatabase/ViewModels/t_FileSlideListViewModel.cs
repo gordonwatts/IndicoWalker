@@ -1,16 +1,14 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
 using IWalker.Util;
+using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IWalker.ViewModels;
 using System.IO;
-using System.Reactive.Linq;
+using System.Linq;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -20,9 +18,10 @@ namespace Test_MRUDatabase.ViewModels
         [TestInitialize]
         public async Task Setup()
         {
-            BlobCache.ApplicationName="Test_MRUDatabase";
+            BlobCache.ApplicationName = "Test_MRUDatabase";
             await Blobs.LocalStorage.InvalidateAll();
             await Blobs.LocalStorage.Flush();
+            Settings.AutoDownloadNewMeeting = true;
         }
 
         [TestMethod]
@@ -62,8 +61,58 @@ namespace Test_MRUDatabase.ViewModels
 
             await vm.DoneBuilding.FirstAsync();
             await vm.DoneBuilding.FirstAsync();
+            Assert.AreEqual(10, list.Count);
+
+            Assert.AreEqual(3, df.Called);
+        }
+
+        [TestMethod]
+        public async Task TestFileNoAutoDownload()
+        {
+            // Cached file, even if no auto upload, should be checked against the internet.
+
+            Settings.AutoDownloadNewMeeting = false;
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+            await df.GetAndUpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+
+            // Now, we are going to update the cache, and see if it gets re-read (which it shoudl since we have it)
+            df.DateToReturn = "this is the second one";
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+
+            var list = vm.SlideThumbnails;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(0, list.Count);
+
+            await vm.DoneBuilding.FirstAsync();
+            Assert.AreEqual(10, list.Count);
 
             Assert.AreEqual(2, df.Called);
+        }
+
+        [TestMethod]
+        public async Task TestFileNoAutoNoCache()
+        {
+            // First, we need to get the file into the cache. Use the infrastructure to do that.
+
+            Settings.AutoDownloadNewMeeting = false;
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+
+            // Now, we are going to update the cache, and see if it gets re-read (which it shoudl since we have it)
+            df.DateToReturn = "this is the second one";
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+
+            var list = vm.SlideThumbnails;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(0, list.Count);
+
+            await vm.DoneBuilding.Timeout(TimeSpan.FromMilliseconds(100), Observable.Return(default(Unit)));
+            Assert.AreEqual(0, list.Count);
+
+            Assert.AreEqual(0, df.Called);
         }
 
         [TestMethod]

@@ -120,7 +120,14 @@ namespace IWalker.ViewModels
                 );
 
             // Init the UI from the cache
-            cmdLookAtCache.ExecuteAsync().Subscribe();
+            if (Settings.AutoDownloadNewMeeting)
+            {
+                cmdDownloadNow.ExecuteAsync().Subscribe();
+            }
+            else
+            {
+                cmdLookAtCache.ExecuteAsync().Subscribe();
+            }
         }
     }
 }

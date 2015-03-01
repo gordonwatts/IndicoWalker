@@ -60,26 +60,24 @@ namespace IWalker.ViewModels
                 if (innerBuffer.Contains(DateTime.Now))
                 {
                     // Fire every 15 minutes, but only while in the proper time.
-                    // Because we will check right after we start up, no need to look right away (skip).
-                    updateTalkFile = Observable.Interval(TimeSpan.FromMinutes(15))
-                        .Skip(1)
-                        .Where(_ => Settings.AutoDownloadNewMeeting)
-                        .Where(_ => innerBuffer.Contains(DateTime.Now))
-                        .Select(_ => default(Unit));
-
+                    // We only check when requested, so we will start right off the bat.
+                    updateTalkFile = Observable.Return(default(Unit))
+                        .Concat(Observable.Interval(TimeSpan.FromMinutes(15))
+                            .Where(_ => innerBuffer.Contains(DateTime.Now))
+                            .Select(_ => default(Unit))
+                        )
+                        .Where(_ => Settings.AutoDownloadNewMeeting);
                 }
 
-                // If we are doing auto-download, then we need to re-download the file no matter
-                // what.
-                if (Settings.AutoDownloadNewMeeting)
-                {
-                    updateTalkFile = Observable.Return(default(Unit)).Concat(updateTalkFile);
-                }
+                // If the file is already downloaded, then we should do an update check right away.
+                var fetchIfThere = f.GetFileFromCache()
+                    .Select(_ => default(Unit));
+                updateTalkFile = fetchIfThere.Concat(updateTalkFile);
 
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
-                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileOnce(updateTalkFile));
+                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileUponRequest(updateTalkFile));
 
                 // Change them into files
                 var files = renderPDF
