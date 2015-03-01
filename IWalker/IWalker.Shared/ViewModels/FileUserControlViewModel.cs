@@ -34,6 +34,12 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<bool> _isDownloading;
 
         /// <summary>
+        /// The string that connotes the filetype (the extension). Since this
+        /// never changes, no need to do anything sophisticated here.
+        /// </summary>
+        public string DocumentTypeString { get; private set; }
+
+        /// <summary>
         /// Command to fire when the user "clicks" on us.
         /// </summary>
         /// <remarks>
@@ -49,6 +55,9 @@ namespace IWalker.ViewModels
         public FileUserControlViewModel(IFile file)
         {
             _file = file;
+
+            // Save the document type for the UI
+            DocumentTypeString = _file.FileType.ToUpper();
 
             // Extract from cache or download it.
             // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.

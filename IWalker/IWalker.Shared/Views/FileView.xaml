@@ -10,6 +10,7 @@
     d:DesignWidth="100">
 
     <Grid Background="#FFC73333">
+        <TextBlock Name="DocumentType" Text="" HorizontalAlignment="Center" Margin="0,0,0,0" Style="{ThemeResource BodyTextBlockStyle}"/>
         <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
         <ProgressRing IsActive="False" Name="DownloadProgress" Width="41" Height="41" Foreground="{ThemeResource ButtonForegroundThemeBrush}" />
         <Grid Name="DownloadIcon" Height="41" Width="41">

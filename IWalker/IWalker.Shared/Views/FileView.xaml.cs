@@ -15,6 +15,7 @@ namespace IWalker.Views
             this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick);
             this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility);
             this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive);
+            this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text);
         }
 
         public FileUserControlViewModel ViewModel
