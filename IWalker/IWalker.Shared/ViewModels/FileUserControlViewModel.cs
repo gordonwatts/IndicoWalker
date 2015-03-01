@@ -24,8 +24,8 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Returns true if the file is cached locally
         /// </summary>
-        public bool HaveFileCached { get { return _haveFileCached.Value; } }
-        private ObservableAsPropertyHelper<bool> _haveFileCached;
+        public bool FileNotCached { get { return _fileNotCached.Value; } }
+        private ObservableAsPropertyHelper<bool> _fileNotCached;
 
         /// <summary>
         /// Command to fire when the user "clicks" on us.
@@ -45,19 +45,22 @@ namespace IWalker.ViewModels
             _file = file;
 
             // Extract from cache or download it.
+            // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.
             var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
             var cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.GetAndUpdateFileOnce());
 
             var initiallyCached = cmdLookAtCache.Merge(cmdDownloadNow)
-                .Select(f => f != null)
-                .ToProperty(this, x => x.HaveFileCached, out _haveFileCached, false);
+                .Select(f => f == null)
+                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
 
             // Lets see if they want to download the file.
             ClickedUs = ReactiveCommand.Create();
 
             ClickedUs
-                .Where(_ => _haveFileCached.Value == false)
+                .Where(_ => _fileNotCached.Value == true)
                 .Subscribe(_ => cmdDownloadNow.Execute(null));
+
+#if false
 
             // Opening the file is a bit more complex
             ClickedUs
@@ -94,7 +97,7 @@ namespace IWalker.ViewModels
                     g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
                     e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName), e); }
                 );
-
+#endif
             // Init the UI from the cache
             cmdLookAtCache.ExecuteAsync().Subscribe();
         }

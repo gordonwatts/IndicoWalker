@@ -13,6 +13,7 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick);
+            this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility);
         }
 
         public FileUserControlViewModel ViewModel
