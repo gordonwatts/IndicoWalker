@@ -229,6 +229,57 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
+        public async Task GetCachedValueRequestFetchMultiIfExistingFalse()
+        {
+            // Motivated by something we saw in the wild. Get an item, and then only
+            // do request if it is not in the cache.
+
+            await Blobs.LocalStorage.InsertObject("key", "this is one");
+
+            var rtn = await Blobs.LocalStorage.GetAndRequestFetch("key",
+                    () => Observable.Return("hi there"),
+                    _ => Blobs.LocalStorage.GetObject<string>("key").Select(org => false).Catch(Observable.Return(true)),
+                    new Unit[] { default(Unit), default(Unit) }.ToObservable()
+                )
+                .ToList()
+                .FirstAsync();
+
+            // We should have gotten it back
+            Assert.IsNotNull(rtn);
+            Assert.AreEqual(1, rtn.Count);
+            Assert.AreEqual("this is one", rtn[0]);
+
+            // It should be in the cache.
+            Assert.AreEqual("this is one", await Blobs.LocalStorage.GetObject<string>("key"));
+        }
+
+        [TestMethod]
+        public async Task GetCachedValueRequestFetchMultiIfExistingFalseWithExpireTime()
+        {
+            // Motivated by something we saw in the wild. Get an item, and then only
+            // do request if it is not in the cache.
+
+            await Blobs.LocalStorage.InsertObject("key", "this is one");
+
+            var rtn = await Blobs.LocalStorage.GetAndRequestFetch("key",
+                    () => Observable.Return("hi there"),
+                    _ => Blobs.LocalStorage.GetObject<string>("key").Select(org => false).Catch(Observable.Return(true)),
+                    new Unit[] { default(Unit), default(Unit) }.ToObservable(),
+                    DateTime.Now + TimeSpan.FromDays(7)
+                )
+                .ToList()
+                .FirstAsync();
+
+            // We should have gotten it back
+            Assert.IsNotNull(rtn);
+            Assert.AreEqual(1, rtn.Count);
+            Assert.AreEqual("this is one", rtn[0]);
+
+            // It should be in the cache.
+            Assert.AreEqual("this is one", await Blobs.LocalStorage.GetObject<string>("key"));
+        }
+
+        [TestMethod]
         public async Task GetNewValueRequestFetchMultiTrue()
         {
             // Value isn't in the cache, and we need to run the update.
