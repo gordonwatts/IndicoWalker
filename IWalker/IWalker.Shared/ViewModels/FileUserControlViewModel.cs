@@ -49,6 +49,11 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> ClickedUs { get; private set; }
 
         /// <summary>
+        /// Fires each time we download/update a file (in the cache).
+        /// </summary>
+        public IObservable<Unit> DownloadedFile { get; private set; }
+
+        /// <summary>
         /// Initialize all of our behaviors.
         /// </summary>
         /// <param name="file"></param>
@@ -62,12 +67,27 @@ namespace IWalker.ViewModels
             // Extract from cache or download it.
             // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.
             var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
-            var cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.GetAndUpdateFileOnce());
+            ReactiveCommand<IRandomAccessStream> cmdDownloadNow = null;
+            if (_file.IsValid)
+            {
+                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.GetAndUpdateFileOnce());
+            }
+            else
+            {
+                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => Observable.Empty<IRandomAccessStream>());
+            }
 
-            var initiallyCached = cmdLookAtCache.Merge(cmdDownloadNow)
+            // When a new file comes down, make sure to switch off the download button.
+            cmdLookAtCache.Merge(cmdDownloadNow)
                 .Select(f => f == null)
                 .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
-                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
+                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, !Settings.AutoDownloadNewMeeting);
+
+            // Notify anyone in the world that is going ot care...
+
+            DownloadedFile = cmdDownloadNow
+                .Select(_ => default(Unit));
+
 
             // Lets see if they want to download the file.
             var canDoDownload = cmdDownloadNow.IsExecuting.Select(x => !x);
@@ -119,7 +139,9 @@ namespace IWalker.ViewModels
                     e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName), e); }
                 );
 
-            // Init the UI from the cache
+            // Init the UI from the cache. We want to do one or the other
+            // because the download will fetch from the cache first. So no need to
+            // fire them both off.
             if (Settings.AutoDownloadNewMeeting)
             {
                 cmdDownloadNow.ExecuteAsync().Subscribe();

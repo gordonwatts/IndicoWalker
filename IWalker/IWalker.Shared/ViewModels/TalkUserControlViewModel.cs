@@ -22,9 +22,10 @@ namespace IWalker.ViewModels
         public TalkUserControlViewModel(ITalk t)
         {
             this.Talk = t;
+            _fileVM = new Lazy<FileUserControlViewModel>(() => new FileUserControlViewModel(Talk.TalkFile));
 #if WINDOWS_APP
             var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
-            _fileSlides = new Lazy<FileSlideListViewModel>(() => new FileSlideListViewModel(t.TalkFile, timeSpan));
+            _fileSlides = new Lazy<FileSlideListViewModel>(() => new FileSlideListViewModel(t.TalkFile, timeSpan, File.DownloadedFile));
 #endif
         }
 
@@ -36,7 +37,8 @@ namespace IWalker.ViewModels
         /// <summary>
         /// The talk file
         /// </summary>
-        public FileUserControlViewModel File { get { return new FileUserControlViewModel(Talk.TalkFile); } }
+        public FileUserControlViewModel File { get { return _fileVM.Value; } }
+        Lazy<FileUserControlViewModel> _fileVM;
 
         /// <summary>
         /// True if the file should be visible

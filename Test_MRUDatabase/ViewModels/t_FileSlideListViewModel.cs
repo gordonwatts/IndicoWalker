@@ -29,7 +29,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             // Make sure the # of times a file is loaded from disk is reasonable.
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -53,7 +53,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -80,7 +80,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read (which it shoudl since we have it)
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -90,6 +90,30 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(10, list.Count);
 
             Assert.AreEqual(2, df.Called);
+        }
+
+        [TestMethod]
+        public async Task TestFileNoAutoDownloadPinged()
+        {
+            // Cached file, even if no auto upload, should be checked against the internet.
+
+            Settings.AutoDownloadNewMeeting = false;
+
+            var df = new dummmyFile("test.pdf", "test.pdf");
+            df.DateToReturn = "this is the second one";
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Interval(TimeSpan.FromMilliseconds(300)).Take(1).Select(_ => default(Unit)));
+            await df.GetAndUpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+
+            var list = vm.SlideThumbnails;
+            Assert.IsNotNull(list);
+            Assert.AreEqual(0, list.Count);
+
+            await vm.DoneBuilding.FirstAsync();
+            Assert.AreEqual(10, list.Count);
+
+            Assert.AreEqual(1, df.Called);
         }
 
         [TestMethod]
@@ -103,7 +127,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read (which it shoudl since we have it)
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -126,7 +150,7 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read.
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -144,7 +168,7 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             await vm.DoneBuilding.FirstAsync();
@@ -175,7 +199,7 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummmyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now));
+            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
             var list = vm.SlideThumbnails;
             await vm.DoneBuilding.FirstAsync();

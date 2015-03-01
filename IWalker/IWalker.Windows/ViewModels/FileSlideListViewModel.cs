@@ -39,7 +39,8 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="f">The file we are to display</param>
         /// <param name="talkTime">The time that this guy is relevant</param>
-        public FileSlideListViewModel(IFile f, TimePeriod talkTime)
+        /// <param name="checkForSlides">When a new check comes in, trigger the slides update</param>
+        public FileSlideListViewModel(IFile f, TimePeriod talkTime, IObservable<Unit> checkForSlides)
         {
             Debug.Assert(f != null);
 
@@ -72,12 +73,17 @@ namespace IWalker.ViewModels
                 // If the file is already downloaded, then we should do an update check right away.
                 var fetchIfThere = f.GetFileFromCache()
                     .Select(_ => default(Unit));
+
                 updateTalkFile = fetchIfThere.Concat(updateTalkFile);
 
                 // Run a rendering and populate the render pdf control with all the
                 // thumbnails we can.
                 // TODO: Replace the catch below to notify bad PDF format.
-                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ => f.GetAndUpdateFileUponRequest(updateTalkFile));
+                var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ =>
+                    Observable.Merge(
+                        f.GetAndUpdateFileUponRequest(updateTalkFile),
+                        checkForSlides.SelectMany(o => f.GetFileFromCache()))
+                );
 
                 // Change them into files
                 var files = renderPDF
