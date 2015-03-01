@@ -57,10 +57,12 @@ namespace IWalker.ViewModels
 
             var initiallyCached = cmdLookAtCache.Merge(cmdDownloadNow)
                 .Select(f => f == null)
+                .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
                 .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
 
             // Lets see if they want to download the file.
-            ClickedUs = ReactiveCommand.Create();
+            var canDoDownload = cmdDownloadNow.IsExecuting.Select(x => !x);
+            ClickedUs = ReactiveCommand.Create(canDoDownload);
 
             ClickedUs
                 .Where(_ => _fileNotCached.Value == true)
