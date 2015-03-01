@@ -31,16 +31,15 @@
 
             <!-- Section 2 header -->
             <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Local Cache" Margin="0,10,0,0" />
-
-            <!-- Section 2 body -->
             <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
                 <TextBlock.Text>
-                    Indico talks and agendas are cached locally to speed up access and make it possible to explore meetings offline.
+                    If requested, all talks can be automatically downloaded (and cached) when a meeting is opened.
                 </TextBlock.Text>
             </TextBlock>
-            <Button x:Name="ClearCache" Content="Delete Local Cache" HorizontalAlignment="Right" Click="ClearCache_Click"/>
-            
-            <!-- Section 3 body -->
+            <ToggleSwitch Name="AutoDownload" HorizontalAlignment="Right" OffContent="Manual" OnContent="Automatic" Toggled="AutoDownload_Toggled" />
+
+
+            <!-- Section 2 body -->
             <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
                 <TextBlock.Text>
                     The agenda data is cached locally to make it availible offline and to make display quick even when online. It is refreshed when you look at a meeting. How long should it be kept?
@@ -54,6 +53,14 @@
                 </TextBlock.Text>
             </TextBlock>
             <ComboBox x:Name="ClearCacheTalkFiles" HorizontalAlignment="Right" SelectionChanged="ClearCacheTalkFiles_SelectionChanged"/>
+
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Indico talks and agendas are cached locally to speed up access and make it possible to explore meetings offline.
+                </TextBlock.Text>
+            </TextBlock>
+            <Button x:Name="ClearCache" Content="Delete Local Cache" HorizontalAlignment="Right" Click="ClearCache_Click"/>
+
         </StackPanel>
 
         <!-- Define more Content Sections below as necessary -->

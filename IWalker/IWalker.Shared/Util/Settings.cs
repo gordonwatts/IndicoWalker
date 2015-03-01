@@ -69,5 +69,29 @@ namespace IWalker.Util
         {
             get { return TimeSpan.FromDays(3); }
         }
+
+        /// <summary>
+        /// Get/Set if meeting talks should be automatically downloaded (and thus cached) when we open a meeting.
+        /// </summary>
+        public static bool AutoDownloadNewMeeting
+        {
+            get
+            {
+                if (ApplicationData.Current.LocalSettings.Values.Keys.Contains("AutoDownloadNewMeeting"))
+                {
+                    return (bool)ApplicationData.Current.LocalSettings.Values["AutoDownloadNewMeeting"];
+                }
+#if WINDOWS_APP
+                return true;
+#endif
+#if WINDOWS_PHONE
+                return false;
+#endif
+            }
+            set
+            {
+                ApplicationData.Current.LocalSettings.Values["AutoDownloadNewMeeting"] = value;
+            }
+        }
     }
 }

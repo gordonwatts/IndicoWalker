@@ -1,11 +1,10 @@
-﻿using Akavache;
+﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Linq;
 using System.Collections.Generic;
+using System.Linq;
 using Windows.UI.Xaml.Controls;
-using IWalker.Util;
 
 // The Settings Fly-out item template is documented at http://go.microsoft.com/fwlink/?LinkId=273769
 
@@ -58,6 +57,9 @@ namespace IWalker.Views
             ClearCacheAgenda.SelectedItem = timeList.Where(x => x.Time == s).FirstOrDefault();
             s = Settings.CacheFilesTime;
             ClearCacheTalkFiles.SelectedItem = timeList.Where(x => x.Time == s).FirstOrDefault();
+
+            // And the auto download
+            AutoDownload.IsOn = Settings.AutoDownloadNewMeeting;
         }
 
         /// <summary>
@@ -99,9 +101,24 @@ namespace IWalker.Views
             setTime(cacheTime.Time);
         }
 
+        /// <summary>
+        /// When there is a change, record it.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
         private void ClearCacheTalkFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
             UpdateSelection(e.AddedItems.First() as CacheTime, x => Settings.CacheFilesTime = x);
+        }
+
+        /// <summary>
+        /// What the user wants to do with auto download has switched.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void AutoDownload_Toggled(object sender, Windows.UI.Xaml.RoutedEventArgs e)
+        {
+            Settings.AutoDownloadNewMeeting = AutoDownload.IsOn;
         }
     }
 }

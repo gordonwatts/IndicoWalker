@@ -119,7 +119,6 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
-                .WriteLine("Got a new meeting.")
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0)
                 .Select(s => s[0])
