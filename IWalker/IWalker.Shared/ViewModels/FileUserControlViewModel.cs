@@ -66,19 +66,27 @@ namespace IWalker.ViewModels
                 .SelectMany(async stream =>
                 {
                     var fname = string.Format("{1}-{0}.{2}", await _file.GetCacheCreateTime(), _file.DisplayName, _file.FileType).CleanFilename();
-                    var f = await Windows.Storage.ApplicationData.Current.TemporaryFolder.CreateFileAsync(fname, CreationCollisionOption.FailIfExists);
-                    var fstream = await f.OpenStreamForWriteAsync();
-                    await stream.AsStreamForRead().CopyToAsync(fstream);
-                    return f;
+
+                    // Write the file. If it is already written, then we will just return it (e.g. assume it is the same).
+                    // 0x800700B7 (-2147024713) is the error code for file already exists.
+                    return Observable.FromAsync(token => ApplicationData.Current.TemporaryFolder.CreateFileAsync(fname, CreationCollisionOption.FailIfExists).AsTask())
+                        .SelectMany(f => f.OpenStreamForWriteAsync())
+                        .SelectMany(async fstream => { await stream.AsStreamForRead().CopyToAsync(fstream); return default(Unit); })
+                        .Catch<Unit, Exception>(e =>
+                        {
+                            if (e.HResult == unchecked((int)0x800700B7))
+                                return Observable.Return(default(Unit));
+                            return Observable.Throw<Unit>(e);
+                        })
+                        .SelectMany(_ => ApplicationData.Current.TemporaryFolder.GetFileAsync(fname));
                 })
-                .SelectMany(f => Launcher.LaunchFileAsync(f))
-                .Subscribe(g =>
-                {
-                    if (!g)
-                    {
-                        throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName));
-                    }
-                });
+                .SelectMany(f => f)
+                .SelectMany(f => Launcher.LaunchFileAsync(f, new LauncherOptions() { DisplayApplicationPicker = true }))
+                .Where(g => g == false)
+                .Subscribe(
+                    g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
+                    e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName), e); }
+                );
 
             // Init the UI from the cache
             cmdLookAtCache.ExecuteAsync().Subscribe();

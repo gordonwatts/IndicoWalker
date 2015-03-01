@@ -181,7 +181,8 @@ namespace IWalker.Util
         {
             return original.Replace(":", "_")
                 .Replace("/", "_")
-                .Replace("\\", "_");
+                .Replace("\\", "_")
+                .Replace("+", "_");
         }
 
     }
