@@ -81,7 +81,14 @@ namespace IWalker.ViewModels
                         .SelectMany(_ => ApplicationData.Current.TemporaryFolder.GetFileAsync(fname));
                 })
                 .SelectMany(f => f)
-                .SelectMany(f => Launcher.LaunchFileAsync(f, new LauncherOptions() { DisplayApplicationPicker = true }))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .SelectMany(async f =>
+                {
+                    var v = await Launcher.LaunchFileAsync(f);
+                    return Tuple.Create(f, v);
+                })
+                .Where(g => g.Item2 == false)
+                .SelectMany(f => Launcher.LaunchFileAsync(f.Item1, new LauncherOptions() { DisplayApplicationPicker = true }))
                 .Where(g => g == false)
                 .Subscribe(
                     g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
