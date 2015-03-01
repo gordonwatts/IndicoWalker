@@ -84,7 +84,7 @@ namespace IWalker.Util
 #if WINDOWS_APP
                 return true;
 #endif
-#if WINDOWS_PHONE
+#if WINDOWS_PHONE_APP
                 return false;
 #endif
             }

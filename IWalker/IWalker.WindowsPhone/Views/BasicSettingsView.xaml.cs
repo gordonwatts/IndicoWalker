@@ -1,5 +1,4 @@
-﻿using Akavache;
-using IWalker.Util;
+﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
@@ -31,6 +30,7 @@ namespace IWalker.Views
             // Feedback for the user.
             this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text);
             this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text);
+            this.Bind(ViewModel, x => x.AutoDownload, x => x.AutoDownload.IsOn);
 
             // When they click find, we have to locate a file and go from there.
             _ridOfMe.Add(

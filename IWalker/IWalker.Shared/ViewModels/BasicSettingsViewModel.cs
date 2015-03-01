@@ -109,6 +109,23 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<string> _error;
 
         /// <summary>
+        /// True if we are going to auto-download (or not)
+        /// </summary>
+        public bool AutoDownload
+        {
+            get { return Settings.AutoDownloadNewMeeting; }
+            set
+            {
+                if (value != Settings.AutoDownloadNewMeeting)
+                {
+                    Settings.AutoDownloadNewMeeting = value;
+                    this.RaisePropertyChanged();
+                }
+
+                }
+        }
+
+        /// <summary>
         /// Track the screen we've switch over to.
         /// </summary>
         public IScreen HostScreen { get; private set; }
