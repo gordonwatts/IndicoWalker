@@ -28,6 +28,12 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<bool> _fileNotCached;
 
         /// <summary>
+        /// Get the state of a file download. If true, then the download is in progress.
+        /// </summary>
+        public bool IsDownloading { get { return _isDownloading.Value; } }
+        private ObservableAsPropertyHelper<bool> _isDownloading;
+
+        /// <summary>
         /// Command to fire when the user "clicks" on us.
         /// </summary>
         /// <remarks>
@@ -59,6 +65,11 @@ namespace IWalker.ViewModels
             ClickedUs
                 .Where(_ => _fileNotCached.Value == true)
                 .Subscribe(_ => cmdDownloadNow.Execute(null));
+
+            // Let the UI know the file is downloading
+            cmdDownloadNow.IsExecuting
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
 #if false
 

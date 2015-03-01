@@ -11,6 +11,7 @@
 
     <Grid Background="#FFC73333">
         <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
+        <ProgressRing IsActive="False" Name="DownloadProgress" Width="41" Height="41" Foreground="{ThemeResource ButtonForegroundThemeBrush}" />
         <Grid Name="DownloadIcon" Height="41" Width="41">
             <Ellipse
                                 x:Name="Ellipse"
