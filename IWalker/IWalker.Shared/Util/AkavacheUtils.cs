@@ -120,6 +120,8 @@ namespace IWalker.Util
             if (requestSequence == null)
                 return items;
 
+            // TODO: How can we make this atomic. THe problem is that fetchPredicate may depend on the object having been
+            // inserted, but because they are on different threads we may get race conditions. So there must be a way...
             var getAfter = requestSequence
                 .SelectMany(_ => This.GetObjectCreatedAt<T>(key))
                 .SelectMany(dt => fetchPredicate(dt))
