@@ -1,6 +1,7 @@
 ﻿using IWalker.Util;
 using ReactiveUI;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -21,6 +22,49 @@ namespace IWalker.ViewModels
         /// Fired when the page hooks up - so we can do an init of our status.
         /// </summary>
         public ReactiveCommand<Certificate> LookupCertStatus { get; private set; }
+
+        /// <summary>
+        /// The list of options we might like (or not).
+        /// </summary>
+        public List<ExpirationOptions.CacheTime> CacheDecayOptions { get; private set; }
+
+        /// <summary>
+        /// Get/Set the file(talk) cache time.
+        /// </summary>
+        public ExpirationOptions.CacheTime CacheDecayFiles
+        {
+            get
+            {
+                return CacheDecayOptions.Where(x => x.Time == Settings.CacheFilesTime).First();
+            }
+            set
+            {
+                if (value.Time != Settings.CacheFilesTime)
+                {
+                    Settings.CacheFilesTime = value.Time;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
+
+        /// <summary>
+        /// Get/Set the agenda cache time
+        /// </summary>
+        public ExpirationOptions.CacheTime CacheDecayAgendas
+        {
+            get
+            {
+                return CacheDecayOptions.Where(x => x.Time == Settings.CacheAgendaTime).First();
+            }
+            set
+            {
+                if (value.Time != Settings.CacheAgendaTime)
+                {
+                    Settings.CacheAgendaTime = value.Time;
+                    this.RaisePropertyChanged();
+                }
+            }
+        }
 
         /// <summary>
         /// Basic settings are configured on the view that is attached to this VM.
@@ -88,6 +132,10 @@ namespace IWalker.ViewModels
                     g => LookupCertStatus.ExecuteAsync().Subscribe(),
                     e => errors.OnNext(e.Message.TakeFirstLine())
                     ));
+
+            // Set/Get the file expiration policy.
+            CacheDecayOptions = ExpirationOptions.GetListExpirationOptions();
+
         }
         
         /// <summary>

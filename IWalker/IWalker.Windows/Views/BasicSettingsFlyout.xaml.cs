@@ -2,7 +2,6 @@
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using Windows.UI.Xaml.Controls;
 
@@ -15,20 +14,6 @@ namespace IWalker.Views
         private IScreen _screen;
 
         /// <summary>
-        /// Small item that will be displayed in the various combo-boxes.
-        /// </summary>
-        class CacheTime
-        {
-            public string TimeString { get; set; }
-            public TimeSpan Time { get; set; }
-
-            public override string ToString()
-            {
-                return TimeString;
-            }
-        }
-
-        /// <summary>
         /// Get the item setup.
         /// </summary>
         /// <param name="screen"></param>
@@ -37,18 +22,7 @@ namespace IWalker.Views
             this.InitializeComponent();
             _screen = screen;
 
-            // Setup the Cache dropdown.
-            var timeList = new List<CacheTime>()
-            {
-                new CacheTime() { Time = TimeSpan.FromDays(1), TimeString="One Day"},
-                new CacheTime() { Time = TimeSpan.FromDays(7), TimeString="One Week"},
-                new CacheTime() { Time = TimeSpan.FromDays(31), TimeString="One Month"},
-                new CacheTime() {Time = TimeSpan.FromDays(31*2), TimeString="Two Months"},
-                new CacheTime() { Time=TimeSpan.FromDays(31*3), TimeString="Three Months"},
-                new CacheTime() { Time = TimeSpan.FromDays(31*6), TimeString="Six Months"},
-                new CacheTime() { Time = TimeSpan.FromDays(365), TimeString="One Year"}
-            };
-
+            var timeList = ExpirationOptions.GetListExpirationOptions();
             ClearCacheAgenda.ItemsSource = timeList;
             ClearCacheTalkFiles.ItemsSource = timeList;
 
@@ -89,14 +63,14 @@ namespace IWalker.Views
         /// <param name="e"></param>
         private void ClearCacheAgenda_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateSelection(e.AddedItems.First() as CacheTime, x => Settings.CacheAgendaTime = x);
+            UpdateSelection(e.AddedItems.First() as ExpirationOptions.CacheTime, x => Settings.CacheAgendaTime = x);
         }
 
         /// <summary>
         /// Cache the selection that has changed.
         /// </summary>
         /// <param name="cacheTime"></param>
-        private void UpdateSelection(CacheTime cacheTime, Action<TimeSpan> setTime)
+        private void UpdateSelection(ExpirationOptions.CacheTime cacheTime, Action<TimeSpan> setTime)
         {
             setTime(cacheTime.Time);
         }
@@ -108,7 +82,7 @@ namespace IWalker.Views
         /// <param name="e"></param>
         private void ClearCacheTalkFiles_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
-            UpdateSelection(e.AddedItems.First() as CacheTime, x => Settings.CacheFilesTime = x);
+            UpdateSelection(e.AddedItems.First() as ExpirationOptions.CacheTime, x => Settings.CacheFilesTime = x);
         }
 
         /// <summary>

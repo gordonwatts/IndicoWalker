@@ -60,6 +60,17 @@ namespace IWalker.Views
             _ridOfMe.Add(Observable.FromEventPattern(this, "Unloaded")
                 .Subscribe(a => _ridOfMe.Dispose()));
 
+            // Setup the expiration options. We use this clumsy method b.c. we want
+            // to avoid ReactiveUI's auto view lookup - we are just going to use ToString for this...
+            this.WhenAny(x => x.ViewModel, x => x.Value)
+                .Subscribe(x =>
+                {
+                    ClearCacheAgenda.ItemsSource = x == null ? null : x.CacheDecayOptions;
+                    ClearCacheTalkFiles.ItemsSource = x == null ? null : x.CacheDecayOptions;
+                });
+            this.Bind(ViewModel, x => x.CacheDecayAgendas, x => x.ClearCacheAgenda.SelectedItem);
+            this.Bind(ViewModel, x => x.CacheDecayFiles, x => x.ClearCacheTalkFiles.SelectedItem);
+
         }
 
         /// <summary>
