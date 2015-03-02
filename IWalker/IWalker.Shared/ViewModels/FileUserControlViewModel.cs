@@ -51,6 +51,7 @@ namespace IWalker.ViewModels
 
         /// <summary>
         /// Fires each time we download/update a file (in the cache).
+        /// Will not fire if the file is already in the cache.
         /// </summary>
         public IObservable<Unit> DownloadedFile { get; private set; }
 
@@ -71,7 +72,7 @@ namespace IWalker.ViewModels
             ReactiveCommand<IRandomAccessStream> cmdDownloadNow = null;
             if (_file.IsValid)
             {
-                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.GetAndUpdateFileOnce());
+                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.UpdateFileOnce());
             }
             else
             {
@@ -83,7 +84,7 @@ namespace IWalker.ViewModels
             // - During download, run the ring progress bar thing.
             // We access ".Value" to force the side-effect of causing a subscription. We have to do this, as ToProperty won't
             // untill the Bind occurs, and the command that we execute below will probably happen before we get a chance.
-            cmdLookAtCache.Merge(cmdDownloadNow)
+            cmdLookAtCache.Concat(cmdDownloadNow)
                 .Select(f => f == null)
                 .WriteLine("Got file {0}.", file.UniqueKey)
                 .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
@@ -101,7 +102,8 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
             bogus = _isDownloading.Value;
 
-            // Notify anyone in the world that is going ot care...
+            // Notify anyone in the world that is going to care. We can only
+            // fire when there has been a real-update to the file.
 
             DownloadedFile = cmdDownloadNow
                 .Select(_ => default(Unit));
@@ -161,13 +163,10 @@ namespace IWalker.ViewModels
             // Init the UI from the cache. We want to do one or the other
             // because the download will fetch from the cache first. So no need to
             // fire them both off.
+            cmdLookAtCache.ExecuteAsync().Subscribe();
             if (Settings.AutoDownloadNewMeeting)
             {
                 cmdDownloadNow.ExecuteAsync().Subscribe();
-            }
-            else
-            {
-                cmdLookAtCache.ExecuteAsync().Subscribe();
             }
         }
     }

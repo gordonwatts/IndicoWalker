@@ -97,6 +97,21 @@ namespace IWalker.Util
         }
 
         /// <summary>
+        /// Update the file if it is either not cached, or out of date. Otherwise do nothing. And only attempt to update once.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        public static IObservable<IRandomAccessStream> UpdateFileOnce(this IFile file)
+        {
+            return file.CheckForUpdate()
+                .Where(doUpdate => doUpdate == true)
+                .SelectMany(_ => file.Download())
+                .SelectMany(v => Blobs.LocalStorage.InsertObject(file.UniqueKey, v, DateTime.Now + Settings.CacheFilesTime).Select(_ => v))
+                .Select(a => a.Item2.AsRORAByteStream())
+                .Catch(Observable.Empty<IRandomAccessStream>());
+        }
+
+        /// <summary>
         /// If the file is present in the cache, return it right away. If not, wait until requests fires, and use that to update. A full update only happens if the file claims it is out of date.
         /// </summary>
         /// <param name="file"></param>

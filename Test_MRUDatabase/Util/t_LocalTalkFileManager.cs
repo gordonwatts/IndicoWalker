@@ -266,6 +266,46 @@ namespace Test_MRUDatabase
             Assert.IsNotNull(r);
         }
 
+        [TestMethod]
+        public async Task UpdateOnceNoCache()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            var f = await df.UpdateFileOnce();
+            Assert.IsNotNull(f);
+            Assert.AreEqual(1, df.Called);
+            // Make sure it has been cached as well.
+            var o = await Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(df.UniqueKey);
+            Assert.IsNotNull(o);
+            Assert.AreEqual(await df.GetFileDate(), o.Item1);
+        }
+
+        [TestMethod]
+        public async Task UpdateOnceWithCache()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            await df.GetAndUpdateFileOnce();
+
+            var f = await df.UpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+            Assert.IsNotNull(f);
+            Assert.AreEqual(0, f.Count);
+        }
+
+        [TestMethod]
+        public async Task UpdateOnceWithCacheAndUpdate()
+        {
+            var df = new dummmyFile("test.pdf", "test");
+            await df.GetAndUpdateFileOnce();
+            df.SetDate("must update now");
+
+            var f = await df.UpdateFileOnce()
+                .ToList()
+                .FirstAsync();
+            Assert.IsNotNull(f);
+            Assert.AreEqual(1, f.Count);
+        }
+
         class dummmyFile : IFile
         {
             public int Called { get; private set; }
