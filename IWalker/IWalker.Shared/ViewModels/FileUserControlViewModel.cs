@@ -139,13 +139,19 @@ namespace IWalker.ViewModels
                 })
                 .SelectMany(f => f)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .SelectMany(async f =>
+                .SelectMany(f =>
                 {
-                    var v = await Launcher.LaunchFileAsync(f);
-                    return Tuple.Create(f, v);
+                    return Observable.FromAsync(async _ => await Launcher.LaunchFileAsync(f))
+                        .Select(good => Tuple.Create(f, good))
+                        .Catch(Observable.Return(Tuple.Create(f, false)));
                 })
                 .Where(g => g.Item2 == false)
-                .SelectMany(f => Launcher.LaunchFileAsync(f.Item1, new LauncherOptions() { DisplayApplicationPicker = true }))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .SelectMany(f => 
+                    {
+                        return Observable.FromAsync(async _ => await Launcher.LaunchFileAsync(f.Item1, new LauncherOptions() { DisplayApplicationPicker = true }))
+                            .Catch(Observable.Return(false));
+                    })
                 .Where(g => g == false)
                 .Subscribe(
                     g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
