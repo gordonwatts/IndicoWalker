@@ -85,11 +85,17 @@ namespace IWalker.ViewModels
             // untill the Bind occurs, and the command that we execute below will probably happen before we get a chance.
             cmdLookAtCache.Merge(cmdDownloadNow)
                 .Select(f => f == null)
+                .WriteLine("Got file {0}.", file.UniqueKey)
                 .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
                 .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
             var bogus = _fileNotCached.Value;
 
+            var seenFirstFile = cmdDownloadNow
+                .Where(f => f != null)
+                .Select(_ => true);
+
             cmdDownloadNow.IsExecuting
+                .CombineLatest(seenFirstFile.StartWith(false), (isExe, seenFF) => isExe && !seenFF)
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Do(x => Debug.WriteLine("We are executing: {0}", x))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
