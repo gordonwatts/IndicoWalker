@@ -7,29 +7,33 @@
     xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
     mc:Ignorable="d"
     d:DesignHeight="100"
-    d:DesignWidth="100">
+    d:DesignWidth="110">
 
     <Grid Background="#FFC73333">
-        <TextBlock Name="DocumentType" Text="" HorizontalAlignment="Center" Margin="0,0,0,0" Style="{ThemeResource BodyTextBlockStyle}"/>
-        <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"></Button>
-        <ProgressRing IsActive="False" Name="DownloadProgress" Width="41" Height="41" Foreground="{ThemeResource ButtonForegroundThemeBrush}" />
-        <Grid Name="DownloadIcon" Height="41" Width="41">
-            <Ellipse
-                                x:Name="Ellipse"
-                                Fill="{ThemeResource AppBarItemBackgroundThemeBrush}"
-                                Stroke="{ThemeResource AppBarItemForegroundThemeBrush}"
-                                StrokeThickness="2"
-                                UseLayoutRounding="False" />
-            <ContentPresenter 
-                                x:Name="Content" 
-                                HorizontalAlignment="Stretch" 
-                                VerticalAlignment="Stretch">
-                <PathIcon Data="F1 M 17.4126,18L 24.0752,11L 17.6558,11L 8.77931,20.4678L 8.77931,20.5322L 17.6558,30L 24.0752,30L 17.4126,23L 32,23L 32,18L 17.4126,18 Z " >
-                    <PathIcon.Projection>
-                        <PlaneProjection RotationZ="90"/>
-                    </PathIcon.Projection>
-                </PathIcon>
-            </ContentPresenter>
-        </Grid>
+        <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"/>
+        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
+        	<TextBlock x:Name="DocumentType" Text="PDF" HorizontalAlignment="Center" Style="{ThemeResource BodyTextBlockStyle}" Margin="0,0,0,-9"/>
+        	<Grid Width="110" Margin="0">
+        		<ProgressRing IsActive="False" x:Name="DownloadProgress" Width="35" Height="35" Foreground="{ThemeResource ButtonForegroundThemeBrush}" />
+        		<Grid x:Name="DownloadIcon" Height="41" Width="41">
+        			<Ellipse
+        				x:Name="Ellipse"
+        				Fill="{ThemeResource AppBarItemBackgroundThemeBrush}"
+        				Stroke="{ThemeResource AppBarItemForegroundThemeBrush}"
+        				StrokeThickness="2"
+        				UseLayoutRounding="False" />
+        			<ContentPresenter 
+        				x:Name="Content" 
+        				HorizontalAlignment="Stretch" 
+        				VerticalAlignment="Stretch">
+        				<PathIcon Data="F1 M 17.4126,18L 24.0752,11L 17.6558,11L 8.77931,20.4678L 8.77931,20.5322L 17.6558,30L 24.0752,30L 17.4126,23L 32,23L 32,18L 17.4126,18 Z " >
+        					<PathIcon.Projection>
+        						<PlaneProjection RotationZ="90"/>
+        					</PathIcon.Projection>
+        				</PathIcon>
+        			</ContentPresenter>
+        		</Grid>
+        	</Grid>
+        </StackPanel>
     </Grid>
 </UserControl>
