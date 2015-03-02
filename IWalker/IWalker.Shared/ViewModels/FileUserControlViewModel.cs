@@ -8,6 +8,7 @@ using System.Reactive;
 using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
+using System.Diagnostics;
 
 namespace IWalker.ViewModels
 {
@@ -77,11 +78,22 @@ namespace IWalker.ViewModels
                 cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => Observable.Empty<IRandomAccessStream>());
             }
 
-            // When a new file comes down, make sure to switch off the download button.
+            // UI Updating
+            // - When we have downloaded already, turn off the little download button.
+            // - During download, run the ring progress bar thing.
+            // We access ".Value" to force the side-effect of causing a subscription. We have to do this, as ToProperty won't
+            // untill the Bind occurs, and the command that we execute below will probably happen before we get a chance.
             cmdLookAtCache.Merge(cmdDownloadNow)
                 .Select(f => f == null)
                 .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
-                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, !Settings.AutoDownloadNewMeeting);
+                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
+            var bogus = _fileNotCached.Value;
+
+            cmdDownloadNow.IsExecuting
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Do(x => Debug.WriteLine("We are executing: {0}", x))
+                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
+            bogus = _isDownloading.Value;
 
             // Notify anyone in the world that is going ot care...
 
@@ -96,11 +108,6 @@ namespace IWalker.ViewModels
             ClickedUs
                 .Where(_ => _fileNotCached.Value == true)
                 .Subscribe(_ => cmdDownloadNow.Execute(null));
-
-            // Let the UI know the file is downloading
-            cmdDownloadNow.IsExecuting
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
             // Opening the file is a bit more complex. It happens only when the user clicks the button a second time.
             // Requires us to write a file to the local cache.
