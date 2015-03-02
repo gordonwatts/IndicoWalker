@@ -130,7 +130,21 @@ namespace IWalker.ViewModels
                     // 0x800700B7 (-2147024713) is the error code for file already exists.
                     return Observable.FromAsync(token => ApplicationData.Current.TemporaryFolder.CreateFileAsync(fname, CreationCollisionOption.FailIfExists).AsTask())
                         .SelectMany(f => f.OpenStreamForWriteAsync())
-                        .SelectMany(async fstream => { await stream.AsStreamForRead().CopyToAsync(fstream); return default(Unit); })
+                        .SelectMany(async fstream =>
+                        {
+                            try
+                            {
+                                using (var readerStream = stream.AsStreamForRead())
+                                {
+                                    await readerStream.CopyToAsync(fstream);
+                                }
+                            }
+                            finally
+                            {
+                                fstream.Dispose();
+                            }
+                            return default(Unit);
+                        })
                         .Catch<Unit, Exception>(e =>
                         {
                             if (e.HResult == unchecked((int)0x800700B7))
