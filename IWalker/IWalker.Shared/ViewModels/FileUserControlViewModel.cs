@@ -125,10 +125,11 @@ namespace IWalker.ViewModels
                 .SelectMany(async stream =>
                 {
                     var fname = string.Format("{1}-{0}.{2}", await _file.GetCacheCreateTime(), _file.DisplayName, _file.FileType).CleanFilename();
+                    var folder = _file.UniqueKey.CleanFilename();
 
                     // Write the file. If it is already written, then we will just return it (e.g. assume it is the same).
                     // 0x800700B7 (-2147024713) is the error code for file already exists.
-                    return Observable.FromAsync(token => ApplicationData.Current.TemporaryFolder.CreateFileAsync(fname, CreationCollisionOption.FailIfExists).AsTask())
+                    return CreateFile(folder, fname)
                         .SelectMany(f => f.OpenStreamForWriteAsync())
                         .SelectMany(async fstream =>
                         {
@@ -151,7 +152,7 @@ namespace IWalker.ViewModels
                                 return Observable.Return(default(Unit));
                             return Observable.Throw<Unit>(e);
                         })
-                        .SelectMany(_ => ApplicationData.Current.TemporaryFolder.GetFileAsync(fname));
+                        .SelectMany(_ => GetExistingFile(folder, fname));
                 })
                 .SelectMany(f => f)
                 .ObserveOn(RxApp.MainThreadScheduler)
@@ -182,6 +183,35 @@ namespace IWalker.ViewModels
             {
                 cmdDownloadNow.ExecuteAsync().Subscribe();
             }
+        }
+
+        /// <summary>
+        /// Create a file in a special folder.
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="fname"></param>
+        /// <returns></returns>
+        private IObservable<StorageFile> CreateFile(string folder, string fname)
+        {
+            var sFolder = Observable.FromAsync(_ => ApplicationData.Current.TemporaryFolder.GetFolderAsync(folder).AsTask())
+                .Catch(Observable.FromAsync(_ => ApplicationData.Current.TemporaryFolder.CreateFolderAsync(folder).AsTask()));
+
+            var sFile = sFolder
+                .SelectMany(sf => sf.CreateFileAsync(fname, CreationCollisionOption.FailIfExists));
+
+            return sFile;
+        }
+
+        /// <summary>
+        /// Return a file that already exists (or bad things happen).
+        /// </summary>
+        /// <param name="folder"></param>
+        /// <param name="fname"></param>
+        /// <returns></returns>
+        private IObservable<StorageFile> GetExistingFile(string folder, string fname)
+        {
+            return Observable.FromAsync(_ => ApplicationData.Current.TemporaryFolder.GetFolderAsync(folder).AsTask())
+                .SelectMany(sf => sf.GetFileAsync(fname));
         }
     }
 }
