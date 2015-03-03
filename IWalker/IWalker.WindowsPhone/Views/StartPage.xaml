@@ -9,10 +9,33 @@
     Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
 
     <Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBox Name="IndicoUrl" MinWidth="200"/>
-            <Button Name="FindIndicoUrl" Content="Load It!"/>
-        </StackPanel>
+        <Hub x:Name="MainHubView" HorizontalContentAlignment="Stretch">
+            <Hub.Header>
+                <Grid>
+                    <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
+                                IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                        <TextBox Name="IndicoUrl" Width="300" FontSize="12" HorizontalContentAlignment="Left" Padding="0" Height="23" MinHeight="0" />
+                        <Button Name="FindIndicoUrl" Content="Load It!"/>
+                    </StackPanel>
+                </Grid>
+            </Hub.Header>
+            <HubSection Header="Upcoming Meetings" Width="600"/>
+            <HubSection Header="Viewed Meetings">
+                <DataTemplate>
+                    <GridView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
+                        <GridView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Width="500">
+                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="NoWrap" />
+                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </GridView.ItemTemplate>
+                    </GridView>
+                </DataTemplate>
+            </HubSection>
+        </Hub>
     </Grid>
     <Page.BottomAppBar>
         <CommandBar ClosedDisplayMode="Minimal" >

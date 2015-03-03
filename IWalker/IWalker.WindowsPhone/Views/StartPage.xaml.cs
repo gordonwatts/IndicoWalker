@@ -24,11 +24,20 @@ namespace IWalker.Views
             this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
+            this.Bind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext);
+            this.Loaded += StartPage_Loaded;
+
             // Do the navagation when we need it here.
             _removeMe.Add(Observable.FromEventPattern<RoutedEventArgs>(GoToSettingsPage, "Click")
                 .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new BasicSettingsViewModel(ViewModel.HostScreen))));
             _removeMe.Add(Observable.FromEventPattern(this, "Unloaded")
                 .Subscribe(a => _removeMe.Dispose()));
+        }
+
+        void StartPage_Loaded(object sender, RoutedEventArgs e)
+        {
+            ViewModel.LoadRecentMeetings
+                .Execute(null);
         }
 
         /// <summary>
@@ -46,6 +55,16 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (StartPageViewModel)value; }
+        }
+
+        /// <summary>
+        /// When the user clicks on an existing meeting, this is where we end up.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void GridView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.OpenMRUMeeting.Execute(e.ClickedItem);
         }
     }
 }
