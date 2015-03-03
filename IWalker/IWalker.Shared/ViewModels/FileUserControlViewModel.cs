@@ -91,7 +91,7 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
             var bogus = _fileNotCached.Value;
 
-            var seenFirstFile = cmdDownloadNow
+            var seenFirstFile = cmdLookAtCache
                 .Where(f => f != null)
                 .Select(_ => true);
 
