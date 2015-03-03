@@ -28,7 +28,6 @@ namespace IWalker
         [AutoIncrement]
         public int Id { get; set; }
         
-        [MaxLength(40)]
         [NotNull]
         public String Title { get; set; }
         
@@ -38,7 +37,6 @@ namespace IWalker
         [NotNull]
         public DateTime LastLookedAt { get; set; }
         
-        [MaxLength(256)]
         [NotNull]
         public String IDRef { get; set; }
         
