@@ -48,7 +48,7 @@ namespace IWalker
         {
             this.InitializeComponent();
 
-            // Register everything... because....
+            // Register everything so the ReactiveUI view model finder can do the wiring it needs to do.
 
             Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
