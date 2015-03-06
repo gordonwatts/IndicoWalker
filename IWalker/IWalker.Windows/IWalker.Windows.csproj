@@ -114,6 +114,9 @@
     <Compile Include="Views\BasicSettingsFlyout.xaml.cs">
       <DependentUpon>BasicSettingsFlyout.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CategoryPageView.xaml.cs">
+      <DependentUpon>CategoryPageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
     </Compile>
@@ -215,6 +218,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\BasicSettingsFlyout.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CategoryPageView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
