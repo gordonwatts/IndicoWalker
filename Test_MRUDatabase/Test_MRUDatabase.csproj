@@ -131,6 +131,7 @@
     <Compile Include="ViewModels\t_MeetingPageViewModel.cs" />
     <Compile Include="ViewModels\t_PDFPageViewModel.cs" />
     <Compile Include="ViewModels\t_SlideThumbViewModel.cs" />
+    <Compile Include="ViewModels\t_StartPage.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">

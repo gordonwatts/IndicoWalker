@@ -67,10 +67,19 @@ namespace IWalker.ViewModels
             // When we navigate away, we should save the text and go
             SwitchPages
                 .Select(x => MeetingAddress)
+                .Where(x => IsMeeting(x))
                 .Subscribe(addr =>
                 {
                     Settings.LastViewedMeeting = addr;
                     HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
+                });
+            SwitchPages
+                .Select(x => MeetingAddress)
+                .Where(x => IsAgendaList(x))
+                .Subscribe(addr =>
+                {
+                    Settings.LastViewedMeeting = addr;
+                    HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(HostScreen, ConvertToIAgendaList(addr)));
                 });
 
             // MRU button was pressed.
@@ -104,6 +113,36 @@ namespace IWalker.ViewModels
                     RecentMeetings.Clear();
                     RecentMeetings.AddRange(l);
                 });
+        }
+
+        /// <summary>
+        /// Return true if this is url is a valid agenda listing
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        private bool IsAgendaList(string url)
+        {
+            return IndicoMeetingListRef.IsValid(url);
+        }
+
+        /// <summary>
+        /// Return true if this is a meeting
+        /// </summary>
+        /// <param name="x"></param>
+        /// <returns></returns>
+        private bool IsMeeting(string url)
+        {
+            return IndicoMeetingRef.IsValid(url);
+        }
+
+        /// <summary>
+        /// Return a list of possible meetings
+        /// </summary>
+        /// <param name="addr"></param>
+        /// <returns></returns>
+        private IMeetingListRef ConvertToIAgendaList(string addr)
+        {
+            return new IndicoMeetingListRef(addr);
         }
 
         /// <summary>

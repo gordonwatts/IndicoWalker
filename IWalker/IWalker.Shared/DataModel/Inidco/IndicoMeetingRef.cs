@@ -370,5 +370,15 @@ namespace IWalker.DataModel.Inidco
         {
             return _info.AsShortString();
         }
+
+        /// <summary>
+        /// Return true if this is a valid meeting reference
+        /// </summary>
+        /// <param name="url"></param>
+        /// <returns></returns>
+        internal static bool IsValid(string url)
+        {
+            return AgendaInfo.IsValid(url);
+        }
     }
 }
