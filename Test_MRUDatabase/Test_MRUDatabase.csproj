@@ -176,9 +176,9 @@
     <Reference Include="DDay.iCal">
       <HintPath>..\packages\DDay.iCal.1.0.2.575\lib\DDay.iCal.dll</HintPath>
     </Reference>
-    <Reference Include="IndicoInterface.NET, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IndicoInterface.NET, Version=1.3.2.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\packages\IndicoInterface.NET.1.3.1\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
+      <HintPath>..\packages\IndicoInterface.NET.1.3.2\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
     </Reference>
     <Reference Include="Microsoft.Reactive.Testing">
       <HintPath>..\packages\Rx-Testing.2.2.5\lib\windows8\Microsoft.Reactive.Testing.dll</HintPath>
