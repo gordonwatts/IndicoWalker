@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
+using Newtonsoft.Json;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -38,6 +39,16 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
+        /// Return a unique string which can be used as a cache.
+        /// </summary>
+        /// <remarks>We do it as a uri, as that is unique at least on the internet...</remarks>
+        [JsonIgnore]
+        public string UniqueString
+        {
+            get { return aCategory.GetCagetoryUri(10).OriginalString; }
+        }
+
+        /// <summary>
         /// Return a list of meetings for this agenda.
         /// </summary>
         public async Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays)
@@ -67,12 +78,16 @@ namespace IWalker.DataModel.Inidco
                 aMeetingRef = a;
             }
 
+            [JsonIgnore]
             public string Title { get { return aMeetingRef.Title; } }
 
+            [JsonIgnore]
             public DateTime StartTime { get { return aMeetingRef.StartTime; } }
 
+            [JsonIgnore]
             public DateTime EndTime { get { return aMeetingRef.EndTime; } }
 
+            [JsonIgnore]
             public IMeetingRef Meeting
             {
                 get { return (IMeetingRef) aMeetingRef; }

@@ -1,7 +1,7 @@
 ﻿using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using ReactiveUI;
 using System;
+using Test_MRUDatabase.Util;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -62,14 +62,6 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsInstanceOfType(newPage, typeof(CategoryPageViewModel));
         }
 
-        class dummyScreen : IScreen
-        {
-            public dummyScreen()
-            {
-                Router = new RoutingState();
-            }
-            public RoutingState Router { get; private set; }
-        }
 
     }
 }

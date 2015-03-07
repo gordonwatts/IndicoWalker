@@ -16,6 +16,7 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
+            this.OneWayBind(ViewModel, x => x.MeetingList, y => y.MeetingList.ItemsSource);
         }
 
         /// <summary>

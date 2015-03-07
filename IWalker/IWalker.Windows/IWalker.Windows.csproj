@@ -173,9 +173,9 @@
     <Reference Include="HtmlAgilityPack">
       <HintPath>..\..\packages\HtmlAgilityPack.1.4.9\lib\portable-net45+netcore45+wpa81+wp8+MonoAndroid+MonoTouch\HtmlAgilityPack.dll</HintPath>
     </Reference>
-    <Reference Include="IndicoInterface.NET, Version=1.3.0.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IndicoInterface.NET, Version=1.3.1.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\IndicoInterface.NET.1.3.0\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
+      <HintPath>..\..\packages\IndicoInterface.NET.1.3.1\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.3\lib\netcore45\Newtonsoft.Json.dll</HintPath>

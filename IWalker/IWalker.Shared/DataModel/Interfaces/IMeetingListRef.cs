@@ -14,5 +14,10 @@ namespace IWalker.DataModel.Interfaces
         /// Return a list of meetings
         /// </summary>
         Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays);
+
+        /// <summary>
+        /// Returns a unique string for this item (we can use it as a cache key).
+        /// </summary>
+        string UniqueString { get; }
     }
 }
