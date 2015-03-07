@@ -13,6 +13,16 @@ namespace IWalker.DataModel.Inidco
     class IndicoDataFetcher : IUrlFetcher
     {
         /// <summary>
+        /// Hold onto the fetcher singleton.
+        /// </summary>
+        static Lazy<IndicoDataFetcher> _fetcher = new Lazy<IndicoDataFetcher>(() => new IndicoDataFetcher());
+
+        /// <summary>
+        /// Get the singlton instance of the fetcher
+        /// </summary>
+        public static IndicoDataFetcher Fetcher { get { return _fetcher.Value; } }
+
+        /// <summary>
         /// True if we've loaded the CERN cert.
         /// </summary>
         bool _loadedCERNCert = false;

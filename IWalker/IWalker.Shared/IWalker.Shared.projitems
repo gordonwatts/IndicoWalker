@@ -23,6 +23,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeeting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingListRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRefExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMRUDatabase.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ISession.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\ITalk.cs" />

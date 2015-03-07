@@ -1,8 +1,10 @@
 ﻿using IndicoInterface.NET;
 using IWalker.DataModel.Interfaces;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -11,12 +13,18 @@ namespace IWalker.DataModel.Inidco
     /// </summary>
     class IndicoMeetingListRef : IMeetingListRef
     {
-        private string addr;
+        /// <summary>
+        /// Get/Set the agenda. This is here so serialization works properly.
+        /// </summary>
+        public AgendaCategory aCategory { get; set; }
 
-        public IndicoMeetingListRef(string addr)
+        /// <summary>
+        /// Initialize with a parituclar URI
+        /// </summary>
+        /// <param name="uri"></param>
+        public IndicoMeetingListRef(string uri)
         {
-            // TODO: Complete member initialization
-            this.addr = addr;
+            aCategory = new AgendaCategory(uri);
         }
 
         /// <summary>
@@ -27,6 +35,48 @@ namespace IWalker.DataModel.Inidco
         internal static bool IsValid(string url)
         {
             return AgendaCategory.IsValid(url);
+        }
+
+        /// <summary>
+        /// Return a list of meetings for this agenda.
+        /// </summary>
+        public async Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays)
+        {
+            var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
+            var meetings = await al.GetCategory(aCategory, goingBackDays);
+
+            return meetings.Select(m => new IndicoMeetingExtendedRef(m)).Cast<IMeetingRefExtended>().ToArray();
+        }
+
+        /// <summary>
+        /// The meeting reference
+        /// </summary>
+        class IndicoMeetingExtendedRef : IMeetingRefExtended
+        {
+            /// <summary>
+            /// Here for serialization. Get the underlying agenda which has the data.
+            /// </summary>
+            public AgendaInfoExtended aMeetingRef { get; set; }
+
+            /// <summary>
+            /// Init with a particular agenda.
+            /// </summary>
+            /// <param name="a"></param>
+            public IndicoMeetingExtendedRef(AgendaInfoExtended a)
+            {
+                aMeetingRef = a;
+            }
+
+            public string Title { get { return aMeetingRef.Title; } }
+
+            public DateTime StartTime { get { return aMeetingRef.StartTime; } }
+
+            public DateTime EndTime { get { return aMeetingRef.EndTime; } }
+
+            public IMeetingRef Meeting
+            {
+                get { return (IMeetingRef) aMeetingRef; }
+            }
         }
     }
 }

@@ -217,7 +217,7 @@ namespace IWalker.DataModel.Inidco
             {
                 // Get the file, save it to the proper location, and then return it.
                 Debug.WriteLine("  Doing download for {0}", _aUrl.OriginalString);
-                return await _fetcher.Value.GetDataFromURL(_aUrl);
+                return await IndicoDataFetcher.Fetcher.GetDataFromURL(_aUrl);
             }
 
             /// <summary>
@@ -253,7 +253,7 @@ namespace IWalker.DataModel.Inidco
             /// <returns></returns>
             public async Task<string> GetFileDate()
             {
-                var headers = await _fetcher.Value.GetContentHeadersFromUrl(_aUrl);
+                var headers = await IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(_aUrl);
                 if (!headers.LastModified.HasValue)
                     return "";
                 return headers.LastModified.Value.ToString();
@@ -345,11 +345,6 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
-        /// Hold onto the fetcher singleton.
-        /// </summary>
-        static Lazy<IndicoDataFetcher> _fetcher = new Lazy<IndicoDataFetcher>(() => new IndicoDataFetcher());
-
-        /// <summary>
         /// Get the meeting info for this Indico agenda.
         /// </summary>
         /// <returns></returns>
@@ -357,7 +352,7 @@ namespace IWalker.DataModel.Inidco
         {
             // Load up the normalized data.
 
-            var al = new AgendaLoader(_fetcher.Value);
+            var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
             var agenda = await al.GetNormalizedConferenceData(_info);
             return new IndicoMeeting(agenda, _info.AsShortString());
         }
