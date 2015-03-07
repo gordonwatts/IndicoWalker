@@ -38,16 +38,7 @@
                     <TextBlock x:Name="AgendaListTitle" Text="1112" VerticalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}"/>
                 </StackPanel>
             </Grid>
-            <GridView Grid.Row="1" SelectionMode="None" IsItemClickEnabled="True" x:Name="MeetingList" >
-                <GridView.ItemTemplate>
-                    <DataTemplate>
-                        <StackPanel Orientation="Vertical" Width="500">
-                            <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="NoWrap" />
-                            <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
-                        </StackPanel>
-                    </DataTemplate>
-                </GridView.ItemTemplate>
-            </GridView>
+            <local:CategoryURIUserControl Grid.Row="1" x:Name="CategoryView" Margin="10,0" />
         </Grid>
     </Grid>
 </Page>

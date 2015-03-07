@@ -46,6 +46,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\AkavacheUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BasicSettingsViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryPageViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryURIViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MeetingPageViewModel.cs" />

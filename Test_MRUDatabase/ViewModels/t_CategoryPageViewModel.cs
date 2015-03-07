@@ -3,6 +3,8 @@ using IWalker.DataModel.Interfaces;
 using IWalker.Util;
 using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using Newtonsoft.Json;
+using Splat;
 using System;
 using System.Collections.Generic;
 using System.Reactive.Linq;
@@ -20,6 +22,12 @@ namespace Test_MRUDatabase.ViewModels
             BlobCache.ApplicationName = "Test_MRUDatabase";
             await Blobs.LocalStorage.InvalidateAll();
             await Blobs.LocalStorage.Flush();
+            Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
+            {
+                ObjectCreationHandling = ObjectCreationHandling.Replace,
+                ReferenceLoopHandling = ReferenceLoopHandling.Ignore,
+                TypeNameHandling = TypeNameHandling.All,
+            }, typeof(JsonSerializerSettings), null);
         }
 
         [TestMethod]

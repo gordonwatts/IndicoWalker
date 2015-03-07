@@ -16,10 +16,7 @@ namespace IWalker.ViewModels
     /// </summary>
     public class CategoryPageViewModel : ReactiveObject, IRoutableViewModel
     {
-        /// <summary>
-        /// Get the list of meetings that we are going to be looking at
-        /// </summary>
-        public ReactiveList<IMeetingRefExtended> MeetingList { get; private set; }
+        public CategoryURIViewModel CategoryListing { get; private set; }
 
         /// <summary>
         /// Initialize a new category page view model
@@ -28,24 +25,7 @@ namespace IWalker.ViewModels
         public CategoryPageViewModel(IScreen parent, IMeetingListRef meetings)
         {
             HostScreen = parent;
-
-            // Get the list of items we are going to show.
-            MeetingList = new ReactiveList<IMeetingRefExtended>();
-            Blobs.LocalStorage.GetAndFetchLatest(meetings.UniqueString, async () => (await meetings.GetMeetings(60)).ToArray(), null)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(m => SetMeetings(m));
-        }
-
-        /// <summary>
-        /// Set the meeting list as desired. Do our best to be "neat" about it.
-        /// </summary>
-        /// <param name="m"></param>
-        private void SetMeetings(IMeetingRefExtended[] m)
-        {
-            MeetingList.MakeListLookLike(m,
-                (oItem, dItem) => oItem.Equals(dItem),
-                dItem => dItem
-                );
+            CategoryListing = new CategoryURIViewModel(meetings);
         }
 
         /// <summary>

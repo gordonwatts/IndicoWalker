@@ -117,6 +117,9 @@
     <Compile Include="Views\CategoryPageView.xaml.cs">
       <DependentUpon>CategoryPageView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CategoryURIUserControl.xaml.cs">
+      <DependentUpon>CategoryURIUserControl.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
     </Compile>
@@ -222,6 +225,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CategoryPageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CategoryURIUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
