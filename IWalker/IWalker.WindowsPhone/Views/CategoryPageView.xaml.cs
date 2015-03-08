@@ -15,6 +15,7 @@ namespace IWalker.Views
         public CategoryPageView()
         {
             this.InitializeComponent();
+            this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel);
         }
 
         /// <summary>
