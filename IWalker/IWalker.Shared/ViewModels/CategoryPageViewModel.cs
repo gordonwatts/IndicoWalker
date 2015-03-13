@@ -18,6 +18,8 @@ namespace IWalker.ViewModels
     {
         public CategoryURIViewModel CategoryListing { get; private set; }
 
+        public CategoryConfigViewModel CategoryConfig { get; private set; }
+
         /// <summary>
         /// Initialize a new category page view model
         /// </summary>
@@ -26,6 +28,7 @@ namespace IWalker.ViewModels
         {
             HostScreen = parent;
             CategoryListing = new CategoryURIViewModel(meetings);
+            CategoryConfig = new CategoryConfigViewModel();
         }
 
         /// <summary>

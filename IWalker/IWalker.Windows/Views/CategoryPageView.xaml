@@ -35,7 +35,7 @@
                 <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="0,0,0,0" VerticalAlignment="Center">
                     <TextBlock Text="Agenda List:" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
                             IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <TextBlock x:Name="AgendaListTitle" Text="1112" VerticalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}"/>
+                    <local:CategoryConfigUserControl x:Name="CategoryConfigView" />
                 </StackPanel>
             </Grid>
             <local:CategoryURIUserControl Grid.Row="1" x:Name="CategoryView" Margin="10,0" />
