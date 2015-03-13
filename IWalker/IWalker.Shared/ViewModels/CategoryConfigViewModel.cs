@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reactive.Linq;
 
 namespace IWalker.ViewModels
 {
@@ -48,6 +49,16 @@ namespace IWalker.ViewModels
         public CategoryConfigViewModel()
         {
             CategoryTitle = "not yet";
+
+            // If they want it to be displayed on the main page, then we have to subscribe to it.
+            this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.Value)
+                .Where(isDisplayedValue => isDisplayedValue)
+                .Subscribe(v => IsSubscribed = true);
+
+            // If they don't want to subscribe, then we can't display it.
+            this.WhenAny(x => x.IsSubscribed, x => x.Value)
+                .Where(isSubscribed => !isSubscribed)
+                .Subscribe(x => IsDisplayedOnMainPage = false);
         }
     }
 }
