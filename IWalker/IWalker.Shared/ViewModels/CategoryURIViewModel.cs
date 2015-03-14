@@ -27,7 +27,7 @@ namespace IWalker.ViewModels
         {
             // Get the list of items we are going to show.
             MeetingList = new ReactiveList<IMeetingRefExtended>();
-            Blobs.LocalStorage.GetAndFetchLatest(meetings.UniqueString, async () => (await meetings.GetMeetings(60)).ToArray(), null)
+            meetings.FetchRecentMeetings()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(m => SetMeetings(m));
         }

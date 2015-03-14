@@ -93,5 +93,13 @@ namespace IWalker.Util
                 ApplicationData.Current.LocalSettings.Values["AutoDownloadNewMeeting"] = value;
             }
         }
+
+        /// <summary>
+        /// How far back should we ask for meetings?
+        /// </summary>
+        public static int DaysBackToFetchMeetings
+        {
+            get { return 60; }
+        }
     }
 }
