@@ -101,5 +101,11 @@ namespace IWalker.Util
         {
             get { return 60; }
         }
+
+        /// <summary>
+        /// How long before we re-fetch the meeting list when we are being "nice".
+        /// Returns in hours.
+        /// </summary>
+        public static double MeetingCategoryStaleHours { get { return 6; } }
     }
 }
