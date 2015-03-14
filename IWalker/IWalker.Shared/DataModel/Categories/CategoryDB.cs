@@ -37,8 +37,9 @@ namespace IWalker.DataModel.Categories
                 var ll = new List<CategoryConfigInfo>();
                 ll.AddRange(cached);
                 return ll;
-            } catch (Exception e)
+            } catch (Exception)
             {
+                // This is brutal, but not sure how else to deal with corrupt settings data!
                 return new List<CategoryConfigInfo>();
             }
         }
