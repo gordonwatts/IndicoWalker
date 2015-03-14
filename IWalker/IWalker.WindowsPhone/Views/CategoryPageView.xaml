@@ -22,7 +22,7 @@
 
         <StackPanel Grid.Row="0" Margin="19,0,0,0">
             <TextBlock Text="Meeting List" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
-            <TextBlock Name="MeetingTitle" Text="1112" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
+            <local:CategoryConfigUserControl x:Name="CategoryConfigView" />
         </StackPanel>
         <local:CategoryURIUserControl Grid.Row="1" x:Name="CategoryView" Margin="10,0" />
     </Grid>
