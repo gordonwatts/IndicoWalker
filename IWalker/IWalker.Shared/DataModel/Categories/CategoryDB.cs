@@ -1,6 +1,8 @@
-﻿using Newtonsoft.Json;
+﻿using IWalker.DataModel.Interfaces;
+using Newtonsoft.Json;
 using Splat;
 using System;
+using System.Linq;
 using System.Collections.Generic;
 using System.IO;
 using System.Text;
@@ -91,6 +93,18 @@ namespace IWalker.DataModel.Categories
                     return;
                 }
             }
+        }
+
+        /// <summary>
+        /// Find a meeting in the db. If it isn't there, return null.
+        /// </summary>
+        /// <param name="meeting"></param>
+        /// <returns></returns>
+        public static CategoryConfigInfo Find (IMeetingListRef meeting)
+        {
+            return LoadCategories()
+                .Where(m => m.MeetingList.UniqueString == meeting.UniqueString)
+                .FirstOrDefault();
         }
     }
 }

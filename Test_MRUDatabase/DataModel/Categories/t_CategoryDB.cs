@@ -114,5 +114,24 @@ namespace Test_MRUDatabase.DataModel.Categories
             Assert.AreEqual(0, r.Count);
 
         }
+
+        [TestMethod]
+        public void FindNotThere()
+        {
+            var m = new myMeetingListRef();
+            var r = CategoryDB.Find(m);
+            Assert.IsNull(r);
+        }
+
+        [TestMethod]
+        public void FindThere()
+        {
+            var ci = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
+            CategoryDB.UpdateOrInsert(ci);
+            var m = new myMeetingListRef();
+            var r = CategoryDB.Find(ci.MeetingList);
+            Assert.IsNotNull(r);
+            Assert.AreEqual("hi", r.CategoryTitle);
+        }
     }
 }
