@@ -15,6 +15,8 @@
     <Compile Include="$(MSBuildThisFileDirectory)App.xaml.cs">
       <DependentUpon>App.xaml</DependentUpon>
     </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Categories\CategoryConfigInfo.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Categories\CategoryDB.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\DBTestHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoDataFetcher.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingListRef.cs" />

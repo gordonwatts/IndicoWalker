@@ -2,8 +2,6 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase
@@ -138,5 +136,57 @@ namespace Test_MRUDatabase
         }
 
         public int NumberOfTimesFetched { get; set; }
+    }
+
+
+    class myMeetingListRef : IMeetingListRef
+    {
+        public int Counter { get; private set; }
+
+        public myMeetingListRef()
+        {
+            Counter = 0;
+        }
+
+        /// <summary>
+        /// Return a dummy set of meetings.
+        /// </summary>
+        /// <param name="goingBackDays"></param>
+        /// <returns></returns>
+        public Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays)
+        {
+            Counter++;
+            return Task.Factory.StartNew(() =>
+            {
+                return new IMeetingRefExtended[] { new anExtendedMeetingRef("meeting1"), new anExtendedMeetingRef("meeting2") } as IEnumerable<IMeetingRefExtended>;
+            });
+        }
+
+
+        public string UniqueString
+        {
+            get { return "111222"; }
+        }
+    }
+
+    /// <summary>
+    /// Dummy extended meeting for testing.
+    /// </summary>
+    class anExtendedMeetingRef : IMeetingRefExtended
+    {
+        public anExtendedMeetingRef(string mname)
+        {
+            Title = mname;
+        }
+        public string Title { get; private set; }
+
+        public System.DateTime StartTime { get { return DateTime.Now; } }
+
+        public System.DateTime EndTime { get { return DateTime.Now; } }
+
+        public IMeetingRef Meeting
+        {
+            get { throw new System.NotImplementedException(); }
+        }
     }
 }
