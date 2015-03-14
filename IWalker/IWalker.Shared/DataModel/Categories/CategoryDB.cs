@@ -31,8 +31,16 @@ namespace IWalker.DataModel.Categories
                 return new List<CategoryConfigInfo>();
 
             var json = ApplicationData.Current.RoamingSettings.Values[CategoryDBSettingName] as string;
-            var cached = JsonConvert.DeserializeObject<List<CategoryConfigInfo>>(json, GetSettings());
-            return cached;
+            try
+            {
+                var cached = JsonConvert.DeserializeObject<CategoryConfigInfo[]>(json, GetSettings());
+                var ll = new List<CategoryConfigInfo>();
+                ll.AddRange(cached);
+                return ll;
+            } catch (Exception e)
+            {
+                return new List<CategoryConfigInfo>();
+            }
         }
 
         /// <summary>
@@ -41,7 +49,7 @@ namespace IWalker.DataModel.Categories
         /// <param name="cats"></param>
         public static void SaveCategories(List<CategoryConfigInfo> cats)
         {
-            var sb = JsonConvert.SerializeObject(cats, GetSettings());
+            var sb = JsonConvert.SerializeObject(cats.ToArray(), GetSettings());
             ApplicationData.Current.RoamingSettings.Values[CategoryDBSettingName] = sb;
         }
 

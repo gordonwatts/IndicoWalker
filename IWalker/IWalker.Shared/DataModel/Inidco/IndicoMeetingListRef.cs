@@ -29,6 +29,12 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
+        /// Used for serialization
+        /// </summary>
+        public IndicoMeetingListRef()
+        { }
+
+        /// <summary>
         /// Is this URL a valid meeting list reference (a pointer to a category)?
         /// </summary>
         /// <param name="url"></param>
@@ -77,6 +83,12 @@ namespace IWalker.DataModel.Inidco
             {
                 aMeetingRef = a;
             }
+
+            /// <summary>
+            /// For serialization initaliztion
+            /// </summary>
+            public IndicoMeetingExtendedRef()
+            { }
 
             [JsonIgnore]
             public string Title { get { return aMeetingRef.Title; } }

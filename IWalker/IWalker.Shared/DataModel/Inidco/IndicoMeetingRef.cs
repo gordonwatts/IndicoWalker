@@ -36,6 +36,12 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
+        /// The Initializer to be used with serialization
+        /// </summary>
+        public IndicoMeetingRef()
+        { }
+
+        /// <summary>
         /// Implement the interface to a session.
         /// </summary>
         private class IndicoSesson : ISession
