@@ -28,15 +28,12 @@
                 </Grid.ColumnDefinitions>
                 <Button x:Name="backButton" 
                         Style="{StaticResource NavigationBackButtonNormalStyle}"
+                        Grid.Column="0"
                         VerticalAlignment="Center" HorizontalAlignment="Center"
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
-                <StackPanel Orientation="Horizontal" Grid.Column="1" Margin="0,0,0,0" VerticalAlignment="Center">
-                    <TextBlock Text="Agenda List:" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
-                            IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,10,0"/>
-                    <local:CategoryConfigUserControl x:Name="CategoryConfigView" />
-                </StackPanel>
+                    <local:CategoryConfigUserControl Grid.Column="1" x:Name="CategoryConfigView" Grid.ColumnSpan="2" />
             </Grid>
             <local:CategoryURIUserControl Grid.Row="1" x:Name="CategoryView" Margin="10,0" />
         </Grid>
