@@ -34,9 +34,14 @@ namespace Test_MRUDatabase.ViewModels
             return ApplicationData.Current.RoamingSettings.Values.ContainsKey("CategoryDBSerliazied");
         }
 
+        /// <summary>
+        /// Look up a category config
+        /// </summary>
+        /// <param name="meetingListRef"></param>
+        /// <returns></returns>
         private CategoryConfigInfo FindDBConfigInfo(IMeetingListRef meetingListRef)
         {
-            throw new System.NotImplementedException();
+            return CategoryDB.Find(meetingListRef);
         }
 
         [TestMethod]
@@ -47,7 +52,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsFalse(HaveDBConfigInfo());
             Assert.IsFalse(ccvm.IsDisplayedOnMainPage);
             Assert.IsFalse(ccvm.IsSubscribed);
-            Assert.AreEqual("hi", ccvm.CategoryTitle);
+            Assert.AreEqual("Meeting List", ccvm.CategoryTitle);
         }
 
         [TestMethod]
@@ -64,7 +69,7 @@ namespace Test_MRUDatabase.ViewModels
             var info = FindDBConfigInfo(unknown.MeetingList);
             Assert.IsNotNull(info);
             Assert.IsTrue(info.DisplayOnHomePage);
-            Assert.AreEqual("hi", info.CategoryTitle);
+            Assert.AreEqual("Meeting List", info.CategoryTitle);
         }
 
         [TestMethod]
@@ -75,13 +80,13 @@ namespace Test_MRUDatabase.ViewModels
             ccvm.IsSubscribed = true;
 
             Assert.IsTrue(ccvm.IsSubscribed);
-            Assert.IsTrue(ccvm.IsDisplayedOnMainPage);
+            Assert.IsFalse(ccvm.IsDisplayedOnMainPage);
 
             Assert.IsTrue(HaveDBConfigInfo());
             var info = FindDBConfigInfo(unknown.MeetingList);
             Assert.IsNotNull(info);
-            Assert.IsTrue(info.DisplayOnHomePage);
-            Assert.AreEqual("hi", info.CategoryTitle);
+            Assert.IsFalse(info.DisplayOnHomePage);
+            Assert.AreEqual("Meeting List", info.CategoryTitle);
         }
 
         [TestMethod]
@@ -135,13 +140,11 @@ namespace Test_MRUDatabase.ViewModels
             var list = new List<CategoryConfigInfo>() { unknown1 };
             CategoryDB.SaveCategories(list);
 
-            var unknown = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
-            var ccvm = new CategoryConfigViewModel(unknown.MeetingList);
+            var ccvm = new CategoryConfigViewModel(unknown1.MeetingList);
             ccvm.IsSubscribed = false;
 
-            var info = FindDBConfigInfo(unknown.MeetingList);
-            Assert.IsNotNull(info);
-            Assert.IsFalse(info.DisplayOnHomePage);
+            var info = FindDBConfigInfo(unknown1.MeetingList);
+            Assert.IsNull(info);
         }
 
         [TestMethod]

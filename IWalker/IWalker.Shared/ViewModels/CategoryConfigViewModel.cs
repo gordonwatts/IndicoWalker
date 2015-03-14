@@ -21,7 +21,17 @@ namespace IWalker.ViewModels
         public bool IsSubscribed
         {
             get { return _isSubscribed; }
-            set { this.RaiseAndSetIfChanged(ref _isSubscribed, value); }
+            set {
+                this.RaiseAndSetIfChanged(ref _isSubscribed, value);
+                if (_isSubscribed)
+                {
+                    CategoryDB.UpdateOrInsert(_meetingInfo);
+                }
+                else
+                {
+                    CategoryDB.Remove(_meetingInfo);
+                }
+            }
         }
         private bool _isSubscribed;
 
@@ -31,7 +41,12 @@ namespace IWalker.ViewModels
         public bool IsDisplayedOnMainPage
         {
             get { return _isDisplayedOnMainPage; }
-            set { this.RaiseAndSetIfChanged(ref _isDisplayedOnMainPage, value); }
+            set {
+                this.RaiseAndSetIfChanged(ref _isDisplayedOnMainPage, value);
+                _meetingInfo.DisplayOnHomePage = value;
+                if (IsSubscribed)
+                    CategoryDB.UpdateOrInsert(_meetingInfo);
+            }
         }
         private bool _isDisplayedOnMainPage;
 
@@ -41,9 +56,19 @@ namespace IWalker.ViewModels
         public string CategoryTitle
         {
             get { return _title; }
-            set { this.RaiseAndSetIfChanged(ref _title, value); }
+            set { 
+                this.RaiseAndSetIfChanged(ref _title, value);
+                _meetingInfo.CategoryTitle = _title;
+                if (IsSubscribed)
+                    CategoryDB.UpdateOrInsert(_meetingInfo);
+            }
         }
         private string _title;
+
+        /// <summary>
+        /// Hold onto the meeting info for this meeting.
+        /// </summary>
+        private CategoryConfigInfo _meetingInfo = null;
 
         /// <summary>
         /// Initialize the settings interface for a particular category.
@@ -53,14 +78,28 @@ namespace IWalker.ViewModels
             // First, we need to determine if this meeting is already in the
             // database.
 
-            CategoryTitle = "not yet";
+            _meetingInfo = CategoryDB.Find(meeting);
+            _isSubscribed = _meetingInfo != null;
+            if (_meetingInfo == null)
+            {
+                _meetingInfo = new CategoryConfigInfo()
+                {
+                    MeetingList = meeting,
+                    CategoryTitle = "Meeting List",
+                    DisplayOnHomePage = false
+                };
+            }
+
+            _title = _meetingInfo.CategoryTitle;
 
             // If they want it to be displayed on the main page, then we have to subscribe to it.
+           
             this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.Value)
                 .Where(isDisplayedValue => isDisplayedValue)
                 .Subscribe(v => IsSubscribed = true);
 
             // If they don't want to subscribe, then we can't display it.
+            _isDisplayedOnMainPage = _meetingInfo.DisplayOnHomePage;
             this.WhenAny(x => x.IsSubscribed, x => x.Value)
                 .Where(isSubscribed => !isSubscribed)
                 .Subscribe(x => IsDisplayedOnMainPage = false);
