@@ -62,5 +62,57 @@ namespace Test_MRUDatabase.DataModel.Categories
             Assert.AreEqual("hi", r[0].CategoryTitle);
             Assert.IsFalse(r[0].DisplayOnHomePage);
         }
+
+        [TestMethod]
+        public void UpdateNewCategoryInfo()
+        {
+            var ci = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
+            CategoryDB.UpdateOrInsert(ci);
+
+            var r = CategoryDB.LoadCategories();
+            Assert.IsNotNull(r);
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual("hi", r[0].CategoryTitle);
+            Assert.IsFalse(r[0].DisplayOnHomePage);
+        }
+
+        [TestMethod]
+        public void UpdateOldCategoryInfo()
+        {
+            var ci = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
+            CategoryDB.UpdateOrInsert(ci);
+            var ci2 = new CategoryConfigInfo() { CategoryTitle = "no", DisplayOnHomePage = false, MeetingList = ci.MeetingList };
+            CategoryDB.UpdateOrInsert(ci2);
+
+            var r = CategoryDB.LoadCategories();
+            Assert.IsNotNull(r);
+            Assert.AreEqual(1, r.Count);
+            Assert.AreEqual("no", r[0].CategoryTitle);
+            Assert.IsFalse(r[0].DisplayOnHomePage);
+        }
+
+        [TestMethod]
+        public void RemoveCategoryInfo()
+        {
+            var ci = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
+            CategoryDB.UpdateOrInsert(ci);
+            CategoryDB.Remove(ci);
+
+            var r = CategoryDB.LoadCategories();
+            Assert.IsNotNull(r);
+            Assert.AreEqual(0, r.Count);
+        }
+
+        [TestMethod]
+        public void RemoveNonCategoryInfo()
+        {
+            var ci = new CategoryConfigInfo() { CategoryTitle = "hi", DisplayOnHomePage = false, MeetingList = new myMeetingListRef() };
+            CategoryDB.Remove(ci);
+
+            var r = CategoryDB.LoadCategories();
+            Assert.IsNotNull(r);
+            Assert.AreEqual(0, r.Count);
+
+        }
     }
 }

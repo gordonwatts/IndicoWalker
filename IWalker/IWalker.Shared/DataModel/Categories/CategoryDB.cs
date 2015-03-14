@@ -43,9 +43,54 @@ namespace IWalker.DataModel.Categories
             ApplicationData.Current.RoamingSettings.Values[CategoryDBSettingName] = sb;
         }
 
+        /// <summary>
+        /// Internal helper to get the JSON settings easier...
+        /// </summary>
+        /// <returns></returns>
         private static JsonSerializerSettings GetSettings()
         {
             return Locator.Current.GetService<JsonSerializerSettings>();
+        }
+
+        /// <summary>
+        /// Update or, if not there, insert the category.
+        /// </summary>
+        /// <param name="cat"></param>
+        public static void UpdateOrInsert (CategoryConfigInfo cat)
+        {
+            bool found = false;
+            var items = LoadCategories();
+            for (int i = 0; i < items.Count; i++ )
+            {
+                if (items[i].MeetingList.UniqueString == cat.MeetingList.UniqueString)
+                {
+                    items[i] = cat;
+                    found = true;
+                }
+            }
+            if (!found)
+            {
+                items.Add(cat);
+            }
+            SaveCategories(items);
+        }
+
+        /// <summary>
+        /// Remove a category from the list.
+        /// </summary>
+        /// <param name="cat"></param>
+        public static void Remove (CategoryConfigInfo cat)
+        {
+            var items = LoadCategories();
+            for (int i = 0; i < items.Count; i++)
+            {
+                if (items[i].MeetingList.UniqueString == cat.MeetingList.UniqueString)
+                {
+                    items.RemoveAt(i);
+                    SaveCategories(items);
+                    return;
+                }
+            }
         }
     }
 }
