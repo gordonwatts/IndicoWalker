@@ -8,6 +8,7 @@ using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Akavache;
+using IWalker.DataModel.Categories;
 
 namespace IWalker.ViewModels
 {
@@ -28,7 +29,7 @@ namespace IWalker.ViewModels
         {
             HostScreen = parent;
             CategoryListing = new CategoryURIViewModel(meetings);
-            CategoryConfig = new CategoryConfigViewModel();
+            CategoryConfig = new CategoryConfigViewModel(meetings);
         }
 
         /// <summary>

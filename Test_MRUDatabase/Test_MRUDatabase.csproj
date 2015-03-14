@@ -129,6 +129,7 @@
     <Compile Include="Util\t_AkavacheUtils.cs" />
     <Compile Include="Util\t_LocalTalkFileManager.cs" />
     <Compile Include="Util\t_ListOrdering.cs" />
+    <Compile Include="ViewModels\t_CategoryConfigViewModel.cs" />
     <Compile Include="ViewModels\t_CategoryPageViewModel.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\t_MeetingPageViewModel.cs" />

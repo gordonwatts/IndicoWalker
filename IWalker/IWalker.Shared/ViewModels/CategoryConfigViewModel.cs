@@ -4,6 +4,8 @@ using System.Collections.Generic;
 using System.Linq;
 using System.Text;
 using System.Reactive.Linq;
+using IWalker.DataModel.Categories;
+using IWalker.DataModel.Interfaces;
 
 namespace IWalker.ViewModels
 {
@@ -46,8 +48,11 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Initialize the settings interface for a particular category.
         /// </summary>
-        public CategoryConfigViewModel()
+        public CategoryConfigViewModel(IMeetingListRef meeting)
         {
+            // First, we need to determine if this meeting is already in the
+            // database.
+
             CategoryTitle = "not yet";
 
             // If they want it to be displayed on the main page, then we have to subscribe to it.
