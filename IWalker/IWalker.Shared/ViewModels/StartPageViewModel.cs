@@ -35,6 +35,11 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> OpenMRUMeeting { get; private set; }
 
         /// <summary>
+        /// Pass in an upcoming meeting to be opened.
+        /// </summary>
+        public ReactiveCommand<object> OpenUpcomingMeeting { get; private set; }
+
+        /// <summary>
         /// The meeting address (bindable).
         /// </summary>
         public string MeetingAddress
@@ -94,6 +99,13 @@ namespace IWalker.ViewModels
                 .Cast<MRU>()
                 .Select(mru => ConvertToIMeeting(mru))
                 .Subscribe(addr => HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, addr)));
+
+            // And an upcoming meeting was pushed...
+            OpenUpcomingMeeting = ReactiveCommand.Create();
+            OpenUpcomingMeeting
+                .Cast<IMeetingRefExtended>()
+                .Where(m => m != null)
+                .Subscribe(m => HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, m.Meeting)));
 
             // Setup the first value for the last time we ran to make life a little simpler.
             MeetingAddress = Settings.LastViewedMeeting;

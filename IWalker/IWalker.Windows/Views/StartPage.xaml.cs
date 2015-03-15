@@ -61,5 +61,15 @@ namespace IWalker.Views
         {
             ViewModel.OpenMRUMeeting.Execute(e.ClickedItem);
         }
+
+        /// <summary>
+        /// They have clicked on a meeting, so we should page to it.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.OpenUpcomingMeeting.Execute(e.ClickedItem);
+        }
     }
 }

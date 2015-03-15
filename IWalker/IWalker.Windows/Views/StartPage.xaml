@@ -22,7 +22,7 @@
             </Hub.Header>
             <HubSection Header="Upcoming Meetings" Width="600">
                 <DataTemplate>
-                    <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
+                    <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="ListView_ItemClick">
                         <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Width="500">

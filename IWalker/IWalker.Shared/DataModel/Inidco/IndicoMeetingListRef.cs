@@ -102,7 +102,7 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public IMeetingRef Meeting
             {
-                get { return (IMeetingRef) aMeetingRef; }
+                get { return new IndicoMeetingRef(aMeetingRef); }
             }
         }
     }
