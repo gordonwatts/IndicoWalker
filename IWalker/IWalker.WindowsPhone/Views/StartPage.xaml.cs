@@ -25,6 +25,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
             this.Bind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext);
+            this.Bind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext);
             this.Loaded += StartPage_Loaded;
 
             // Do the navagation when we need it here.
@@ -65,6 +66,16 @@ namespace IWalker.Views
         private void GridView_ItemClick(object sender, ItemClickEventArgs e)
         {
             ViewModel.OpenMRUMeeting.Execute(e.ClickedItem);
+        }
+
+        /// <summary>
+        /// Fired when an upcoming meeting is selected.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void ListView_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.OpenUpcomingMeeting.Execute(e.ClickedItem);
         }
     }
 }
