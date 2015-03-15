@@ -15,6 +15,7 @@ using Windows.ApplicationModel.Activation;
 using Windows.Security.Cryptography.Certificates;
 using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
+using IWalker.DataModel.Categories;
 
 namespace IWalker.ViewModels
 {
@@ -47,6 +48,11 @@ namespace IWalker.ViewModels
         /// The list of recently set meetings.
         /// </summary>
         public ReactiveList<MRU> RecentMeetings { get; private set; }
+
+        /// <summary>
+        /// The list of meetings that are up coming
+        /// </summary>
+        public ReactiveList<IMeetingRefExtended> UpcomingMeetings { get; private set; }
 
         /// <summary>
         /// Reload from the DB all the meetings
@@ -113,6 +119,16 @@ namespace IWalker.ViewModels
                     RecentMeetings.Clear();
                     RecentMeetings.AddRange(l);
                 });
+
+            // Upcoming meetings. This is easy - we fetch once.
+            UpcomingMeetings = new ReactiveList<IMeetingRefExtended>();
+            var updateUpcomingMeetings = ReactiveCommand.Create();
+            updateUpcomingMeetings
+                .SelectMany(_ => CategoryDB.LoadCategories())
+                .Where(cat => cat.DisplayOnHomePage)
+                .SelectMany(cat => cat.MeetingList.FetchAndUpdateRecentMeetings(false))
+                .Subscribe(meetings => UpcomingMeetings.AddRange(meetings));
+            updateUpcomingMeetings.Execute(null);
         }
 
         /// <summary>

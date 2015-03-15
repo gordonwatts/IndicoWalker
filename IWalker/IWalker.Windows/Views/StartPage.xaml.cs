@@ -1,6 +1,5 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
-using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -21,6 +20,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
 
             this.Bind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext);
+            this.Bind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext);
             this.Loaded += StartPage_Loaded;
         }
 
