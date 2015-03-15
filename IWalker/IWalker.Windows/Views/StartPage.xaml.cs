@@ -1,5 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Collections.Generic;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -70,6 +73,35 @@ namespace IWalker.Views
         private void ListView_ItemClick(object sender, ItemClickEventArgs e)
         {
             ViewModel.OpenUpcomingMeeting.Execute(e.ClickedItem);
+        }
+
+        private void Button_Click(object sender, RoutedEventArgs e)
+        {
+
+        }
+
+        /// <summary>
+        /// They want to see the full calendar list now!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenFullCalendarListsList(object sender, RoutedEventArgs e)
+        {
+            ViewModel.HostScreen.Router.Navigate.Execute(new CategoryAllPageViewModel(ViewModel.HostScreen));
+        }
+
+        IObservable<List<int>> getItemsFromNetwork()
+        {
+            return null;
+        }
+        public void Bogus()
+        {
+            int intialCount = 500;
+            var x = Observable.Timer(TimeSpan.FromSeconds(1))
+                .Take(5)
+                .SelectMany(_ => getItemsFromNetwork())
+                .Where(l1 => l1.Count != intialCount)
+                .Take(1);
         }
     }
 }

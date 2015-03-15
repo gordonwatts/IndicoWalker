@@ -49,6 +49,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\TimePeriod.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AkavacheUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\BasicSettingsViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryAllPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryConfigViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryURIViewModel.cs" />

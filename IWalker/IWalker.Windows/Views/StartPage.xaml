@@ -20,7 +20,17 @@
                     </StackPanel>
                 </Grid>
             </Hub.Header>
-            <HubSection Header="Upcoming Meetings" Width="600">
+            <HubSection Header="Upcoming Meetings" Width="600" IsHeaderInteractive="True">
+            	<HubSection.Resources>
+            		<DataTemplate x:Key="ClickableHeader">
+            			<Grid>
+            				<Button HorizontalAlignment="Left" Content="{Binding}" VerticalAlignment="Top" Style="{StaticResource TextBlockButtonStyle}" Click="OpenFullCalendarListsList" FontFamily="Global User Interface" FontSize="26.667" FontWeight="Light" />
+            			</Grid>
+            		</DataTemplate>
+            	</HubSection.Resources>
+            	<HubSection.HeaderTemplate>
+            		<StaticResource ResourceKey="ClickableHeader"/>
+            	</HubSection.HeaderTemplate>
                 <DataTemplate>
                     <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="ListView_ItemClick">
                         <ListView.ItemTemplate>
