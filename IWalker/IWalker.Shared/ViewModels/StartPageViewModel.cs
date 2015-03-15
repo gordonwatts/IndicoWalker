@@ -133,15 +133,44 @@ namespace IWalker.ViewModels
                 });
 
             // Upcoming meetings. This is easy - we fetch once.
+            // But since they are coming from multiple sources, we have to be a little
+            // careful about combining them.
             UpcomingMeetings = new ReactiveList<IMeetingRefExtended>();
             var updateUpcomingMeetings = ReactiveCommand.Create();
-            updateUpcomingMeetings
-                .SelectMany(_ => CategoryDB.LoadCategories())
-                .Where(cat => cat.DisplayOnHomePage)
-                .SelectMany(cat => cat.MeetingList.FetchAndUpdateRecentMeetings(false))
-                .Subscribe(meetings => UpcomingMeetings.AddRange(meetings));
+            var meetingList = from xup in updateUpcomingMeetings
+                    from category in CategoryDB.LoadCategories()
+                    where category.DisplayOnHomePage
+                    from meetings in category.MeetingList.FetchAndUpdateRecentMeetings(false)
+                    select Tuple.Create(category.MeetingList, meetings);
+
+            meetingList
+                .Select(ml => {
+                    _meetingCatalog[ml.Item1.UniqueString] = ml.Item2;
+                    return _meetingCatalog;
+                })
+                .Select(mc => mc.SelectMany(mi => mi.Value).Where(mi => mi.StartTime.Within(TimeSpan.FromDays(Settings.DaysOfUpcomingMeetingsToShowOnMainPage))).OrderByDescending(minfo => minfo.StartTime))
+                .Subscribe(meetings => SetUpcomingMeetings(meetings));
+
             updateUpcomingMeetings.Execute(null);
         }
+
+        /// <summary>
+        /// Set/update the upcoming meetings
+        /// </summary>
+        /// <param name="meetings">List of the upcoming meeting</param>
+        /// <returns></returns>
+        private void SetUpcomingMeetings(IEnumerable<IMeetingRefExtended> meetings)
+        {
+            UpcomingMeetings.MakeListLookLike(meetings,
+                (oItem, dItem) => oItem.Meeting.AsReferenceString() == dItem.Meeting.AsReferenceString(),
+                dItem => dItem
+                );
+        }
+
+        /// <summary>
+        /// Keep track of all the various meetings, and how we are going to have to combine them.
+        /// </summary>
+        Dictionary<string, IMeetingRefExtended[]> _meetingCatalog = new Dictionary<string, IMeetingRefExtended[]>();
 
         /// <summary>
         /// Return true if this is url is a valid agenda listing

@@ -107,5 +107,10 @@ namespace IWalker.Util
         /// Returns in hours.
         /// </summary>
         public static double MeetingCategoryStaleHours { get { return 6; } }
+
+        /// <summary>
+        /// How long from the current time should we show the a meeting on the main page?
+        /// </summary>
+        public static double DaysOfUpcomingMeetingsToShowOnMainPage { get { return 14; } }
     }
 }

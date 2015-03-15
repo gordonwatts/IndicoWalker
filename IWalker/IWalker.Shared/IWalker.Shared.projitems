@@ -36,6 +36,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\BackgroundTasks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Blobs.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\DateUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\DebugUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ExpirationOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Files.cs" />
