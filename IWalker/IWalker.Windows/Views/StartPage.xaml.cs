@@ -1,8 +1,5 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -88,20 +85,6 @@ namespace IWalker.Views
         private void OpenFullCalendarListsList(object sender, RoutedEventArgs e)
         {
             ViewModel.HostScreen.Router.Navigate.Execute(new CategoryAllPageViewModel(ViewModel.HostScreen));
-        }
-
-        IObservable<List<int>> getItemsFromNetwork()
-        {
-            return null;
-        }
-        public void Bogus()
-        {
-            int intialCount = 500;
-            var x = Observable.Timer(TimeSpan.FromSeconds(1))
-                .Take(5)
-                .SelectMany(_ => getItemsFromNetwork())
-                .Where(l1 => l1.Count != intialCount)
-                .Take(1);
         }
     }
 }
