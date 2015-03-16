@@ -58,6 +58,9 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MeetingPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\StartPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TalkUserControlViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Views\CategoryInfoSimpleView.xaml.cs">
+      <DependentUpon>CategoryInfoSimpleView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\CategoryURIUserControl.xaml.cs">
       <DependentUpon>CategoryURIUserControl.xaml</DependentUpon>
     </Compile>
@@ -69,6 +72,10 @@
     </Compile>
   </ItemGroup>
   <ItemGroup>
+    <Page Include="$(MSBuildThisFileDirectory)Views\CategoryInfoSimpleView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
     <Page Include="$(MSBuildThisFileDirectory)Views\CategoryURIUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
