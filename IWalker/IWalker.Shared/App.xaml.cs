@@ -13,10 +13,10 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using System.Reactive.Linq;
 using IWalker.Util;
+using IWalker.DataModel.Categories;
 
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
-using IWalker.DataModel.Categories;
 #endif
 #if WINDOWS_PHONE_APP
 using Windows.UI.Xaml.Media.Animation;

@@ -77,5 +77,15 @@ namespace IWalker.Views
         {
             ViewModel.OpenUpcomingMeeting.Execute(e.ClickedItem);
         }
+
+        /// <summary>
+        /// They want to see the full calendar list now!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void OpenFullCalendarListsList(object sender, RoutedEventArgs e)
+        {
+            ViewModel.HostScreen.Router.Navigate.Execute(new CategoryAllPageViewModel(ViewModel.HostScreen));
+        }
     }
 }

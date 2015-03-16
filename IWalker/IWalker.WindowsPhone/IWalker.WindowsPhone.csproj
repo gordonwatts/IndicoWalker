@@ -84,6 +84,9 @@
     <Compile Include="Views\BasicSettingsView.xaml.cs">
       <DependentUpon>BasicSettingsView.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\CategoryAllPageView.xaml.cs">
+      <DependentUpon>CategoryAllPageView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\CategoryConfigUserControl.xaml.cs">
       <DependentUpon>CategoryConfigUserControl.xaml</DependentUpon>
     </Compile>
@@ -177,6 +180,10 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="Views\BasicSettingsView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\CategoryAllPageView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
