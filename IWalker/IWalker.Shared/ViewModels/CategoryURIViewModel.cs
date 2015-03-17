@@ -39,7 +39,7 @@ namespace IWalker.ViewModels
         private void SetMeetings(IMeetingRefExtended[] m)
         {
             MeetingList.MakeListLookLike(m,
-                (oItem, dItem) => oItem.Equals(dItem),
+                (oItem, dItem) => oItem.Meeting.AsReferenceString() == dItem.Meeting.AsReferenceString(),
                 dItem => dItem
                 );
         }
