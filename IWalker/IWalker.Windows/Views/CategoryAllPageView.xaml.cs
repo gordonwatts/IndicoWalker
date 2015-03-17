@@ -17,6 +17,9 @@ namespace IWalker.Views
             this.InitializeComponent();
             this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
             this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource);
+            this.Bind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel);
+            this.Bind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel);
+            this.OneWayBind(ViewModel, x => x.ValidCategorySelected, y => y.DetailsGrid.Visibility);
         }
 
         /// <summary>
@@ -34,6 +37,16 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (CategoryAllPageViewModel)value; }
+        }
+
+        /// <summary>
+        /// Ok - we have the next item to look at!
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CategoryNames_SelectionChanged(object sender, SelectionChangedEventArgs e)
+        {
+            ViewModel.ShowCategoryDetails.Execute(e.AddedItems[0]);
         }
     }
 }

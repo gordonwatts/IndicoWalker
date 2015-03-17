@@ -10,6 +10,6 @@
     d:DesignWidth="400">
     
     <Grid>
-        <TextBlock x:Name="CategoryTitle" Text="hi" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" FontFamily="Global User Interface" />
+        <TextBlock x:Name="CategoryTitle" Text="" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource BodyTextBlockStyle}" FontFamily="Global User Interface" />
     </Grid>
 </UserControl>

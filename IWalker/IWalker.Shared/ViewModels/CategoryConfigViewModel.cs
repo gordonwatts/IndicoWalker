@@ -21,7 +21,8 @@ namespace IWalker.ViewModels
         public bool IsSubscribed
         {
             get { return _isSubscribed; }
-            set {
+            set
+            {
                 this.RaiseAndSetIfChanged(ref _isSubscribed, value);
                 if (_isSubscribed)
                 {
@@ -41,7 +42,8 @@ namespace IWalker.ViewModels
         public bool IsDisplayedOnMainPage
         {
             get { return _isDisplayedOnMainPage; }
-            set {
+            set
+            {
                 this.RaiseAndSetIfChanged(ref _isDisplayedOnMainPage, value);
                 _meetingInfo.DisplayOnHomePage = value;
                 if (IsSubscribed)
@@ -56,7 +58,8 @@ namespace IWalker.ViewModels
         public string CategoryTitle
         {
             get { return _title; }
-            set { 
+            set
+            {
                 this.RaiseAndSetIfChanged(ref _title, value);
                 _meetingInfo.CategoryTitle = _title;
                 if (IsSubscribed)
@@ -70,6 +73,12 @@ namespace IWalker.ViewModels
         /// </summary>
         private CategoryConfigInfo _meetingInfo = null;
 
+        public CategoryConfigViewModel(CategoryConfigInfo ci)
+        {
+            _meetingInfo = ci;
+            InitializeVM(null);
+        }
+
         /// <summary>
         /// Initialize the settings interface for a particular category.
         /// </summary>
@@ -79,6 +88,15 @@ namespace IWalker.ViewModels
             // database.
 
             _meetingInfo = CategoryDB.Find(meeting);
+            InitializeVM(meeting);
+        }
+
+        /// <summary>
+        /// Get everything else up and configured.
+        /// </summary>
+        /// <param name="meeting"></param>
+        private void InitializeVM(IMeetingListRef meeting)
+        {
             _isSubscribed = _meetingInfo != null;
             if (_meetingInfo == null)
             {
@@ -93,7 +111,7 @@ namespace IWalker.ViewModels
             _title = _meetingInfo.CategoryTitle;
 
             // If they want it to be displayed on the main page, then we have to subscribe to it.
-           
+
             this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.Value)
                 .Where(isDisplayedValue => isDisplayedValue)
                 .Subscribe(v => IsSubscribed = true);

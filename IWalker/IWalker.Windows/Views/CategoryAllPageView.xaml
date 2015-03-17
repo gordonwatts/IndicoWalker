@@ -41,7 +41,15 @@
                         <ColumnDefinition Width="395*"/>
                         <ColumnDefinition Width="971*"/>
                     </Grid.ColumnDefinitions>
-                    <ListView Grid.Column="0" x:Name="CategoryNames" />
+                    <ListView Grid.Column="0" x:Name="CategoryNames" SelectionMode="Single" SelectionChanged="CategoryNames_SelectionChanged" />
+                    <Grid Grid.Column="1" x:Name="DetailsGrid">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                        </Grid.RowDefinitions>
+                        <local:CategoryConfigUserControl Grid.Row="0" x:Name="CatConfig"/>
+                        <local:CategoryURIUserControl Grid.Row="1" x:Name="CatListing" />
+                    </Grid>
                 </Grid>
             </Grid>
         </Grid>
