@@ -1,5 +1,8 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.DataModel.Categories;
+using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -16,6 +19,14 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource);
+            this.ObservableForProperty(x => x.ViewModel)
+                .Select(vm => vm.Value)
+                .Where(vm => vm != null)
+                .Subscribe(vm =>
+                {
+                    vm.ViewCategory
+                        .Subscribe(nextCi => ViewModel.HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(ViewModel.HostScreen, nextCi.MeetingList)));
+                });
         }
 
         /// <summary>
@@ -33,6 +44,16 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (CategoryAllPageViewModel)value; }
+        }
+
+        /// <summary>
+        /// User has selected an item. Feed it back for checking and eventual selection.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void CategoryNames_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.ShowCategoryDetails.Execute(e.ClickedItem as CategoryConfigInfo);
         }
     }
 }

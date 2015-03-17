@@ -45,6 +45,11 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<bool> _validCategorySelected;
 
         /// <summary>
+        /// A stream of events that indicate what we are going to observe next.
+        /// </summary>
+        public IObservable<CategoryConfigInfo> ViewCategory { get; private set; }
+
+        /// <summary>
         /// Fire this with the CategoryConfigInfo of what should be shown in the
         /// details.
         /// </summary>
@@ -74,6 +79,9 @@ namespace IWalker.ViewModels
             asCategoryInfo
                 .Select(ci => new CategoryURIViewModel(ci.MeetingList))
                 .ToProperty(this, x => x.CategoryFullListVM, out _catgoryFullListVM, null);
+
+            // Track what we are doing
+            ViewCategory = asCategoryInfo;
 
             // Keep the display "clean" until somethign is selected.
             asCategoryInfo
