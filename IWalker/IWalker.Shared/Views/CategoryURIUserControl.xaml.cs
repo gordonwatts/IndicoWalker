@@ -1,5 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using Splat;
+using System;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -9,10 +12,21 @@ namespace IWalker.Views
 {
     public sealed partial class CategoryURIUserControl : UserControl, IViewFor<CategoryURIViewModel>
     {
+        /// <summary>
+        /// Configure the view for... viewing. :-)
+        /// </summary>
         public CategoryURIUserControl()
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.MeetingList, y => y.MeetingList.ItemsSource);
+            this.ObservableForProperty(x => x.ViewModel)
+                .Select(x => x.Value)
+                .Where(x => x != null)
+                .Subscribe(vm =>
+                {
+                    vm.MeetingToVisit
+                        .Subscribe(m => Locator.Current.GetService<RoutingState>().Navigate.Execute(m));
+                });
         }
 
         /// <summary>
@@ -30,6 +44,16 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (CategoryURIViewModel)value; }
+        }
+
+        /// <summary>
+        /// Fires when the user wants to look at a particular item.
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        private void MeetingList_ItemClick(object sender, ItemClickEventArgs e)
+        {
+            ViewModel.ViewMeeting.Execute(e.ClickedItem);
         }
     }
 }
