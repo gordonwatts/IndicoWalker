@@ -16,6 +16,7 @@ using Windows.Security.Cryptography.Certificates;
 using Windows.Storage.Pickers;
 using Windows.UI.Xaml;
 using IWalker.DataModel.Categories;
+using Windows.UI.Popups;
 
 namespace IWalker.ViewModels
 {
@@ -92,6 +93,15 @@ namespace IWalker.ViewModels
                     Settings.LastViewedMeeting = addr;
                     HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(HostScreen, ConvertToIAgendaList(addr)));
                 });
+
+            // Finally, if we don't know what to do with it, we come here.
+            SwitchPages
+                .Select(x => MeetingAddress)
+                .Where(x => !IsMeeting(x) && !IsAgendaList(x))
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Select(x => new MessageDialog("That is not something I recognize as a meeting address or a meeting category address!"))
+                .SelectMany(d => d.ShowAsync())
+                .Subscribe();
 
             // MRU button was pressed.
             OpenMRUMeeting = ReactiveCommand.Create();
