@@ -10,6 +10,7 @@ using System.Threading.Tasks;
 using Windows.Security.Cryptography;
 using Windows.Security.Cryptography.Certificates;
 using Windows.Storage;
+using IWalker.DataModel.Inidco;
 
 namespace IWalker.ViewModels
 {
@@ -22,6 +23,11 @@ namespace IWalker.ViewModels
         /// Fired when the page hooks up - so we can do an init of our status.
         /// </summary>
         public ReactiveCommand<Certificate> LookupCertStatus { get; private set; }
+
+        /// <summary>
+        /// The list of API keys for indico
+        /// </summary>
+        public ReactiveList<IndicoApiKey> ApiKeysForIndico { get; private set; }
 
         /// <summary>
         /// The list of options we might like (or not).

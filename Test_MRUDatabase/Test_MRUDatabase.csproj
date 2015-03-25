@@ -120,6 +120,7 @@
     <Compile Include="AkavacheSqliteLinkerOverride.cs" />
     <Compile Include="BasicUsage.cs" />
     <Compile Include="DataModel\Categories\t_CategoryDB.cs" />
+    <Compile Include="DataModel\Indico\t_IndicoApiKeyAccess.cs" />
     <Compile Include="DataModel\Indico\t_IndicoMeetingRef.cs" />
     <Compile Include="dummyMeeting.cs" />
     <Compile Include="Properties\AssemblyInfo.cs" />
