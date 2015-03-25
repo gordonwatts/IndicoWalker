@@ -29,6 +29,19 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
+        /// Return all keys that are cached, or an empty array
+        /// </summary>
+        /// <returns></returns>
+        public static IndicoApiKey[] LoadAllKeys()
+        {
+            var siteKeys = ApplicationData.Current.RoamingSettings.Values.Keys
+                .Where(k => k.StartsWith(KeyPrefix))
+                .Select(k => ApplicationData.Current.RoamingSettings.Values[k].Deserialize())
+                .ToArray();
+            return siteKeys;
+        }
+
+        /// <summary>
         /// The key prefix for our store.
         /// </summary>
         const string KeyPrefix = "IndicoApiKey_";

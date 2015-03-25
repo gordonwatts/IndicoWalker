@@ -70,6 +70,26 @@ namespace Test_MRUDatabase.DataModel.Indico
         }
 
         [TestMethod]
+        public void LoadAllKeysWith2()
+        {
+            var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
+            IndicoApiKeyAccess.UpdateKey(k);
+            k.ApiKey = "key2";
+            k.Site = "indico.fnal.gov";
+            IndicoApiKeyAccess.UpdateKey(k);
+
+            var keys = IndicoApiKeyAccess.LoadAllKeys();
+            Assert.AreEqual(2, keys.Length);
+        }
+
+        [TestMethod]
+        public void LoadAllKeysWith0()
+        {
+            var keys = IndicoApiKeyAccess.LoadAllKeys();
+            Assert.AreEqual(0, keys.Length);
+        }
+
+        [TestMethod]
         public void UpdateExistingKey()
         {
             var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
