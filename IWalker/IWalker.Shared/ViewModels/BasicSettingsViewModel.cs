@@ -142,6 +142,10 @@ namespace IWalker.ViewModels
             // Set/Get the file expiration policy.
             CacheDecayOptions = ExpirationOptions.GetListExpirationOptions();
 
+            // Get the list of indico api keys we are watching
+            ApiKeysForIndico = new ReactiveList<IndicoApiKey>();
+            ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
+
         }
         
         /// <summary>

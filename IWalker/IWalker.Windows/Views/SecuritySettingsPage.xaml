@@ -61,6 +61,37 @@
                 <Button x:Name="FindCert" Content="Load Certificate" HorizontalAlignment="Right"/>
                 <TextBlock x:Name="StatusMessage" Text="test" />
                 <TextBlock x:Name="ErrorMessage" Text="test" Foreground="#FFFD0909" />
+
+                <!-- ApiKeys for indico -->
+                <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="CERN Security Certificate" />
+                <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                    <TextBlock.Text>
+                        Indico ApiKeys can be used to access indico without a username or password (IndicoWalker only uses them for Indico Category access currently). To
+                        find your ApiKey and SecretKey, open a web browser at https://site-name/user/api. Copy the ApiKey and Secret Key exactly.
+                    </TextBlock.Text>
+                </TextBlock>
+                
+                <ListView x:Name="ApiKeyList" ScrollViewer.VerticalScrollMode="Auto" Height="75"/>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Delete"/>
+                </StackPanel>
+                <Border Background="#FF232323" Margin="15,5,15,0" BorderBrush="#FFB6B1B1" BorderThickness="3" Padding="5">
+                    <StackPanel Orientation="Vertical">
+                        <StackPanel Orientation="Horizontal">
+                            <TextBlock Text="Site:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0" />
+                            <TextBox x:Name="ApiKeyNode" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5.2,0,0">
+                            <TextBlock Text="Api Key:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0"  />
+                            <TextBox x:Name="ApiKeyKey" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
+                            <TextBlock Text="Secret Key:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0" />
+                            <TextBox x:Name="ApiKeySecret" VerticalAlignment="Center"/>
+                        </StackPanel>
+                        <Button Content="Add/Update" HorizontalAlignment="Right"/>
+                    </StackPanel>
+                </Border>
             </StackPanel>
         </Grid>
     </Grid>
