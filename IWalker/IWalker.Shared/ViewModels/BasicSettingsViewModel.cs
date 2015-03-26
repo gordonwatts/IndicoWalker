@@ -35,6 +35,15 @@ namespace IWalker.ViewModels
         public List<ExpirationOptions.CacheTime> CacheDecayOptions { get; private set; }
 
         /// <summary>
+        /// Get the vm for the indico api key view.
+        /// </summary>
+        public AddOrUpdateIndicoApiKeyViewModel IndicoApiKey
+        {
+            get { return _indicoApiKeyVM.Value; }
+        }
+        private ObservableAsPropertyHelper<AddOrUpdateIndicoApiKeyViewModel> _indicoApiKeyVM;
+
+        /// <summary>
         /// Get/Set the file(talk) cache time.
         /// </summary>
         public ExpirationOptions.CacheTime CacheDecayFiles
@@ -143,8 +152,12 @@ namespace IWalker.ViewModels
             CacheDecayOptions = ExpirationOptions.GetListExpirationOptions();
 
             // Get the list of indico api keys we are watching
+            // and hook up the MV for doing the api key manipulation
             ApiKeysForIndico = new ReactiveList<IndicoApiKey>();
             ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
+
+            Observable.Return((AddOrUpdateIndicoApiKeyViewModel)null)
+                .ToProperty(this, x => x.IndicoApiKey, out _indicoApiKeyVM, new AddOrUpdateIndicoApiKeyViewModel(null));
 
         }
         

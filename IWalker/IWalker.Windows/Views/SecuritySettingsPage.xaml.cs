@@ -39,6 +39,9 @@ namespace IWalker.Views
                 .Select(a => new FileOpenPicker().ForCert())
                 .SelectMany(op => op.PickSingleFileAsync());
 
+            // The Indico API key part of the model
+            this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel);
+
             // This is the store, so as soon as we have that stuff, we can cycle straight into doing this.
             _ridOfMe.Add(
                 basicFindFile

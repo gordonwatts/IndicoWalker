@@ -76,21 +76,7 @@
                     <Button Content="Delete"/>
                 </StackPanel>
                 <Border Background="#FF232323" Margin="15,5,15,0" BorderBrush="#FFB6B1B1" BorderThickness="3" Padding="5">
-                    <StackPanel Orientation="Vertical">
-                        <StackPanel Orientation="Horizontal">
-                            <TextBlock Text="Site:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0" />
-                            <TextBox x:Name="ApiKeyNode" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5.2,0,0">
-                            <TextBlock Text="Api Key:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0"  />
-                            <TextBox x:Name="ApiKeyKey" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <StackPanel Orientation="Horizontal" Margin="0,5,0,0">
-                            <TextBlock Text="Secret Key:" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" Margin="0,0,5,0" />
-                            <TextBox x:Name="ApiKeySecret" VerticalAlignment="Center"/>
-                        </StackPanel>
-                        <Button Content="Add/Update" HorizontalAlignment="Right"/>
-                    </StackPanel>
+                    <local:AddOrUpdateIndicoApiKey x:Name="AddUpdateUserControl" />
                 </Border>
             </StackPanel>
         </Grid>
