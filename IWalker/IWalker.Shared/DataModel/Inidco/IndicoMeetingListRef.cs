@@ -20,7 +20,7 @@ namespace IWalker.DataModel.Inidco
         public AgendaCategory aCategory { get; set; }
 
         /// <summary>
-        /// Initialize with a parituclar URI
+        /// Initialize with a particular URI
         /// </summary>
         /// <param name="uri"></param>
         public IndicoMeetingListRef(string uri)
@@ -47,7 +47,7 @@ namespace IWalker.DataModel.Inidco
         /// <summary>
         /// Return a unique string which can be used as a cache.
         /// </summary>
-        /// <remarks>We do it as a uri, as that is unique at least on the internet...</remarks>
+        /// <remarks>We do it as a Uri, as that is unique at least on the internet...</remarks>
         [JsonIgnore]
         public string UniqueString
         {
@@ -85,7 +85,7 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
-            /// For serialization initaliztion
+            /// For serialization initialization
             /// </summary>
             public IndicoMeetingExtendedRef()
             { }
