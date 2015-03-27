@@ -44,6 +44,11 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<AddOrUpdateIndicoApiKeyViewModel> _indicoApiKeyVM;
 
         /// <summary>
+        /// Fire this off to view an ApiKey.
+        /// </summary>
+        public ReactiveCommand<object> ShowIndicoApiKey { get; private set; }
+
+        /// <summary>
         /// Get/Set the file(talk) cache time.
         /// </summary>
         public ExpirationOptions.CacheTime CacheDecayFiles
@@ -156,7 +161,10 @@ namespace IWalker.ViewModels
             ApiKeysForIndico = new ReactiveList<IndicoApiKey>();
             ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
 
-            Observable.Empty<AddOrUpdateIndicoApiKeyViewModel>()
+            ShowIndicoApiKey = ReactiveCommand.Create();
+            ShowIndicoApiKey
+                .Cast<IndicoApiKey>()
+                .Select(x => new AddOrUpdateIndicoApiKeyViewModel(x))
                 .ToProperty(this, x => x.IndicoApiKey, out _indicoApiKeyVM, new AddOrUpdateIndicoApiKeyViewModel(null));
 
         }

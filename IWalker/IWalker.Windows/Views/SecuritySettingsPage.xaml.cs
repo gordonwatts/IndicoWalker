@@ -1,4 +1,5 @@
-﻿using IWalker.Util;
+﻿using IWalker.DataModel.Inidco;
+using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
@@ -42,6 +43,9 @@ namespace IWalker.Views
             // The Indico API key part of the model
             this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel);
             this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource);
+            this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
+                .Where(x => ViewModel != null)
+                .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x));
 
             // This is the store, so as soon as we have that stuff, we can cycle straight into doing this.
             _ridOfMe.Add(
