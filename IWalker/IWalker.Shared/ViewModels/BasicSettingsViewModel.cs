@@ -160,6 +160,15 @@ namespace IWalker.ViewModels
             // and hook up the MV for doing the api key manipulation
             ApiKeysForIndico = new ReactiveList<IndicoApiKey>();
             ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
+            IndicoApiKeyAccess.IndicoApiKeysUpdated
+                .Subscribe(_ =>
+                {
+                    using (ApiKeysForIndico.SuppressChangeNotifications())
+                    {
+                        ApiKeysForIndico.Clear();
+                        ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
+                    }
+                });
 
             ShowIndicoApiKey = ReactiveCommand.Create();
             ShowIndicoApiKey
