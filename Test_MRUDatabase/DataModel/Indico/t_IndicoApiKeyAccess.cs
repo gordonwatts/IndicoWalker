@@ -21,13 +21,18 @@ namespace Test_MRUDatabase.DataModel.Indico
         [TestMethod]
         public void LoadMissingApiKey()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var k = IndicoApiKeyAccess.GetKey("dummy");
             Assert.IsNull(k);
+            Assert.AreEqual(0, count);
         }
 
         [TestMethod]
         public void LoadPresentApiKey()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
             IndicoApiKeyAccess.UpdateKey(k);
             var fk = IndicoApiKeyAccess.GetKey("indico.cern.ch");
@@ -35,11 +40,14 @@ namespace Test_MRUDatabase.DataModel.Indico
             Assert.AreEqual("key", fk.ApiKey);
             Assert.AreEqual("noway", fk.SecretKey);
             Assert.AreEqual("indico.cern.ch", fk.Site);
+            Assert.AreEqual(1, count);
         }
 
         [TestMethod]
         public void LoadPresentApi2KeysFirst()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
             IndicoApiKeyAccess.UpdateKey(k);
             k.ApiKey = "key2";
@@ -51,6 +59,7 @@ namespace Test_MRUDatabase.DataModel.Indico
             Assert.AreEqual("key", fk.ApiKey);
             Assert.AreEqual("noway", fk.SecretKey);
             Assert.AreEqual("indico.cern.ch", fk.Site);
+            Assert.AreEqual(2, count);
         }
 
         [TestMethod]
@@ -85,8 +94,11 @@ namespace Test_MRUDatabase.DataModel.Indico
         [TestMethod]
         public void LoadAllKeysWith0()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var keys = IndicoApiKeyAccess.LoadAllKeys();
             Assert.AreEqual(0, keys.Length);
+            Assert.AreEqual(0, count);
         }
 
         [TestMethod]
@@ -106,21 +118,27 @@ namespace Test_MRUDatabase.DataModel.Indico
         [TestMethod]
         public void RemoveKey()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
             IndicoApiKeyAccess.UpdateKey(k);
             IndicoApiKeyAccess.RemoveKey("indico.cern.ch");
             var fk = IndicoApiKeyAccess.GetKey("indico.cern.ch");
             Assert.IsNull(fk);
+            Assert.AreEqual(2, count);
         }
 
         [TestMethod]
         public void RemoveAllKeys()
         {
+            int count = 0;
+            IndicoApiKeyAccess.IndicoApiKeysUpdated.Subscribe(x => count++);
             var k = new IndicoApiKey() { ApiKey = "key", SecretKey = "noway", Site = "indico.cern.ch" };
             IndicoApiKeyAccess.UpdateKey(k);
             IndicoApiKeyAccess.RemoveAllKeys();
             var fk = IndicoApiKeyAccess.GetKey("indico.cern.ch");
             Assert.IsNull(fk);
+            Assert.AreEqual(2, count);
         }
 
         [TestMethod]

@@ -4,6 +4,8 @@ using System.Text;
 using Windows.Storage;
 using System.Linq;
 using Newtonsoft.Json;
+using System.Reactive;
+using System.Reactive.Subjects;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -12,6 +14,22 @@ namespace IWalker.DataModel.Inidco
     /// </summary>
     public static class IndicoApiKeyAccess
     {
+        /// <summary>
+        /// Fired each time a key is altered
+        /// </summary>
+        public static IObservable<Unit> IndicoApiKeysUpdated { get; private set; }
+
+        private static Subject<Unit> _indicoApiKeysUpdated;
+
+        /// <summary>
+        /// Get static variables all setup.
+        /// </summary>
+        static IndicoApiKeyAccess()
+        {
+            _indicoApiKeysUpdated = new Subject<Unit>();
+            IndicoApiKeysUpdated = _indicoApiKeysUpdated;
+        }
+
         /// <summary>
         /// Fetch the api key for a give site from the encrypted store.
         /// Returns null if it is not known.
@@ -63,6 +81,7 @@ namespace IWalker.DataModel.Inidco
         public static void UpdateKey(IndicoApiKey apikey)
         {
             ApplicationData.Current.RoamingSettings.Values[AsKey(apikey.Site)] = apikey.Serialize();
+            _indicoApiKeysUpdated.OnNext(default(Unit));
         }
 
         /// <summary>
@@ -76,6 +95,7 @@ namespace IWalker.DataModel.Inidco
             {
                 ApplicationData.Current.RoamingSettings.Values.Remove(key);
             }
+            _indicoApiKeysUpdated.OnNext(default(Unit));
         }
 
         /// <summary>
@@ -90,6 +110,7 @@ namespace IWalker.DataModel.Inidco
             {
                 ApplicationData.Current.RoamingSettings.Values.Remove(k);
             }
+            _indicoApiKeysUpdated.OnNext(default(Unit));
         }
     }
 
