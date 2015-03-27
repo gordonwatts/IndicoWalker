@@ -5,6 +5,7 @@ using System.Reactive;
 using System.Reactive.Linq;
 using System.Collections.Generic;
 using System.Text;
+using System.Reactive.Subjects;
 
 namespace IWalker.ViewModels
 {
@@ -85,12 +86,18 @@ namespace IWalker.ViewModels
             // Setup the add and update commands to work correctly.
             var addCanExe = this.WhenAny(x => x.SiteName, x => x.ApiKey, x => x.SecretKey, (site, apik, seck) => Tuple.Create(site.Value, apik.Value, seck.Value))
                 .Select(x => !string.IsNullOrWhiteSpace(x.Item1) && !string.IsNullOrWhiteSpace(x.Item2) && !string.IsNullOrWhiteSpace(x.Item3));
-
-            var isKnownSite = this.WhenAny(x => x.SiteName, x => x.Value)
-                .Select(sname => IndicoApiKeyAccess.GetKey(sname) != null);
-
             AddUpdateCommand = ReactiveCommand.Create(addCanExe);
-            DeleteCommand = ReactiveCommand.Create(isKnownSite);
+
+            var isKnownSite = new ReplaySubject<bool>(1);
+            DeleteCommand = ReactiveCommand.Create(isKnownSite.StartWith(false));
+
+            Observable.Merge(
+                    this.WhenAny(x => x.SiteName, x => x.Value),
+                    AddUpdateCommand.IsExecuting.Where(isexe => isexe == false).Select(_ => SiteName),
+                    DeleteCommand.IsExecuting.Where(isexe => isexe == false).Select(_ => SiteName)
+                )
+                .Select(sname => IndicoApiKeyAccess.GetKey(sname) != null)
+                .Subscribe(gotit => isKnownSite.OnNext(gotit));
 
             isKnownSite
                 .Select(known => known ? "Update" : "Add")

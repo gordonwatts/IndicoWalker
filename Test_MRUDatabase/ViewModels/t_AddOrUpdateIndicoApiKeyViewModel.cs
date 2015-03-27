@@ -101,6 +101,9 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsNotNull(IndicoApiKeyAccess.GetKey("full moon"));
             vm.DeleteCommand.Execute(null);
             Assert.IsNull(IndicoApiKeyAccess.GetKey("full moon"));
+
+            Assert.IsFalse(canExeDelete);
+            Assert.AreEqual("Add", vm.AddOrUpdateText);
         }
     }
 }
