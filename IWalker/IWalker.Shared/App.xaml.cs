@@ -17,6 +17,7 @@ using IWalker.DataModel.Categories;
 
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
+using IWalker.DataModel.Inidco;
 #endif
 #if WINDOWS_PHONE_APP
 using Windows.UI.Xaml.Media.Animation;
@@ -57,6 +58,7 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<TalkUserControlViewModel>));
             Locator.CurrentMutable.Register(() => new CategoryAllPageView(), typeof(IViewFor<CategoryAllPageViewModel>));
             Locator.CurrentMutable.Register(() => new CategoryInfoSimpleView(), typeof(IViewFor<CategoryConfigInfo>));
+            Locator.CurrentMutable.Register(() => new IndicoApiKeyView(), typeof(IViewFor<IndicoApiKey>));
 #if WINDOWS_APP
             Locator.CurrentMutable.Register(() => new SlideThumbUserControl(), typeof(IViewFor<SlideThumbViewModel>));
             Locator.CurrentMutable.Register(() => new PDFPageUserControl(), typeof(IViewFor<PDFPageViewModel>));
