@@ -156,7 +156,7 @@ namespace IWalker.ViewModels
             ApiKeysForIndico = new ReactiveList<IndicoApiKey>();
             ApiKeysForIndico.AddRange(IndicoApiKeyAccess.LoadAllKeys());
 
-            Observable.Return((AddOrUpdateIndicoApiKeyViewModel)null)
+            Observable.Empty<AddOrUpdateIndicoApiKeyViewModel>()
                 .ToProperty(this, x => x.IndicoApiKey, out _indicoApiKeyVM, new AddOrUpdateIndicoApiKeyViewModel(null));
 
         }
