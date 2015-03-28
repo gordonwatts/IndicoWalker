@@ -32,6 +32,13 @@ namespace IWalker.Views
             this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text);
             this.Bind(ViewModel, x => x.AutoDownload, x => x.AutoDownload.IsOn);
 
+            // The Indico API key part of the model
+            this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel);
+            this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource);
+            this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
+                .Where(x => ViewModel != null)
+                .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x));
+
             // When they click find, we have to locate a file and go from there.
             _ridOfMe.Add(
                 Observable.FromEventPattern(FindCert, "Click")

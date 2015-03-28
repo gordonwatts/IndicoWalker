@@ -55,6 +55,23 @@
                         <TextBlock x:Name="StatusMessage" Text="test" />
                         <TextBlock x:Name="ErrorMessage" Text="test" Foreground="#FFFD0909" />
 
+                        <!-- ApiKeys for indico -->
+                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="CERN Security Certificate" />
+                        <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                            <TextBlock.Text>
+                                Indico ApiKeys can be used to access indico without a username or password (IndicoWalker only uses them for Indico Category access currently). To
+                        find your ApiKey and SecretKey, open a web browser at https://site-name/user/api. Copy the ApiKey and Secret Key exactly.
+                            </TextBlock.Text>
+                        </TextBlock>
+
+                        <ListView x:Name="ApiKeyList" ScrollViewer.VerticalScrollMode="Auto" Height="75"/>
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Delete"/>
+                        </StackPanel>
+                        <Border Background="#FF232323" Margin="15,5,15,0" BorderBrush="#FFB6B1B1" BorderThickness="3" Padding="5">
+                            <local:AddOrUpdateIndicoApiKey x:Name="AddUpdateUserControl" />
+                        </Border>
+
                         <!-- Section 2 title -->
                         <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Local Cache" />
 
