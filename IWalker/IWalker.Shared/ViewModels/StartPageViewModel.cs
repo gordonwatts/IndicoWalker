@@ -66,6 +66,11 @@ namespace IWalker.ViewModels
         public ReactiveCommand<List<MRU>> LoadRecentMeetings { get; private set; }
 
         /// <summary>
+        /// Reload the up coming meetings
+        /// </summary>
+        public ReactiveCommand<object> UpdateUpcomingMeetings { get; private set; }
+
+        /// <summary>
         /// Setup the page
         /// </summary>
         public StartPageViewModel(IScreen screen)
@@ -146,11 +151,10 @@ namespace IWalker.ViewModels
             // But since they are coming from multiple sources, we have to be a little
             // careful about combining them.
             UpcomingMeetings = new ReactiveList<IMeetingRefExtended>();
-            var updateUpcomingMeetings = ReactiveCommand.Create();
-            var meetingList = from xup in updateUpcomingMeetings
+            UpdateUpcomingMeetings = ReactiveCommand.Create();
+            var meetingList = from xup in UpdateUpcomingMeetings
                     from category in CategoryDB.LoadCategories()
-                    where category.DisplayOnHomePage
-                    from meetings in category.MeetingList.FetchAndUpdateRecentMeetings(false)
+                    from meetings in (category.DisplayOnHomePage ? category.MeetingList.FetchAndUpdateRecentMeetings(false) : Observable.Return(new IMeetingRefExtended[0]))
                     select Tuple.Create(category.MeetingList, meetings);
 
             meetingList
@@ -162,7 +166,7 @@ namespace IWalker.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(meetings => SetUpcomingMeetings(meetings));
 
-            updateUpcomingMeetings.Execute(null);
+            UpdateUpcomingMeetings.Execute(null);
         }
 
         /// <summary>

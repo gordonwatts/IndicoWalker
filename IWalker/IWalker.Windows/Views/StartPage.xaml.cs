@@ -33,6 +33,8 @@ namespace IWalker.Views
         {
             ViewModel.LoadRecentMeetings
                 .Execute(null);
+            ViewModel.UpdateUpcomingMeetings
+                .Execute(null);
         }
 
         /// <summary>
