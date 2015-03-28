@@ -60,7 +60,8 @@ namespace IWalker.DataModel.Inidco
         public async Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays)
         {
             var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
-            var meetings = await al.GetCategory(aCategory, goingBackDays);
+            var apiInfo = IndicoApiKeyAccess.GetKey(aCategory.AgendaSite);
+            var meetings = await al.GetCategory(aCategory, goingBackDays, apiInfo == null ? null : apiInfo.ApiKey, apiInfo == null ? null: apiInfo.SecretKey);
 
             return meetings.Select(m => new IndicoMeetingExtendedRef(m)).Cast<IMeetingRefExtended>().ToArray();
         }
