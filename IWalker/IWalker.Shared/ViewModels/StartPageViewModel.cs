@@ -159,6 +159,7 @@ namespace IWalker.ViewModels
                     return _meetingCatalog;
                 })
                 .Select(mc => mc.SelectMany(mi => mi.Value).Where(mi => mi.StartTime.Within(TimeSpan.FromDays(Settings.DaysOfUpcomingMeetingsToShowOnMainPage))).OrderByDescending(minfo => minfo.StartTime))
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(meetings => SetUpcomingMeetings(meetings));
 
             updateUpcomingMeetings.Execute(null);
