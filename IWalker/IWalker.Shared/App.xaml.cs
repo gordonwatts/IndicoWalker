@@ -14,10 +14,10 @@ using Windows.UI.Xaml.Controls;
 using System.Reactive.Linq;
 using IWalker.Util;
 using IWalker.DataModel.Categories;
+using IWalker.DataModel.Inidco;
 
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
-using IWalker.DataModel.Inidco;
 #endif
 #if WINDOWS_PHONE_APP
 using Windows.UI.Xaml.Media.Animation;
