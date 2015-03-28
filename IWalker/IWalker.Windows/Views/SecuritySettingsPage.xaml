@@ -72,9 +72,6 @@
                 </TextBlock>
                 
                 <ListView x:Name="ApiKeyList" ScrollViewer.VerticalScrollMode="Auto" Height="75"/>
-                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
-                    <Button Content="Delete"/>
-                </StackPanel>
                 <Border Background="#FF232323" Margin="15,5,15,0" BorderBrush="#FFB6B1B1" BorderThickness="3" Padding="5">
                     <local:AddOrUpdateIndicoApiKey x:Name="AddUpdateUserControl" />
                 </Border>
