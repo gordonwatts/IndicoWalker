@@ -18,6 +18,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.IsSubscribed, y => y.Subscribe.IsOn);
             this.Bind(ViewModel, x => x.IsDisplayedOnMainPage, y => y.Displayed.IsOn);
             this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitle.Text);
+            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitleEdit.Text);
         }
 
         /// <summary>
