@@ -46,16 +46,16 @@
             </HubSection>
             <HubSection Header="Viewed Meetings">
                 <DataTemplate>
-                    <GridView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
-                        <GridView.ItemTemplate>
+                    <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
+                        <ListView.ItemTemplate>
                             <DataTemplate>
                                 <StackPanel Orientation="Vertical" Width="500">
                                     <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="NoWrap" />
                                     <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
                                 </StackPanel>
                             </DataTemplate>
-                        </GridView.ItemTemplate>
-                    </GridView>
+                        </ListView.ItemTemplate>
+                    </ListView>
                 </DataTemplate>
             </HubSection>
         </Hub>
