@@ -142,10 +142,7 @@ namespace IWalker.ViewModels
             });
             LoadRecentMeetings
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(l => {
-                    RecentMeetings.Clear();
-                    RecentMeetings.AddRange(l);
-                });
+                .Subscribe(l => SetMRUMeetings(l));
 
             // Upcoming meetings. This is easy - we fetch once.
             // But since they are coming from multiple sources, we have to be a little
@@ -178,6 +175,18 @@ namespace IWalker.ViewModels
         {
             UpcomingMeetings.MakeListLookLike(meetings,
                 (oItem, dItem) => oItem.Meeting.AsReferenceString() == dItem.Meeting.AsReferenceString(),
+                dItem => dItem
+                );
+        }
+
+        /// <summary>
+        /// Set/Update teh MRU meeting list
+        /// </summary>
+        /// <param name="meetings"></param>
+        private void SetMRUMeetings(IEnumerable<MRU> meetings)
+        {
+            RecentMeetings.MakeListLookLike(meetings,
+                (oItem, dItem) => oItem.IDRef == dItem.IDRef,
                 dItem => dItem
                 );
         }
