@@ -1,5 +1,7 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -20,6 +22,12 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel);
             this.Bind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel);
             this.OneWayBind(ViewModel, x => x.ValidCategorySelected, y => y.DetailsGrid.Visibility);
+
+            // Run the master/detail stuff
+            Observable.FromEventPattern<SelectionChangedEventArgs>(CategoryNames, "SelectionChanged")
+                .Where(args => args.EventArgs.AddedItems.Count > 0)
+                .Select(args => args.EventArgs.AddedItems[0])
+                .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
         }
 
         /// <summary>
@@ -37,18 +45,6 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (CategoryAllPageViewModel)value; }
-        }
-
-        /// <summary>
-        /// Ok - we have the next item to look at!
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CategoryNames_SelectionChanged(object sender, SelectionChangedEventArgs e)
-        {
-            if (e.AddedItems.Count == 0)
-                return;
-            ViewModel.ShowCategoryDetails.Execute(e.AddedItems[0]);
         }
     }
 }

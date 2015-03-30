@@ -41,7 +41,7 @@
                         <ColumnDefinition Width="395*"/>
                         <ColumnDefinition Width="971*"/>
                     </Grid.ColumnDefinitions>
-                    <ListView Grid.Column="0" x:Name="CategoryNames" SelectionMode="Single" SelectionChanged="CategoryNames_SelectionChanged" />
+                    <ListView Grid.Column="0" x:Name="CategoryNames" SelectionMode="Single" />
                     <Grid Grid.Column="1" x:Name="DetailsGrid">
                         <Grid.RowDefinitions>
                             <RowDefinition Height="Auto"/>
