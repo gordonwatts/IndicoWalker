@@ -46,6 +46,8 @@ namespace IWalker.Views
         /// <param name="e"></param>
         private void CategoryNames_SelectionChanged(object sender, SelectionChangedEventArgs e)
         {
+            if (e.AddedItems.Count == 0)
+                return;
             ViewModel.ShowCategoryDetails.Execute(e.AddedItems[0]);
         }
     }

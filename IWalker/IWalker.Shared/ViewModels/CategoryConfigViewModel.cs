@@ -56,8 +56,11 @@ namespace IWalker.ViewModels
         /// Each time we alter it, we spit something out on this. A null means it isn't subscribed.
         /// </summary>
         public IObservable<CategoryConfigInfo> UpdateToCI { get; private set; }
-        private Subject<CategoryConfigInfo> _updateToCI;
 
+        /// <summary>
+        /// Init with a total category UI.
+        /// </summary>
+        /// <param name="ci"></param>
         public CategoryConfigViewModel(CategoryConfigInfo ci)
         {
             _meetingInfo = ci;
@@ -125,9 +128,8 @@ namespace IWalker.ViewModels
                 .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
 
             // Setup the logic for subscribing (or not).
-
-            _updateToCI = new Subject<CategoryConfigInfo>();
-            UpdateToCI = _updateToCI;
+            UpdateToCI = this.WhenAny(x => x.CategoryTitle, x => x.IsDisplayedOnMainPage, (x, y) => default(Unit))
+                .Select(_ => GetMeetingInfo());
         }
 
         /// <summary>
