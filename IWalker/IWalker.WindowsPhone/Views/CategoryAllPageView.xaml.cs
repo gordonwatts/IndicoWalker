@@ -1,5 +1,4 @@
-﻿using IWalker.DataModel.Categories;
-using IWalker.ViewModels;
+﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
@@ -27,6 +26,14 @@ namespace IWalker.Views
                     vm.ViewCategory
                         .Subscribe(nextCi => ViewModel.HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(ViewModel.HostScreen, nextCi.MeetingList)));
                 });
+
+            // Run the master/detail stuff
+            Observable.FromEventPattern<ItemClickEventArgs>(CategoryNames, "ItemClick")
+                .Select(args => args.EventArgs.ClickedItem)
+                .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
+
+            // Each time the page is shown, make sure to update the list.
+            this.WhenActivated(_ => ViewModel.UpdateCategoryList.Execute(null));
         }
 
         /// <summary>
@@ -44,16 +51,6 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (CategoryAllPageViewModel)value; }
-        }
-
-        /// <summary>
-        /// User has selected an item. Feed it back for checking and eventual selection.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        private void CategoryNames_ItemClick(object sender, ItemClickEventArgs e)
-        {
-            ViewModel.ShowCategoryDetails.Execute(e.ClickedItem as CategoryConfigInfo);
         }
     }
 }

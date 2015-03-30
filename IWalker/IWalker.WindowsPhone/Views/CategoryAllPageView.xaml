@@ -26,6 +26,6 @@
         </StackPanel>
 
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,9.5,19,0">
-            <ListView Grid.Column="0" x:Name="CategoryNames" SelectionMode="None" IsItemClickEnabled="True" ItemClick="CategoryNames_ItemClick" />
+            <ListView Grid.Column="0" x:Name="CategoryNames" SelectionMode="None" IsItemClickEnabled="True" />
         </Grid>
     </Grid></Page>

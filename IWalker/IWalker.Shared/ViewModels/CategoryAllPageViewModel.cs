@@ -56,6 +56,11 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> ShowCategoryDetails { get; private set; }
 
         /// <summary>
+        /// Execute if need to refresh the category list.
+        /// </summary>
+        public ReactiveCommand<object> UpdateCategoryList { get; private set; }
+
+        /// <summary>
         /// Set us up with the complete list of calendars.
         /// </summary>
         /// <param name="parent"></param>
@@ -64,8 +69,16 @@ namespace IWalker.ViewModels
             HostScreen = parent;
 
             // The list of categories.
+            UpdateCategoryList = ReactiveCommand.Create();
             ListOfCalendars = new ReactiveList<CategoryConfigInfo>();
-            ListOfCalendars.AddRange(CategoryDB.LoadCategories());
+            UpdateCategoryList
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_ =>
+            {
+                ListOfCalendars.Clear();
+                ListOfCalendars.AddRange(CategoryDB.LoadCategories());
+            });
+            UpdateCategoryList.Execute(null);
 
             // And setup the category VM
             ShowCategoryDetails = ReactiveCommand.Create();

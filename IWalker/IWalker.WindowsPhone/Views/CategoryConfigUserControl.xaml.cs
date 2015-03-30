@@ -1,7 +1,10 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using Windows.UI.Xaml.Input;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -14,7 +17,27 @@ namespace IWalker.Views
             this.InitializeComponent();
             this.Bind(ViewModel, x => x.IsSubscribed, y => y.Subscribe.IsOn);
             this.Bind(ViewModel, x => x.IsDisplayedOnMainPage, y => y.Displayed.IsOn);
-            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitle.Text);
+            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitle.Content);
+            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitleEdit.Text);
+
+            // When they click on the main item, swap control visibility
+            Observable.FromEventPattern(AgendaListTitle, "Click")
+                .Subscribe(_ =>
+                {
+                    AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                });
+
+            // And when they are done with the new name
+            var rtnHit = Observable.FromEventPattern<KeyRoutedEventArgs>(AgendaListTitleEdit, "KeyUp")
+                .Where(kargs => kargs.EventArgs.Key == Windows.System.VirtualKey.Enter);
+
+            rtnHit
+                .Subscribe(_ =>
+                {
+                    AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                    AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                });
         }
 
         /// <summary>
