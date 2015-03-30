@@ -7,6 +7,7 @@ using System.Collections.Generic;
 using System.IO;
 using System.Text;
 using Windows.Storage;
+using System.Reactive;
 
 namespace IWalker.DataModel.Categories
 {
@@ -33,7 +34,12 @@ namespace IWalker.DataModel.Categories
             var json = ApplicationData.Current.RoamingSettings.Values[CategoryDBSettingName] as string;
             try
             {
-                var cached = JsonConvert.DeserializeObject<CategoryConfigInfo[]>(json, GetSettings());
+                var cached = JsonConvert.DeserializeObject<CategoryConfigInfo[]>(json, GetSettings())
+                    .Select(c => {
+                        if (c.CategoryTitle == null)
+                            c.CategoryTitle = "<blank>";
+                        return c;
+                    });
                 var ll = new List<CategoryConfigInfo>();
                 ll.AddRange(cached);
                 return ll;
