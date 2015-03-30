@@ -151,7 +151,7 @@ namespace IWalker.ViewModels
             UpdateUpcomingMeetings = ReactiveCommand.Create();
             var meetingList = from xup in UpdateUpcomingMeetings
                     from category in CategoryDB.LoadCategories()
-                    from meetings in (category.DisplayOnHomePage ? category.MeetingList.FetchAndUpdateRecentMeetings(false) : Observable.Return(new IMeetingRefExtended[0]))
+                              from meetings in (category.DisplayOnHomePage ? category.MeetingList.FetchAndUpdateRecentMeetings(false).OnErrorResumeNext(Observable.Empty<IMeetingRefExtended[]>()) : Observable.Return(new IMeetingRefExtended[0]))
                     select Tuple.Create(category.MeetingList, meetings);
 
             meetingList

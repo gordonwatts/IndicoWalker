@@ -39,6 +39,7 @@ namespace IWalker.ViewModels
             // Get the list of items we are going to show.
             MeetingList = new ReactiveList<IMeetingRefExtended>();
             meetings.FetchAndUpdateRecentMeetings()
+                .OnErrorResumeNext(Observable.Empty<IMeetingRefExtended[]>())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(m => SetMeetings(m));
 
