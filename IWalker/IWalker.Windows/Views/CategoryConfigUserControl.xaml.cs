@@ -41,6 +41,14 @@ namespace IWalker.Views
                     AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
                     AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
                 });
+
+            // Reset state when we get set up.
+            this.WhenAny(x => x.ViewModel, x => true)
+                .Subscribe(_ =>
+                {
+                    AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                    AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                });
         }
 
         /// <summary>
