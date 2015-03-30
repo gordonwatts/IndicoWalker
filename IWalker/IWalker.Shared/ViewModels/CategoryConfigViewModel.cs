@@ -3,6 +3,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Text;
+using System.Reactive;
 using System.Reactive.Linq;
 using IWalker.DataModel.Categories;
 using IWalker.DataModel.Interfaces;
@@ -22,18 +23,7 @@ namespace IWalker.ViewModels
         public bool IsSubscribed
         {
             get { return _isSubscribed; }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _isSubscribed, value);
-                if (_isSubscribed)
-                {
-                    CategoryDB.UpdateOrInsert(_meetingInfo);
-                }
-                else
-                {
-                    CategoryDB.Remove(_meetingInfo);
-                }
-            }
+            set { this.RaiseAndSetIfChanged(ref _isSubscribed, value); }
         }
         private bool _isSubscribed;
 
@@ -43,13 +33,7 @@ namespace IWalker.ViewModels
         public bool IsDisplayedOnMainPage
         {
             get { return _isDisplayedOnMainPage; }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _isDisplayedOnMainPage, value);
-                _meetingInfo.DisplayOnHomePage = value;
-                if (IsSubscribed)
-                    CategoryDB.UpdateOrInsert(_meetingInfo);
-            }
+            set { this.RaiseAndSetIfChanged(ref _isDisplayedOnMainPage, value); }
         }
         private bool _isDisplayedOnMainPage;
 
@@ -59,13 +43,7 @@ namespace IWalker.ViewModels
         public string CategoryTitle
         {
             get { return _title; }
-            set
-            {
-                this.RaiseAndSetIfChanged(ref _title, value);
-                _meetingInfo.CategoryTitle = _title;
-                if (IsSubscribed)
-                    CategoryDB.UpdateOrInsert(_meetingInfo);
-            }
+            set { this.RaiseAndSetIfChanged(ref _title, value); }
         }
         private string _title;
 
@@ -129,9 +107,38 @@ namespace IWalker.ViewModels
                 .Where(isSubscribed => !isSubscribed)
                 .Subscribe(x => IsDisplayedOnMainPage = false);
 
+            // When things change, we need to reflect the changes back into the main store.
+            this.WhenAny(x => x.IsSubscribed, x => x.GetValue())
+                .Where(x => x)
+                .Subscribe(_ => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
+            this.WhenAny(x => x.IsSubscribed, x => x.GetValue())
+                .Where(x => !x)
+                .Subscribe(_ => CategoryDB.Remove(GetMeetingInfo()));
+
+            this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.GetValue())
+                .Where(_ => IsSubscribed)
+                .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
+
+            this.WhenAny(x => x.CategoryTitle, x => x.GetValue())
+                .Where(x => !string.IsNullOrWhiteSpace(x))
+                .Where(_ => IsSubscribed)
+                .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
+
             // Setup the logic for subscribing (or not).
+
             _updateToCI = new Subject<CategoryConfigInfo>();
             UpdateToCI = _updateToCI;
+        }
+
+        /// <summary>
+        /// Update the meeting info with the most recent stuff.
+        /// </summary>
+        /// <returns></returns>
+        private CategoryConfigInfo GetMeetingInfo()
+        {
+            _meetingInfo.CategoryTitle = CategoryTitle;
+            _meetingInfo.DisplayOnHomePage = IsDisplayedOnMainPage;
+            return _meetingInfo;
         }
     }
 }
