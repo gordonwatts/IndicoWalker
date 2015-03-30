@@ -85,7 +85,7 @@
             <ColumnDefinition Width="1*"/>
             <ColumnDefinition Width="Auto"/>
         </Grid.ColumnDefinitions>
-        <Button x:Name="AgendaListTitle" Content="" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource ButtonAsSimpleText}" ContentTemplate="{StaticResource TextBlockWithHeaderStyle}"/>
+        <Button x:Name="AgendaListTitle" Content="" HorizontalAlignment="Left" VerticalAlignment="Center" Style="{StaticResource ButtonAsSimpleText}" ContentTemplate="{StaticResource TextBlockWithHeaderStyle}"/>
         <TextBox x:Name="AgendaListTitleEdit" Text="" VerticalAlignment="Center" Grid.Column="0" Visibility="Collapsed" />
         <StackPanel VerticalAlignment="Center" Grid.Column="1">
             <ToggleSwitch x:Name="Subscribe" OffContent="Unsubscribed" OnContent="Subscribed" Margin="0,0,0,0" HorizontalAlignment="Right" OffContentTemplate="{StaticResource RightJustifiedSwitchContent}" OnContentTemplate="{StaticResource RightJustifiedSwitchContent}"/>
