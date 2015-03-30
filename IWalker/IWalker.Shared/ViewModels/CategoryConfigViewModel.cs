@@ -43,7 +43,6 @@ namespace IWalker.ViewModels
         public string CategoryTitle
         {
             get { return _title; }
-            set { this.RaiseAndSetIfChanged(ref _title, value); }
         }
         private string _title;
 
@@ -112,14 +111,13 @@ namespace IWalker.ViewModels
 
             // When things change, we need to reflect the changes back into the main store.
             this.WhenAny(x => x.IsSubscribed, x => x.GetValue())
-                .Where(x => x)
+                .Where(x => x && !string.IsNullOrWhiteSpace(CategoryTitle))
                 .Subscribe(_ => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
             this.WhenAny(x => x.IsSubscribed, x => x.GetValue())
                 .Where(x => !x)
                 .Subscribe(_ => CategoryDB.Remove(GetMeetingInfo()));
 
             this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.GetValue())
-                .Where(_ => IsSubscribed)
                 .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
 
             this.WhenAny(x => x.CategoryTitle, x => x.GetValue())
@@ -129,6 +127,7 @@ namespace IWalker.ViewModels
 
             // Setup the logic for subscribing (or not).
             UpdateToCI = this.WhenAny(x => x.CategoryTitle, x => x.IsDisplayedOnMainPage, (x, y) => default(Unit))
+                .Where(_ => !string.IsNullOrWhiteSpace(CategoryTitle))
                 .Select(_ => GetMeetingInfo());
         }
 
