@@ -43,6 +43,7 @@ namespace IWalker.ViewModels
         public string CategoryTitle
         {
             get { return _title; }
+            set { this.RaiseAndSetIfChanged(ref _title, value == null ? "" : value); }
         }
         private string _title;
 
@@ -118,11 +119,12 @@ namespace IWalker.ViewModels
                 .Subscribe(_ => CategoryDB.Remove(GetMeetingInfo()));
 
             this.WhenAny(x => x.IsDisplayedOnMainPage, x => x.GetValue())
+                .Where(_ => IsSubscribed && !string.IsNullOrWhiteSpace(CategoryTitle))
                 .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
 
             this.WhenAny(x => x.CategoryTitle, x => x.GetValue())
                 .Where(x => !string.IsNullOrWhiteSpace(x))
-                .Where(_ => IsSubscribed)
+                .Where(_ => IsSubscribed && !string.IsNullOrWhiteSpace(CategoryTitle))
                 .Subscribe(x => CategoryDB.UpdateOrInsert(GetMeetingInfo()));
 
             // Setup the logic for subscribing (or not).
