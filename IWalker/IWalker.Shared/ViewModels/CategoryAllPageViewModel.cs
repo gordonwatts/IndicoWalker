@@ -73,7 +73,14 @@ namespace IWalker.ViewModels
                 .Cast <CategoryConfigInfo>();
 
             asCategoryInfo
-                .Select(ci => new CategoryConfigViewModel(ci))
+                .Select(ci => {
+                    var index = ListOfCalendars.IndexOf(ci);
+                    var civm = new CategoryConfigViewModel(ci);
+                    civm.UpdateToCI
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Subscribe(newCI => ListOfCalendars[index] = newCI);
+                    return civm;
+                })
                 .ToProperty(this, x => x.ConfigViewModel, out _categoryConfig, null);
 
             asCategoryInfo

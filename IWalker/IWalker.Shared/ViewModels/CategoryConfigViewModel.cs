@@ -6,6 +6,7 @@ using System.Text;
 using System.Reactive.Linq;
 using IWalker.DataModel.Categories;
 using IWalker.DataModel.Interfaces;
+using System.Reactive.Subjects;
 
 namespace IWalker.ViewModels
 {
@@ -73,6 +74,12 @@ namespace IWalker.ViewModels
         /// </summary>
         private CategoryConfigInfo _meetingInfo = null;
 
+        /// <summary>
+        /// Each time we alter it, we spit something out on this. A null means it isn't subscribed.
+        /// </summary>
+        public IObservable<CategoryConfigInfo> UpdateToCI { get; private set; }
+        private Subject<CategoryConfigInfo> _updateToCI;
+
         public CategoryConfigViewModel(CategoryConfigInfo ci)
         {
             _meetingInfo = ci;
@@ -121,6 +128,10 @@ namespace IWalker.ViewModels
             this.WhenAny(x => x.IsSubscribed, x => x.Value)
                 .Where(isSubscribed => !isSubscribed)
                 .Subscribe(x => IsDisplayedOnMainPage = false);
+
+            // Setup the logic for subscribing (or not).
+            _updateToCI = new Subject<CategoryConfigInfo>();
+            UpdateToCI = _updateToCI;
         }
     }
 }
