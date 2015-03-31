@@ -35,7 +35,7 @@
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
                     <TextBlock Text="All Calenders" Grid.Column="1" VerticalAlignment="Center" Style="{StaticResource HeaderTextBlockStyle}"/>
-                    <local:ErrorUserControl x:Name="ErrorListing" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center"/>
+                    <local:ErrorUserControl x:Name="ErrorListing" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,10,0"/>
                 </Grid>
                 <Grid Grid.Row="1">
                     <Grid.ColumnDefinitions>
