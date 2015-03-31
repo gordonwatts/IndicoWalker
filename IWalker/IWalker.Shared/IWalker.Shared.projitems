@@ -55,6 +55,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryConfigViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryURIViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ErrorUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MainPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\MeetingPageViewModel.cs" />
@@ -68,6 +69,9 @@
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\CategoryURIUserControl.xaml.cs">
       <DependentUpon>CategoryURIUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="$(MSBuildThisFileDirectory)Views\ErrorUserControl.xaml.cs">
+      <DependentUpon>ErrorUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="$(MSBuildThisFileDirectory)Views\FileView.xaml.cs">
       <DependentUpon>FileView.xaml</DependentUpon>
@@ -89,6 +93,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="$(MSBuildThisFileDirectory)Views\CategoryURIUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="$(MSBuildThisFileDirectory)Views\ErrorUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

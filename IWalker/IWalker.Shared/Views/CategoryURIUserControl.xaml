@@ -10,7 +10,7 @@
     d:DesignWidth="400">
     
     <Grid>
-        <GridView Grid.Row="1" SelectionMode="None" IsItemClickEnabled="True" x:Name="MeetingList" ItemClick="MeetingList_ItemClick" >
+        <GridView SelectionMode="None" IsItemClickEnabled="True" x:Name="MeetingList" ItemClick="MeetingList_ItemClick" >
             <GridView.ItemTemplate>
                 <DataTemplate>
                     <StackPanel Orientation="Vertical" Width="500">

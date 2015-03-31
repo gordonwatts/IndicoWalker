@@ -42,11 +42,13 @@ namespace IWalker.ViewModels
             // When an error shows up...
             errors
                 .Select(_ => true)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .ToProperty(this, x => x.ErrorSeen, out _haveSeenError, false);
 
             // Cache the error stream as its shows up.
             var bld = new StringBuilder();
             errors
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(e =>
                 {
                     bld.Clear();
@@ -57,7 +59,8 @@ namespace IWalker.ViewModels
             ViewRequest = ReactiveCommand.Create();
             DisplayErrors = ViewRequest
                 .Select(_ => bld.ToString())
-                .Where(msg => !string.IsNullOrWhiteSpace(msg));
+                .Where(msg => !string.IsNullOrWhiteSpace(msg))
+                .ObserveOn(RxApp.MainThreadScheduler);
         }
     }
 }

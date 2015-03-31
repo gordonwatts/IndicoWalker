@@ -6,6 +6,7 @@ using Splat;
 using System;
 using System.Linq;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 
 namespace IWalker.ViewModels
 {
@@ -31,18 +32,37 @@ namespace IWalker.ViewModels
         public IObservable<MeetingPageViewModel> MeetingToVisit { get; private set; }
 
         /// <summary>
+        /// View model for errors that we find.
+        /// </summary>
+        public ErrorUserControlViewModel ErrorsVM { get; private set; }
+
+        /// <summary>
         /// Init ourselves with a new meeting ref
         /// </summary>
         /// <param name="meetings"></param>
         public CategoryURIViewModel(IMeetingListRef meetings)
         {
-            // Get the list of items we are going to show.
+            // Get the list of items we are going to show. If there
+            // is an error we should display it.
             MeetingList = new ReactiveList<IMeetingRefExtended>();
-            meetings.FetchAndUpdateRecentMeetings()
+            var meetingStream = meetings.FetchAndUpdateRecentMeetings()
+                .Publish();
+
+            meetingStream
                 .OnErrorResumeNext(Observable.Empty<IMeetingRefExtended[]>())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(m => SetMeetings(m));
 
+            var errorStream = new Subject<Exception>();
+            ErrorsVM = new ErrorUserControlViewModel(errorStream);
+
+            meetingStream
+                .Subscribe(_ => { },
+                except => errorStream.OnNext(except));
+
+            meetingStream.Connect();
+
+            // When the user wants to view one of the meetings we are showing
             ViewMeeting = ReactiveCommand.Create();
             MeetingToVisit = ViewMeeting
                 .Select(m => m as IMeetingRefExtended)

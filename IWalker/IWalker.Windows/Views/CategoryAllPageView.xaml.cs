@@ -22,6 +22,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel);
             this.Bind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel);
             this.OneWayBind(ViewModel, x => x.ValidCategorySelected, y => y.DetailsGrid.Visibility);
+            this.OneWayBind(ViewModel, x => x.CategoryFullListVM.ErrorsVM, y => y.ErrorListing.ViewModel);
 
             // Run the master/detail stuff
             Observable.FromEventPattern<SelectionChangedEventArgs>(CategoryNames, "SelectionChanged")
