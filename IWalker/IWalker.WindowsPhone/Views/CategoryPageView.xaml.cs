@@ -17,6 +17,7 @@ namespace IWalker.Views
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel);
             this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel);
+            this.OneWayBind(ViewModel, x => x.CategoryListing.ErrorsVM, y => y.ErrorDisplay.ViewModel);
         }
 
         /// <summary>

@@ -23,6 +23,7 @@
         <StackPanel Grid.Row="0" Margin="19,0,0,0">
             <TextBlock Text="Meeting List" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
             <local:CategoryConfigUserControl x:Name="CategoryConfigView" />
+            <local:ErrorUserControl x:Name="ErrorDisplay" HorizontalAlignment="Center" VerticalAlignment="Center" />
         </StackPanel>
         <local:CategoryURIUserControl Grid.Row="1" x:Name="CategoryView" Margin="10,0" />
     </Grid>
