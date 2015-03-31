@@ -184,8 +184,9 @@
     <Reference Include="CGenT.Sprache">
       <HintPath>..\packages\CGenT.Sprache.1.0\lib\portable-net40+sl50+win+wpa81+wp80\CGenT.Sprache.dll</HintPath>
     </Reference>
-    <Reference Include="iCal.PCL">
-      <HintPath>..\packages\iCal.PCL.1.0.2\lib\portable-net40+win+wpa81\iCal.PCL.dll</HintPath>
+    <Reference Include="iCal.PCL, Version=1.0.4.0, Culture=neutral, processorArchitecture=MSIL">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\packages\iCal.PCL.1.0.4\lib\portable-net40+win+wpa81\iCal.PCL.dll</HintPath>
     </Reference>
     <Reference Include="IndicoInterface.NET, Version=1.3.8.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>

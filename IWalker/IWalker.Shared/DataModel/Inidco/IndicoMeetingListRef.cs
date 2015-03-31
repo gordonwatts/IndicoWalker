@@ -6,6 +6,7 @@ using System.Collections.Generic;
 using System.Text;
 using System.Threading.Tasks;
 using Newtonsoft.Json;
+using iCal.PCL.Serialization;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -59,11 +60,17 @@ namespace IWalker.DataModel.Inidco
         /// </summary>
         public async Task<IEnumerable<IMeetingRefExtended>> GetMeetings(int goingBackDays)
         {
-            var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
-            var apiInfo = IndicoApiKeyAccess.GetKey(aCategory.AgendaSite);
-            var meetings = await al.GetCategory(aCategory, goingBackDays, apiInfo == null ? null : apiInfo.ApiKey, apiInfo == null ? null: apiInfo.SecretKey);
+            try
+            {
+                var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
+                var apiInfo = IndicoApiKeyAccess.GetKey(aCategory.AgendaSite);
+                var meetings = await al.GetCategory(aCategory, goingBackDays, apiInfo == null ? null : apiInfo.ApiKey, apiInfo == null ? null : apiInfo.SecretKey);
 
-            return meetings.Select(m => new IndicoMeetingExtendedRef(m)).Cast<IMeetingRefExtended>().ToArray();
+                return meetings.Select(m => new IndicoMeetingExtendedRef(m)).Cast<IMeetingRefExtended>().ToArray();
+            } catch (iCalDeserializationException e)
+            {
+                throw new InvalidOperationException(string.Format("Can't Indico category reply: {0}.", e.ParseText));
+            }
         }
 
         /// <summary>
