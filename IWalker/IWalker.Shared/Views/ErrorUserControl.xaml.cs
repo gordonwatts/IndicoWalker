@@ -24,7 +24,9 @@ namespace IWalker.Views
                     vm.DisplayErrors.Subscribe(msg =>
                     {
                         var dlg = new MessageDialog(msg, "Error Encountered Loading Category");
+#pragma warning disable 4014
                         dlg.ShowAsync();
+#pragma warning restore 4014
                     });
                 });
             this.BindCommand(ViewModel, x => x.ViewRequest, y => y.DisplayError);
