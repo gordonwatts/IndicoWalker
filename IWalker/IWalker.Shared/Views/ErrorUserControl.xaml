@@ -10,6 +10,45 @@
     d:DesignWidth="400">
     
     <Grid>
-        <Button x:Name="DisplayError"/>
+        <Button x:Name="DisplayError" FontFamily="Global User Interface">
+        	<Button.Resources>
+        		<ControlTemplate x:Key="ExclamationPoint" TargetType="Button">
+        			<Grid x:Name="grid" RenderTransformOrigin="0.5,0.5" Width="40" Height="40">
+        				<Grid.RenderTransform>
+        					<CompositeTransform/>
+        				</Grid.RenderTransform>
+        				<VisualStateManager.VisualStateGroups>
+        					<VisualStateGroup x:Name="CommonStates">
+        						<VisualStateGroup.Transitions>
+        							<VisualTransition GeneratedDuration="0:0:0.2"/>
+        						</VisualStateGroup.Transitions>
+        						<VisualState x:Name="Normal"/>
+        						<VisualState x:Name="Pressed">
+        							<Storyboard>
+        								<DoubleAnimation Duration="0" To="0" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.TranslateY)" Storyboard.TargetName="grid" d:IsOptimized="True"/>
+        								<DoubleAnimation Duration="0" To="-10" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.SkewY)" Storyboard.TargetName="grid" d:IsOptimized="True"/>
+        								<DoubleAnimation Duration="0" To="0" Storyboard.TargetProperty="(UIElement.RenderTransform).(CompositeTransform.SkewX)" Storyboard.TargetName="grid" d:IsOptimized="True"/>
+        							</Storyboard>
+        						</VisualState>
+        						<VisualState x:Name="Disabled"/>
+        						<VisualState x:Name="PointerOver">
+        							<Storyboard>
+        								<ColorAnimation Duration="0" To="#FF850000" Storyboard.TargetProperty="(TextBlock.Foreground).(SolidColorBrush.Color)" Storyboard.TargetName="textBlock" d:IsOptimized="True"/>
+        								<ColorAnimation Duration="0" To="Red" Storyboard.TargetProperty="(Shape.Fill).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse" d:IsOptimized="True"/>
+        								<ColorAnimation Duration="0" To="#FF850000" Storyboard.TargetProperty="(Shape.Stroke).(SolidColorBrush.Color)" Storyboard.TargetName="ellipse1" d:IsOptimized="True"/>
+        							</Storyboard>
+        						</VisualState>
+        					</VisualStateGroup>
+        				</VisualStateManager.VisualStateGroups>
+        				<Ellipse x:Name="ellipse1" HorizontalAlignment="Left" Height="40" Stroke="Red" VerticalAlignment="Top" Width="40"/>
+        				<TextBlock x:Name="textBlock" HorizontalAlignment="Center" TextWrapping="Wrap" Text="!" VerticalAlignment="Top" FontSize="32" Margin="0" Foreground="Red"/>
+        				<Ellipse x:Name="ellipse" HorizontalAlignment="Left" Height="40" Stroke="Red" VerticalAlignment="Top" Width="40" Fill="Red" Opacity="0"/>
+        			</Grid>
+        		</ControlTemplate>
+        	</Button.Resources>
+        	<Button.Template>
+        		<StaticResource ResourceKey="ExclamationPoint"/>
+        	</Button.Template>
+        </Button>
     </Grid>
 </UserControl>
