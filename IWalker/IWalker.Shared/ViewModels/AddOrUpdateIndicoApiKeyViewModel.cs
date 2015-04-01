@@ -84,8 +84,9 @@ namespace IWalker.ViewModels
             }
 
             // Setup the add and update commands to work correctly.
+            // A missing secret key is allowed.
             var addCanExe = this.WhenAny(x => x.SiteName, x => x.ApiKey, x => x.SecretKey, (site, apik, seck) => Tuple.Create(site.Value, apik.Value, seck.Value))
-                .Select(x => !string.IsNullOrWhiteSpace(x.Item1) && !string.IsNullOrWhiteSpace(x.Item2) && !string.IsNullOrWhiteSpace(x.Item3));
+                .Select(x => !string.IsNullOrWhiteSpace(x.Item1) && !string.IsNullOrWhiteSpace(x.Item2));
             AddUpdateCommand = ReactiveCommand.Create(addCanExe);
 
             var isKnownSite = new ReplaySubject<bool>(1);
