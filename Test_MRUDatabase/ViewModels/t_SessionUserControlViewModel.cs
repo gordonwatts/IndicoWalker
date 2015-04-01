@@ -15,18 +15,28 @@ namespace Test_MRUDatabase.ViewModels
         public void NormalSession()
         {
             var mtng = new dummyMeeting();
-            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>());
+            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>(), false);
             var j = sVM.IsProperTitledSession;
 
             Assert.IsTrue(sVM.IsProperTitledSession);
         }
 
         [TestMethod]
+        public void NormalSingleSession()
+        {
+            var mtng = new dummyMeeting();
+            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>(), true);
+            var j = sVM.IsProperTitledSession;
+
+            Assert.IsFalse(sVM.IsProperTitledSession);
+        }
+
+        [TestMethod]
         public void FakeSession()
         {
             var mtng = new dummyMeeting();
-            (mtng.Sessions[0] as dummySession).Title = "yoman";
-            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>());
+            (mtng.Sessions[0] as dummySession).Title = "<ad-hoc session>";
+            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>(), false);
             var j = sVM.IsProperTitledSession;
 
             Assert.IsFalse(sVM.IsProperTitledSession);
@@ -37,7 +47,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             var mtng = new dummyMeeting();
             (mtng.Sessions[0] as dummySession).Title = "a grand session";
-            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>());
+            var sVM = new SessionUserControlViewModel(mtng.Sessions[0], Observable.Empty<ISession[]>(), false);
             var j = sVM.Title;
 
             Assert.AreEqual("a grand session", sVM.Title);

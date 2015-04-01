@@ -66,6 +66,12 @@ namespace Test_MRUDatabase
         {
             get { return "1"; }
         }
+
+
+        public bool IsPlaceHolderSession
+        {
+            get { return "<ad-hoc session>" == Title; }
+        }
     }
 
     class dummyTalk : ITalk
