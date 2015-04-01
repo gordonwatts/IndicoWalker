@@ -22,7 +22,7 @@ namespace IWalker.ViewModels
         {
             // Initial default values
             HostScreen = hs;
-            Talks = new ReactiveList<TalkUserControlViewModel>();
+            Sessions = new ReactiveList<SessionUserControlViewModel>();
 
             // And start off a background guy to populate everything.
             LoadMeeting(mRef);
@@ -118,14 +118,14 @@ namespace IWalker.ViewModels
                 .Select(dt => dt.ToString())
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
-            ldrCmdReady
+            var ldrSessions = ldrCmdReady
                 .Select(m => m.Sessions)
-                .Where(s => s != null && s.Length > 0)
-                .Select(s => s[0])
-                .Where(t => t.Talks != null)
-                .Select(t => t.Talks)
+                .Where(s => s != null && s.Length > 0);
+
+            ldrSessions
+                .Select(s => s.OrderBy(ss => ss.StartTime).ToArray())
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(talks => SetAsTalks(talks));
+                .Subscribe(sessions => SetAsSessions(sessions, ldrSessions));
 
             // And mark this meeting as having been viewed by the user!
             var db = Locator.Current.GetService<IMRUDatabase>();
@@ -159,21 +159,22 @@ namespace IWalker.ViewModels
         /// Given the talk list, make our current list look like it.
         /// We integrate the current talks into the current list.
         /// </summary>
-        /// <param name="talks"></param>
-        private void SetAsTalks(ITalk[] talks)
+        /// <param name="sessions"></param>
+        private void SetAsSessions(ISession[] sessions, IObservable<ISession[]> ldrSessions)
         {
-            Debug.WriteLine("Setting up display for {0} talks.", talks.Length);
+            Debug.WriteLine("Setting up display for {0} sessions.", sessions.Length);
             // Normally, we'd want to use this. However, this causes a total list reset,
             // and often the below code will not touch the list at all.
             //using (Talks.SuppressChangeNotifications())
             {
-                Talks.MakeListLookLike(talks,
-                    (oItem, dItem) => oItem.Talk.Equals(dItem),
-                    dItem => new TalkUserControlViewModel(dItem)
+                Sessions.MakeListLookLike(sessions,
+                    (oItem, dItem) => oItem.Id == dItem.Id,
+                    dItem => new SessionUserControlViewModel(dItem, ldrSessions)
                     );
             }
-            Debug.WriteLine("  Display now contains {0} talks.", Talks.Count);
+            Debug.WriteLine("  Display now contains {0} Sessions.", Sessions.Count);
         }
+
 
         /// <summary>
         /// Track the home screen.
@@ -201,7 +202,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get the list of talks
         /// </summary>
-        public ReactiveList<TalkUserControlViewModel> Talks { get; private set; }
+        public ReactiveList<SessionUserControlViewModel> Sessions { get; private set; }
 
         /// <summary>
         /// Where we will be located.

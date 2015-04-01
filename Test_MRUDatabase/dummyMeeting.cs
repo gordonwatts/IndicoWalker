@@ -46,8 +46,26 @@ namespace Test_MRUDatabase
         public dummySession()
         {
             Talks = new ITalk[] { new dummyTalk() };
+            Title = "session title";
         }
         public ITalk[] Talks { get; set; }
+
+
+        public DateTime StartTime
+        {
+            get { return DateTime.Now; }
+        }
+
+        public string Title
+        {
+            get;
+            set;
+        }
+
+        public string Id
+        {
+            get { return "1"; }
+        }
     }
 
     class dummyTalk : ITalk
@@ -71,13 +89,13 @@ namespace Test_MRUDatabase
         [JsonIgnore]
         public DateTime StartTime
         {
-            get { throw new NotImplementedException(); }
+            get { return DateTime.Now; }
         }
 
         [JsonIgnore]
         public DateTime EndTime
         {
-            get { throw new NotImplementedException(); }
+            get { return DateTime.Now; }
         }
     }
 

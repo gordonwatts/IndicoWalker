@@ -83,6 +83,24 @@ namespace IWalker.DataModel.Inidco
             /// Track the key for the meeting.
             /// </summary>
             public string _key { get; set; }
+
+            [JsonIgnore]
+            public DateTime StartTime
+            {
+                get { return aSession.StartDate; }
+            }
+
+            [JsonIgnore]
+            public string Title
+            {
+                get { return aSession.Title; }
+            }
+
+            [JsonIgnore]
+            public string Id
+            {
+                get { return aSession.ID; }
+            }
         }
 
         /// <summary>
