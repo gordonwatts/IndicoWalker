@@ -141,9 +141,9 @@
       <SpecificVersion>False</SpecificVersion>
       <HintPath>..\..\packages\iCal.PCL.1.0.4\lib\portable-net40+win+wpa81\iCal.PCL.dll</HintPath>
     </Reference>
-    <Reference Include="IndicoInterface.NET, Version=1.3.8.0, Culture=neutral, processorArchitecture=MSIL">
+    <Reference Include="IndicoInterface.NET, Version=1.3.9.0, Culture=neutral, processorArchitecture=MSIL">
       <SpecificVersion>False</SpecificVersion>
-      <HintPath>..\..\packages\IndicoInterface.NET.1.3.8\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
+      <HintPath>..\..\packages\IndicoInterface.NET.1.3.9\lib\portable-net451+win81+wpa81\IndicoInterface.NET.dll</HintPath>
     </Reference>
     <Reference Include="Newtonsoft.Json">
       <HintPath>..\..\packages\Newtonsoft.Json.6.0.3\lib\portable-net45+wp80+win8+wpa81\Newtonsoft.Json.dll</HintPath>
