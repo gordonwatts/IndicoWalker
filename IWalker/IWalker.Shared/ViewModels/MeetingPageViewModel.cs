@@ -169,7 +169,7 @@ namespace IWalker.ViewModels
             {
                 Sessions.MakeListLookLike(sessions,
                     (oItem, dItem) => oItem.Id == dItem.Id,
-                    dItem => new SessionUserControlViewModel(dItem, ldrSessions)
+                    dItem => new SessionUserControlViewModel(dItem, ldrSessions, sessions.Length == 1)
                     );
             }
             Debug.WriteLine("  Display now contains {0} Sessions.", Sessions.Count);

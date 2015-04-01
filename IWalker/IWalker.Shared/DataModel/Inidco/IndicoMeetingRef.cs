@@ -101,6 +101,16 @@ namespace IWalker.DataModel.Inidco
             {
                 get { return aSession.ID; }
             }
+
+            /// <summary>
+            /// If this session is one that was made up during the parsing just to make things fit in a uniform model,
+            /// then we should "ignore" it. The code is done just by the title.
+            /// </summary>
+            [JsonIgnore]
+            public bool IsPlaceHolderSession
+            {
+                get { return aSession.Title == "<ad-hoc session>"; }
+            }
         }
 
         /// <summary>

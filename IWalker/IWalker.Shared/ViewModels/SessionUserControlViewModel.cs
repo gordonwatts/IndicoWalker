@@ -47,7 +47,7 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="dItem"></param>
         /// <param name="ldrSessions"></param>
-        public SessionUserControlViewModel(DataModel.Interfaces.ISession dItem, IObservable<DataModel.Interfaces.ISession[]> ldrSessions)
+        public SessionUserControlViewModel(DataModel.Interfaces.ISession dItem, IObservable<DataModel.Interfaces.ISession[]> ldrSessions, bool isSingleSessionMeeting)
         {
             // Cache the ID. This will help with updates later on.
             Id = dItem.Id;
@@ -66,7 +66,7 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.Title, out _title, "");
 
             inCommingSessionUpdates
-                .Select(s => s.Title != "yoman")
+                .Select(s => !s.IsPlaceHolderSession && !isSingleSessionMeeting)
                 .ToProperty(this, x => x.IsProperTitledSession, out _isProperTitledSession, true);
 
             Talks = new ReactiveList<TalkUserControlViewModel>();

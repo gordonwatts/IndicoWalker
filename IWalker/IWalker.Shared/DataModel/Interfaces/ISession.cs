@@ -23,5 +23,11 @@ namespace IWalker.DataModel.Interfaces
         /// A unique ID for a sesson
         /// </summary>
         string Id { get; }
+
+        /// <summary>
+        /// Return true if this is a place holder session - in short, its title, etc., should
+        /// not be displayed to the user
+        /// </summary>
+        bool IsPlaceHolderSession { get; }
     }
 }

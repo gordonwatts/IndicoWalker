@@ -16,7 +16,9 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             this.OneWayBind(ViewModel, x => x.Title, y => y.SessionTitle.Text);
+            this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.SessionTitle.Visibility, isProper => isProper ? Visibility.Visible : Visibility.Collapsed);
             this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.ItemsSource);
+            this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.TalkList.Margin, isProper => isProper ? new Thickness(40, 0, 0, 0) : new Thickness(0, 0, 0, 0));
         }
 
         /// <summary>
