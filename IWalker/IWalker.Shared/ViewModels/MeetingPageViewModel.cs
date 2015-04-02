@@ -133,9 +133,11 @@ namespace IWalker.ViewModels
                 .Where(ds => ds.Length > 0)
                 .Take(1)
                 .Subscribe(ds => DisplayDay = ds[0]);
-            Days = new ReactiveList<DateTime>();
+            Days = new ReactiveList<string>();
             days
-                .Subscribe(ds => Days.MakeLookLike(ds));
+                .Select(lst => lst.Select(dt => string.Format("{0} ({1})", dt.DayOfWeek, dt.ToString("dd MMMM"))).ToArray())
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(ds => Days.MakeListLookLike(ds));
 
             // When we have a set of sessions, only display the day we want to show.
             var theDaysSessions = Observable.Zip(ldrSessions, this.ObservableForProperty(x => x.DisplayDay), (ses, day) => Tuple.Create(ses, day.Value))
@@ -227,7 +229,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// A list of the days this meeting covers for multi-day meetings
         /// </summary>
-        public ReactiveList<DateTime> Days { get; private set; }
+        public ReactiveList<string> Days { get; private set; }
 
         /// <summary>
         /// The day/date we should be displaying.
