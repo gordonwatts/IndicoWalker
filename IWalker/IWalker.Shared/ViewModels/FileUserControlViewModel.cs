@@ -98,7 +98,6 @@ namespace IWalker.ViewModels
             cmdDownloadNow.IsExecuting
                 .CombineLatest(seenFirstFile.StartWith(false), (isExe, seenFF) => isExe && !seenFF)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Do(x => Debug.WriteLine("We are executing: {0}", x))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
             bogus = _isDownloading.Value;
 
