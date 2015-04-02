@@ -129,18 +129,28 @@ namespace IWalker.ViewModels
                                group s.StartTime by s.StartTime.DayOfYear).Select(sgroup => sgroup.First()).Select(dt => new DateTime(dt.Year, dt.Month, dt.Day)).ToArray();
 
             // Select the first item on the list of days.
+            // Give it a reasonable initial value so when everything is wired up we don't get a crash.
+            DisplayDayIndex = -1;
+            Days = new ReactiveList<DateTime>();
             days
-                .Where(ds => ds.Length > 0)
-                .Take(1)
-                .Subscribe(ds => DisplayDay = ds[0]);
-            Days = new ReactiveList<string>();
-            days
-                .Select(lst => lst.Select(dt => string.Format("{0} ({1})", dt.DayOfWeek, dt.ToString("dd MMMM"))).ToArray())
+                //.Select(lst => lst.Select(dt => string.Format("{0} ({1})", dt.DayOfWeek, dt.ToString("dd MMMM"))).ToArray())
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(ds => Days.MakeListLookLike(ds));
+                .Subscribe(ds =>
+                {
+                    Days.MakeListLookLike(ds);
+                    if (DisplayDayIndex == -1)
+                    {
+                        DisplayDayIndex = 0;
+                    }
+                });
 
             // When we have a set of sessions, only display the day we want to show.
-            var theDaysSessions = Observable.Zip(ldrSessions, this.ObservableForProperty(x => x.DisplayDay), (ses, day) => Tuple.Create(ses, day.Value))
+            var selectedByUserDay = this.ObservableForProperty(x => x.DisplayDayIndex)
+                .Select(v => v.Value)
+                .Where(v => v >= 0)
+                .DistinctUntilChanged()
+                .Select(index => Days[index]);
+            var theDaysSessions = Observable.Zip(ldrSessions, selectedByUserDay, (ses, day) => Tuple.Create(ses, day))
                 .Select(x => x.Item1.Where(s => s.StartTime.DayOfYear == x.Item2.DayOfYear));
 
             // And prepare them for display
@@ -229,17 +239,17 @@ namespace IWalker.ViewModels
         /// <summary>
         /// A list of the days this meeting covers for multi-day meetings
         /// </summary>
-        public ReactiveList<string> Days { get; private set; }
+        public ReactiveList<DateTime> Days { get; private set; }
 
         /// <summary>
         /// The day/date we should be displaying.
         /// </summary>
-        public DateTime DisplayDay
+        public int DisplayDayIndex
         {
-            get { return _displayDay; }
-            set { this.RaiseAndSetIfChanged(ref _displayDay, value); }
+            get { return _displayDayIndex; }
+            set { this.RaiseAndSetIfChanged(ref _displayDayIndex, value); }
         }
-        private DateTime _displayDay;
+        private int _displayDayIndex;
 
         /// <summary>
         /// Where we will be located.
