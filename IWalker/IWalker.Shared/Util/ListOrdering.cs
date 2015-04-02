@@ -75,7 +75,7 @@ namespace IWalker.Util
         /// <param name="desired"></param>
         /// <returns></returns>
         public static void MakeListLookLike<T>(this IList<T> original, IEnumerable<T> desired)
-            where T : class, IEquatable<T>
+            where T : IEquatable<T>
         {
             original.MakeListLookLike(desired, (oItem, dItem) => oItem.Equals(dItem), dItem => dItem);
         }
@@ -90,8 +90,6 @@ namespace IWalker.Util
         /// <param name="compare"></param>
         /// <param name="generate"></param>
         public static void MakeListLookLike<U, T>(this IList<U> original, IEnumerable<T> desired, Func<U, T, bool> compare, Func<T, U> generate)
-            where T : class
-            where U : class
         {
             // Find anything in desired that is already in original.
             var oArray = original.ToArray();
@@ -130,7 +128,7 @@ namespace IWalker.Util
                     original.Add(item);
                     index++;
                 }
-                else if (oArray[index] != item)
+                else if (!oArray[index].Equals(item))
                 {
                     // We need to put this item here, but if it is further down, perhaps we can just delete to it?
                     // If the item is further down, then we should remove everything until this item.
@@ -167,12 +165,11 @@ namespace IWalker.Util
         /// <param name="startPoint"></param>
         /// <param name="item"></param>
         /// <returns></returns>
-        private static bool itemExistsAhead<U>(U[] oArray, int startPoint, object item)
-            where U : class
+        private static bool itemExistsAhead<U>(U[] oArray, int startPoint, U item)
         {
             for (int i = startPoint + 1; i < oArray.Length; i++)
             {
-                if (oArray[i] == item)
+                if (oArray[i].Equals(item))
                     return true;
             }
 
