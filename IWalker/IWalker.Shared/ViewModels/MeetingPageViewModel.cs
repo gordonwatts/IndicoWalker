@@ -122,7 +122,27 @@ namespace IWalker.ViewModels
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0);
 
-            ldrSessions
+            // Multi-day meetings are a bit more complex. Here we take the sessions and extract all the days associated with them.
+            // Day's is a stream of date/times.
+            var days = from meetingSessions in ldrSessions
+                       select (from s in meetingSessions
+                               group s.StartTime by s.StartTime.DayOfYear).Select(sgroup => sgroup.First()).Select(dt => new DateTime(dt.Year, dt.Month, dt.Day)).ToArray();
+
+            // Select the first item on the list of days.
+            days
+                .Where(ds => ds.Length > 0)
+                .Take(1)
+                .Subscribe(ds => DisplayDay = ds[0]);
+            Days = new ReactiveList<DateTime>();
+            days
+                .Subscribe(ds => Days.MakeLookLike(ds));
+
+            // When we have a set of sessions, only display the day we want to show.
+            var theDaysSessions = Observable.Zip(ldrSessions, this.ObservableForProperty(x => x.DisplayDay), (ses, day) => Tuple.Create(ses, day.Value))
+                .Select(x => x.Item1.Where(s => s.StartTime.DayOfYear == x.Item2.DayOfYear));
+
+            // And prepare them for display
+            theDaysSessions
                 .Select(s => s.OrderBy(ss => ss.StartTime).ToArray())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(sessions => SetAsSessions(sessions, ldrSessions));
@@ -203,6 +223,21 @@ namespace IWalker.ViewModels
         /// Get the list of talks
         /// </summary>
         public ReactiveList<SessionUserControlViewModel> Sessions { get; private set; }
+
+        /// <summary>
+        /// A list of the days this meeting covers for multi-day meetings
+        /// </summary>
+        public ReactiveList<DateTime> Days { get; private set; }
+
+        /// <summary>
+        /// The day/date we should be displaying.
+        /// </summary>
+        public DateTime DisplayDay
+        {
+            get { return _displayDay; }
+            set { this.RaiseAndSetIfChanged(ref _displayDay, value); }
+        }
+        private DateTime _displayDay;
 
         /// <summary>
         /// Where we will be located.

@@ -21,6 +21,7 @@ namespace IWalker.Views
             this.Bind(ViewModel, x => x.StartTime, y => y.StartTime.Text);
             this.OneWayBind(ViewModel, x => x.Sessions, y => y.SessionList.ItemsSource);
             this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
+            this.OneWayBind(ViewModel, x => x.Days, y => y.ConferenceDayPicker.ItemsSource);
         }
 
         /// <summary>
