@@ -150,7 +150,7 @@ namespace IWalker.ViewModels
                 .Where(v => v >= 0)
                 .DistinctUntilChanged()
                 .Select(index => Days[index]);
-            var theDaysSessions = Observable.Zip(ldrSessions, selectedByUserDay, (ses, day) => Tuple.Create(ses, day))
+            var theDaysSessions = Observable.CombineLatest(ldrSessions, selectedByUserDay, (ses, day) => Tuple.Create(ses, day))
                 .Select(x => x.Item1.Where(s => s.StartTime.DayOfYear == x.Item2.DayOfYear));
 
             // And prepare them for display
