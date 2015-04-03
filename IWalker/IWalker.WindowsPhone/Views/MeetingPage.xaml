@@ -23,7 +23,16 @@
         <StackPanel Grid.Row="0" Margin="19,0,0,0">
             <TextBlock Text="Meeting" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
             <TextBlock Name="MeetingTitle" Text="page title" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
-            <TextBlock Name="StartTime" Text="12/10/2014 11:11:33 PM" Style="{StaticResource BodyTextBlockStyle}" />
+            <Grid>
+                <TextBlock Name="StartTime" Text="12/10/2014 11:11:33 PM" Style="{StaticResource BodyTextBlockStyle}" HorizontalAlignment="Left" VerticalAlignment="Top" Margin="0,0,0,8" />
+                <ComboBox x:Name="ConferenceDayPicker" Grid.Row="0" HorizontalAlignment="Right" VerticalAlignment="Center" >
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DayOfWeek}"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+            </Grid>
         </StackPanel>
 
         <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,0,19,0">
@@ -31,13 +40,6 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="437*"/>
             </Grid.RowDefinitions>
-            <ComboBox x:Name="ConferenceDayPicker" Grid.Row="0" HorizontalAlignment="Center" >
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                        <TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
             <ScrollViewer HorizontalScrollMode="Disabled" Grid.Row="1">
                 <ItemsControl x:Name="SessionList"/>
             </ScrollViewer>
