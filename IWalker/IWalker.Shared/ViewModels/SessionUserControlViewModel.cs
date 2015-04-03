@@ -41,6 +41,8 @@ namespace IWalker.ViewModels
         /// </summary>
         public string Id { get; private set; }
 
+        public DateTime StartTime { get; private set; }
+
         /// <summary>
         /// Setup the VM to display the session. We are given an inital set of talks, as well as a session of updates
         /// for future talks.
@@ -51,13 +53,14 @@ namespace IWalker.ViewModels
         {
             // Cache the ID. This will help with updates later on.
             Id = dItem.Id;
+            StartTime = dItem.StartTime;
 
             // The stream of talks, which starts with our initial stuff, and then continues on will
             // anything that comes through the update stream.
 
             var inCommingSessionUpdates = Observable.Merge(
                 Observable.Return(dItem),
-                ldrSessions.SelectMany(ses => ses).Where(s => s.Id == Id)
+                ldrSessions.SelectMany(ses => ses).Where(s => s.Id == Id && s.StartTime == StartTime)
                 )
                 .ObserveOn(RxApp.MainThreadScheduler);
 
