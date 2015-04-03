@@ -23,11 +23,22 @@
         <StackPanel Grid.Row="0" Margin="19,0,0,0">
             <TextBlock Text="Meeting" Style="{ThemeResource TitleTextBlockStyle}" Margin="0,12,0,0"/>
             <TextBlock Name="MeetingTitle" Text="page title" Margin="0,-6.5,0,0" Style="{ThemeResource HeaderTextBlockStyle}" CharacterSpacing="{ThemeResource PivotHeaderItemCharacterSpacing}"/>
-            <TextBlock Name="StartTime" Text="12/10/2014 11:11:33 PM" Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,26.5" />
+            <TextBlock Name="StartTime" Text="12/10/2014 11:11:33 PM" Style="{StaticResource BodyTextBlockStyle}" />
         </StackPanel>
 
-        <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,9.5,19,0">
-            <ScrollViewer HorizontalScrollMode="Disabled">
+        <Grid Grid.Row="1" x:Name="ContentRoot" Margin="19,0,19,0">
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="437*"/>
+            </Grid.RowDefinitions>
+            <ComboBox x:Name="ConferenceDayPicker" Grid.Row="0" HorizontalAlignment="Center" >
+                <ComboBox.ItemTemplate>
+                    <DataTemplate>
+                        <TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left"/>
+                    </DataTemplate>
+                </ComboBox.ItemTemplate>
+            </ComboBox>
+            <ScrollViewer HorizontalScrollMode="Disabled" Grid.Row="1">
                 <ItemsControl x:Name="SessionList"/>
             </ScrollViewer>
         </Grid>
