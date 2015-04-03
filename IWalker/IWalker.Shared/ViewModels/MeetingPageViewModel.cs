@@ -200,7 +200,7 @@ namespace IWalker.ViewModels
             //using (Talks.SuppressChangeNotifications())
             {
                 Sessions.MakeListLookLike(sessions,
-                    (oItem, dItem) => oItem.Id == dItem.Id,
+                    (oItem, dItem) => oItem.Id == dItem.Id && oItem.StartTime == dItem.StartTime,
                     dItem => new SessionUserControlViewModel(dItem, ldrSessions, sessions.Length == 1)
                     );
             }
