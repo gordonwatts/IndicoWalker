@@ -8,7 +8,7 @@ using Windows.UI.Xaml.Controls;
 namespace IWalker.Views
 {
     /// <summary>
-    /// The view for the file slides. We are mostly a list of all the slide images.
+    /// The view for the file slides. We are mostly a list of all the slide thumbnails.
     /// </summary>
     public sealed partial class FileSlidesUserControl : UserControl, IViewFor<FileSlideListViewModel>
     {
