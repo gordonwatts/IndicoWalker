@@ -165,14 +165,21 @@ namespace IWalker.DataModel.Inidco
                     if (_file == null)
                     {
                         // We have to be a little fast/loose with the default file here.
-                        var defaultFile = new TalkMaterial()
+                        if (aTalk.SlideURL != null)
                         {
-                            URL = aTalk.SlideURL,
-                            DisplayFilename = aTalk.DisplayFilename,
-                            FilenameExtension = aTalk.FilenameExtension,
-                            MaterialType = "Slides"
-                        };
-                        _file = new IndicoFile(defaultFile, Key);
+                            var defaultFile = new TalkMaterial()
+                            {
+                                URL = aTalk.SlideURL,
+                                DisplayFilename = aTalk.DisplayFilename,
+                                FilenameExtension = aTalk.FilenameExtension,
+                                MaterialType = "Slides"
+                            };
+                            _file = new IndicoFile(defaultFile, Key);
+                        }
+                        else
+                        {
+                            _file = new IndicoFile(null, Key);
+                        }
                     }
                     return _file;
                 }

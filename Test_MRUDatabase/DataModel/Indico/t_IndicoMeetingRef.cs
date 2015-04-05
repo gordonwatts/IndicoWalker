@@ -123,5 +123,24 @@ namespace Test_MRUDatabase.DataModel.Indico
                 TalkType = TypeOfTalk.Talk
             };
         }
+
+        [TestMethod]
+        public void TalkHasNoMaterial()
+        {
+            var mess = new Talk()
+            {
+                Title = "this is a talk",
+                StartDate = DateTime.Now - TimeSpan.FromMinutes(30),
+                EndDate = DateTime.Now + TimeSpan.FromMinutes(30),
+                ID = "5",
+                SlideURL = null,
+                Speakers = new string[] { },
+                TalkType = TypeOfTalk.Talk,
+                FilenameExtension = null,
+                DisplayFilename = null
+            };
+            var mr = new IndicoMeetingRef.IndicoTalk(mess, "t1");
+            Assert.AreEqual("", mr.TalkFile.FileType);
+        }
     }
 }
