@@ -45,10 +45,5 @@ namespace IWalker.ViewModels
         /// Get the title (for the UI).
         /// </summary>
         public string Title { get; private set; }
-
-#if WINDOWS_APP
-        private readonly Lazy<FileSlideListViewModel> _fileSlides;
-        public FileSlideListViewModel FileSlides { get { return _fileSlides.Value;}}
-#endif
     }
 }
