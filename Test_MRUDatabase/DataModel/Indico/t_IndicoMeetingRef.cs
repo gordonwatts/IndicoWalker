@@ -3,9 +3,6 @@ using IWalker.DataModel.Inidco;
 using IWalker.DataModel.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.DataModel.Indico
@@ -20,8 +17,11 @@ namespace Test_MRUDatabase.DataModel.Indico
         public async Task HeaderDateOnPublicConference()
         {
             // Make sure that we can get back the header date properly.
-            var fileUri = "http://indico.cern.ch/event/336571/session/1/contribution/1/material/slides/0.pdf";
-            var f = new IndicoMeetingRef.IndicoFile(fileUri, "thisIsAFile") as IFile;
+            var fileInfo = new TalkMaterial()
+            {
+                URL = "http://indico.cern.ch/event/336571/session/1/contribution/1/material/slides/0.pdf"
+            };
+            var f = new IndicoMeetingRef.IndicoFile(fileInfo, "thisIsAFile") as IFile;
 
             Assert.AreEqual("1/28/2015 4:53:19 PM +01:00", await f.GetFileDate());
         }
@@ -90,6 +90,26 @@ namespace Test_MRUDatabase.DataModel.Indico
             Assert.IsFalse(tt1.Equals(tt2));
         }
 
+        [TestMethod]
+        public void TalkFileUrlIsAMess()
+        {
+            var mess = new Talk()
+            {
+                Title = "this is a talk",
+                StartDate = DateTime.Now - TimeSpan.FromMinutes(30),
+                EndDate = DateTime.Now + TimeSpan.FromMinutes(30),
+                ID = "5",
+                SlideURL = "https://indico.fnal.gov/getFile.py/access?contribId=13&sessionId=0&resId=0&materialId=slides&confId=9726",
+                Speakers = new string[] { "G. Watts", "M. Verdu", "R. Upton" },
+                TalkType = TypeOfTalk.Talk,
+                FilenameExtension = ".pdf",
+                DisplayFilename = "dude"
+            };
+
+            var mr = new IndicoMeetingRef.IndicoTalk(mess, "t1");
+            Assert.AreEqual("pdf", mr.TalkFile.FileType);
+        }
+
         private Talk MakeTalk()
         {
             return new Talk()
@@ -99,7 +119,7 @@ namespace Test_MRUDatabase.DataModel.Indico
                 EndDate = DateTime.Now + TimeSpan.FromMinutes(30),
                 ID = "5",
                 SlideURL = "https://indico.cern.ch/event/23722/material/0/0.pdf",
-                Speakers = new string[] { "G. Watts", "M. Verdu", "R. Upton"},
+                Speakers = new string[] { "G. Watts", "M. Verdu", "R. Upton" },
                 TalkType = TypeOfTalk.Talk
             };
         }

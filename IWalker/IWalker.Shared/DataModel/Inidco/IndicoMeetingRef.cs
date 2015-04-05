@@ -155,7 +155,7 @@ namespace IWalker.DataModel.Inidco
             private IndicoFile _file;
 
             /// <summary>
-            /// Return the file associated with this talk.
+            /// Return the default file associated with this talk.
             /// </summary>
             [JsonIgnore]
             public IFile TalkFile
@@ -164,7 +164,15 @@ namespace IWalker.DataModel.Inidco
                 {
                     if (_file == null)
                     {
-                        _file = new IndicoFile(aTalk.SlideURL, Key);
+                        // We have to be a little fast/loose with the default file here.
+                        var defaultFile = new TalkMaterial()
+                        {
+                            URL = aTalk.SlideURL,
+                            DisplayFilename = aTalk.DisplayFilename,
+                            FilenameExtension = aTalk.FilenameExtension,
+                            MaterialType = "Slides"
+                        };
+                        _file = new IndicoFile(defaultFile, Key);
                     }
                     return _file;
                 }
@@ -215,22 +223,22 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
-        /// Represents a file on the indico server.
+        /// Represents a file on the indico server, a component of a talk in an agenda somewhere.
         /// </summary>
         public class IndicoFile : IFile
         {
             /// <summary>
             /// Get/Set the URL for the file.
             /// </summary>
-            public Uri _aUrl { get; set; }
+            public TalkMaterial _aFile { get; set; }
 
             /// <summary>
             /// Initialize with the URL for this talk
             /// </summary>
             /// <param name="fileUri"></param>
-            public IndicoFile(string fileUri, string uniqueKey)
+            public IndicoFile(TalkMaterial talkInfo, string uniqueKey)
             {
-                _aUrl = string.IsNullOrWhiteSpace(fileUri) ? null : new Uri(fileUri);
+                _aFile = talkInfo;
                 UniqueKey = uniqueKey;
             }
 
@@ -240,7 +248,7 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public bool IsValid
             {
-                get { return _aUrl != null; }
+                get { return _aFile != null; }
             }
 
             /// <summary>
@@ -250,8 +258,8 @@ namespace IWalker.DataModel.Inidco
             public async Task<StreamReader> GetFileStream()
             {
                 // Get the file, save it to the proper location, and then return it.
-                Debug.WriteLine("  Doing download for {0}", _aUrl.OriginalString);
-                return await IndicoDataFetcher.Fetcher.GetDataFromURL(_aUrl);
+                Debug.WriteLine("  Doing download for {0}", _aFile.URL);
+                return await IndicoDataFetcher.Fetcher.GetDataFromURL(new Uri(_aFile.URL));
             }
 
             /// <summary>
@@ -263,7 +271,7 @@ namespace IWalker.DataModel.Inidco
                 get {
                     if (!IsValid)
                         return "";
-                    return Path.GetExtension(_aUrl.Segments.Last()).Substring(1);
+                    return _aFile.FilenameExtension.Substring(1);
                 }
             }
 
@@ -278,7 +286,7 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public string DisplayName
             {
-                get { return Path.GetFileNameWithoutExtension(_aUrl.OriginalString); }
+                get { return _aFile.DisplayFilename; }
             }
 
             /// <summary>
@@ -287,7 +295,7 @@ namespace IWalker.DataModel.Inidco
             /// <returns></returns>
             public async Task<string> GetFileDate()
             {
-                var headers = await IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(_aUrl);
+                var headers = await IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(new Uri(_aFile.URL));
                 if (!headers.LastModified.HasValue)
                     return "";
                 return headers.LastModified.Value.ToString();
