@@ -13,6 +13,11 @@ namespace IWalker.DataModel.Interfaces
         /// Get the main file that holds the contents of this talk.
         /// </summary>
         IFile TalkFile { get; }
+        
+        /// <summary>
+        /// Returns a list of all talk files
+        /// </summary>
+        IFile[] AllTalkFiles { get; }
 
         /// <summary>
         /// TIme when the talk should start.

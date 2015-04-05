@@ -103,6 +103,12 @@ namespace Test_MRUDatabase
         {
             get { return DateTime.Now; }
         }
+
+
+        public IFile[] AllTalkFiles
+        {
+            get { return new IFile[] { new dummyFile() }; }
+        }
     }
 
     class dummyFile : IFile

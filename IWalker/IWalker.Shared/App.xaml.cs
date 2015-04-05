@@ -60,6 +60,8 @@ namespace IWalker
             Locator.CurrentMutable.Register(() => new CategoryInfoSimpleView(), typeof(IViewFor<CategoryConfigInfo>));
             Locator.CurrentMutable.Register(() => new IndicoApiKeyView(), typeof(IViewFor<IndicoApiKey>));
             Locator.CurrentMutable.Register(() => new SessionUserControl(), typeof(IViewFor<SessionUserControlViewModel>));
+            Locator.CurrentMutable.Register(() => new TalkFileCollectionUserControl(), typeof(IViewFor<TalkFileCollectionUserControlViewModel>));
+            Locator.CurrentMutable.Register(() => new FileView(), typeof(IViewFor<FileUserControlViewModel>));
 #if WINDOWS_APP
             Locator.CurrentMutable.Register(() => new SlideThumbUserControl(), typeof(IViewFor<SlideThumbViewModel>));
             Locator.CurrentMutable.Register(() => new PDFPageUserControl(), typeof(IViewFor<PDFPageViewModel>));

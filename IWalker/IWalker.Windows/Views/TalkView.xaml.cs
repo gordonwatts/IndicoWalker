@@ -1,7 +1,5 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
-using System;
-using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -14,15 +12,7 @@ namespace IWalker.Views
             this.InitializeComponent();
 
             this.Bind(ViewModel, x => x.Title, y => y.TalkTitle.Text);
-            this.OneWayBind(ViewModel, x => x.File, y => y.GoodFile.ViewModel);
-            this.OneWayBind(ViewModel, x => x.HasValidMainFile, y => y.GoodFile.Visibility);
-            this.OneWayBind(ViewModel, x => x.FileSlides, y => y.FileSlides.ViewModel);
-
-            MainGrid.Events().SizeChanged
-                .Select(sg => sg.NewSize.Width)
-                .Select(width => width - 100)
-                .Where(w => w > 10)
-                .Subscribe(w => FileSlides.Width = w);
+            this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource);
         }
 
         /// <summary>

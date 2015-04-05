@@ -137,7 +137,17 @@ namespace IWalker.DataModel.Inidco
             public IndicoTalk(Talk t, string meetingUniqueID)
             {
                 this.aTalk = t;
-                Key = string.Format("{0}/{1}/{2}", meetingUniqueID, t.ID, t.SlideURL);
+                MeetingUniqueID = meetingUniqueID;
+                Key = GenerateTalkFileKey(t.SlideURL);
+            }
+
+            /// <summary>
+            /// Generate a talk file key
+            /// </summary>
+            /// <param name="t"></param>
+            private string GenerateTalkFileKey(string url)
+            {
+                return string.Format("{0}/{1}/{2}", MeetingUniqueID, aTalk.ID, url);
             }
 
             /// <summary>
@@ -227,6 +237,24 @@ namespace IWalker.DataModel.Inidco
             /// </summary>
             [JsonIgnore]
             public DateTime EndTime { get { return aTalk.EndDate; } }
+
+            /// <summary>
+            /// Returns a list of all talk files
+            /// </summary>
+            [JsonIgnore]
+            public IFile[] AllTalkFiles
+            {
+                get {
+                    if (_allTalkFiles == null)
+                    {
+                        _allTalkFiles = aTalk.AllMaterial.Select(t => new IndicoFile(t, GenerateTalkFileKey(t.URL))).ToArray();
+                    }
+                    return _allTalkFiles;
+                }
+            }
+            private IFile[] _allTalkFiles = null;
+
+            public string MeetingUniqueID { get; set; }
         }
 
         /// <summary>
@@ -255,7 +283,7 @@ namespace IWalker.DataModel.Inidco
             [JsonIgnore]
             public bool IsValid
             {
-                get { return _aFile != null; }
+                get { return _aFile != null && !string.IsNullOrWhiteSpace(_aFile.FilenameExtension); }
             }
 
             /// <summary>
