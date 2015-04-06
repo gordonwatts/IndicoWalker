@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.Util;
+using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Reactive.Linq;
@@ -17,7 +18,7 @@ namespace IWalker.Views
         public CategoryAllPageView()
         {
             this.InitializeComponent();
-            this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
+            backButton.WireAsBackButton();
             this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource);
             this.Bind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel);
             this.Bind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel);

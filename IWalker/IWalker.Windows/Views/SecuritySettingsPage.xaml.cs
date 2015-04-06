@@ -1,5 +1,4 @@
-﻿using IWalker.DataModel.Inidco;
-using IWalker.Util;
+﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
@@ -33,7 +32,7 @@ namespace IWalker.Views
             // Feedback for the user.
             this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text);
             this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text);
-            this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
+            backButton.WireAsBackButton();
 
             // When they click find, we have to locate a file and go from there.
             var basicFindFile = Observable.FromEventPattern(FindCert, "Click")

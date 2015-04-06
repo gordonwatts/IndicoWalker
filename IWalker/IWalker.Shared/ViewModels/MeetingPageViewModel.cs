@@ -182,7 +182,7 @@ namespace IWalker.ViewModels
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .SelectMany(_ => d.ShowAsync())
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Do(_ => HostScreen.Router.NavigateBack.Execute(null))
+                .Do(_ => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null))
                 .Where(_ => false)
                 .Select(_ => (IMeeting)null);
         }

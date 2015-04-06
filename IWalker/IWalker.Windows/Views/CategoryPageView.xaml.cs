@@ -1,4 +1,5 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.Util;
+using IWalker.ViewModels;
 using ReactiveUI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,7 +16,7 @@ namespace IWalker.Views
         public CategoryPageView()
         {
             this.InitializeComponent();
-            this.BindCommand(ViewModel, x => x.HostScreen.Router.NavigateBack, y => y.backButton);
+            backButton.WireAsBackButton();
             this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel);
             this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel);
         }

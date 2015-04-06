@@ -1,6 +1,7 @@
 ﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Linq;
 using System.Reactive;
@@ -28,9 +29,9 @@ namespace IWalker.Views
             keyrelease
                 .Where(keys => keys.Key == VirtualKey.Escape)
                 .Do(keys => keys.Handled = true)
-                .Subscribe(e => ViewModel.GoBack.Execute(null));
+                .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
 
-            this.BindCommand(ViewModel, x => x.GoBack, y => y.backButton);
+            backButton.WireAsBackButton();
 
             // Forward and backwards arrows.
             // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
