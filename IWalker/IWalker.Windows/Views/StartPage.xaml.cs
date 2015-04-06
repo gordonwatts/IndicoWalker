@@ -1,5 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -21,20 +22,15 @@ namespace IWalker.Views
 
             this.Bind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext);
             this.Bind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext);
-            this.Loaded += StartPage_Loaded;
-        }
-
-        /// <summary>
-        /// Each time we are re-loaded, update the MRU list.
-        /// </summary>
-        /// <param name="sender"></param>
-        /// <param name="e"></param>
-        void StartPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            ViewModel.LoadRecentMeetings
-                .Execute(null);
-            ViewModel.UpdateUpcomingMeetings
-                .Execute(null);
+            this.WhenActivated(remover =>
+            {
+                GC.Collect();
+                GC.WaitForPendingFinalizers();
+                ViewModel.LoadRecentMeetings
+                    .Execute(null);
+                ViewModel.UpdateUpcomingMeetings
+                    .Execute(null);
+            });
         }
 
         /// <summary>
@@ -72,11 +68,6 @@ namespace IWalker.Views
         private void ListView_ItemClick(object sender, ItemClickEventArgs e)
         {
             ViewModel.OpenUpcomingMeeting.Execute(e.ClickedItem);
-        }
-
-        private void Button_Click(object sender, RoutedEventArgs e)
-        {
-
         }
 
         /// <summary>
