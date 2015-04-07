@@ -106,8 +106,7 @@ namespace IWalker.ViewModels
             var ldrCmd = ReactiveCommand.Create();
             var ldrCmdReady = ldrCmd
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
-                .Catch(MeetingLoadFailed(meeting))
-                .Publish();
+                .Catch(MeetingLoadFailed(meeting));
 
             ldrCmdReady
                 .Select(m => m.Title)
@@ -166,7 +165,6 @@ namespace IWalker.ViewModels
                 .Subscribe(m => db.MarkVisitedNow(m));
 
             // Start everything off.
-            ldrCmdReady.Connect();
             ldrCmd.Execute(null);
         }
 
