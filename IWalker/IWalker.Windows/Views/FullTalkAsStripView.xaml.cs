@@ -130,8 +130,7 @@ namespace IWalker.Views
 
                 // We want to capture key strokes, etc. By default we don't have
                 // the focus, so grab it.
-                disposeOfMe(this.Events().Loaded
-                    .Subscribe(t => Focus(Windows.UI.Xaml.FocusState.Programmatic)));
+                Focus(Windows.UI.Xaml.FocusState.Programmatic);
 
                 // The orientation of this pannel will affect how we calc the arrow key stuff.
                 _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
