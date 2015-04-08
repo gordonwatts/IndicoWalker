@@ -20,36 +20,37 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
 
-            // The image source
-            //this.OneWayBind(ViewModel, x => x.ImageStream, y => y.ThumbImage.Source);
-            this.WhenAny(x => x.ViewModel, x => x.Value)
-                .Where(vm => vm != null)
-                .Subscribe(vm => vm.ImageStream
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .SelectMany(async imageStream =>
-                    {
-                        imageStream.Seek(0, SeekOrigin.Begin);
-                        var bm = new BitmapImage();
-                        await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
-                        imageStream.Dispose();
-                        return bm;
-                    })
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(image => ThumbImage.Source = image));
+            this.WhenActivated(disposeOfMe =>
+            {
+                // The image source
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .Where(vm => vm != null)
+                    .Subscribe(vm => vm.ImageStream
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .SelectMany(async imageStream =>
+                        {
+                            imageStream.Seek(0, SeekOrigin.Begin);
+                            var bm = new BitmapImage();
+                            await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
+                            imageStream.Dispose();
+                            return bm;
+                        })
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Subscribe(image => ThumbImage.Source = image)));
 
-            // Now, when something about our size and rendering stuff changes, we need
-            // to shoot off a rendering request. Don't do it if we have already requested it, however!
-            this.Events().SizeChanged.Select(a => RespectRenderingDimension)
-                .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
-                .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
-                .Where(x => ShowPDF)
-                .Where(t => ViewModel != null)
-                .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
-                .DistinctUntilChanged()
-                .Throttle(TimeSpan.FromMilliseconds(500))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(t => ViewModel.RenderImage.Execute(t));
-
+                // Now, when something about our size and rendering stuff changes, we need
+                // to shoot off a rendering request. Don't do it if we have already requested it, however!
+                disposeOfMe(this.Events().SizeChanged.Select(a => RespectRenderingDimension)
+                    .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
+                    .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
+                    .Where(x => ShowPDF)
+                    .Where(t => ViewModel != null)
+                    .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
+                    .DistinctUntilChanged()
+                    .Throttle(TimeSpan.FromMilliseconds(500))
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(t => ViewModel.RenderImage.Execute(t)));
+            });
         }
 
         /// <summary>
