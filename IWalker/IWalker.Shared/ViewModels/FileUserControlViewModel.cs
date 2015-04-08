@@ -18,11 +18,6 @@ namespace IWalker.ViewModels
     public class FileUserControlViewModel : ReactiveObject
     {
         /// <summary>
-        /// The file we represent.
-        /// </summary>
-        private IFile _file;
-
-        /// <summary>
         /// Returns true if the file is cached locally
         /// </summary>
         public bool FileNotCached { get { return _fileNotCached.Value; } }
@@ -61,18 +56,16 @@ namespace IWalker.ViewModels
         /// <param name="file"></param>
         public FileUserControlViewModel(IFile file)
         {
-            _file = file;
-
             // Save the document type for the UI
-            DocumentTypeString = _file.FileType.ToUpper();
+            DocumentTypeString = file.FileType.ToUpper();
 
             // Extract from cache or download it.
             // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.
-            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => _file.GetFileFromCache());
+            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => file.GetFileFromCache());
             ReactiveCommand<IRandomAccessStream> cmdDownloadNow = null;
-            if (_file.IsValid)
+            if (file.IsValid)
             {
-                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => _file.UpdateFileOnce());
+                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => file.UpdateFileOnce());
             }
             else
             {
@@ -120,11 +113,11 @@ namespace IWalker.ViewModels
             // Requires us to write a file to the local cache.
             ClickedUs
                 .Where(_ => _fileNotCached.Value == false)
-                .SelectMany(_ => _file.GetFileFromCache())
+                .SelectMany(_ => file.GetFileFromCache())
                 .SelectMany(async stream =>
                 {
-                    var fname = string.Format("{1}-{0}.{2}", await _file.GetCacheCreateTime(), _file.DisplayName, _file.FileType).CleanFilename();
-                    var folder = _file.UniqueKey.CleanFilename();
+                    var fname = string.Format("{1}-{0}.{2}", await file.GetCacheCreateTime(), file.DisplayName, file.FileType).CleanFilename();
+                    var folder = file.UniqueKey.CleanFilename();
 
                     // Write the file. If it is already written, then we will just return it (e.g. assume it is the same).
                     // 0x800700B7 (-2147024713) is the error code for file already exists.
@@ -170,8 +163,8 @@ namespace IWalker.ViewModels
                     })
                 .Where(g => g == false)
                 .Subscribe(
-                    g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName)); },
-                    e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", _file.DisplayName), e); }
+                    g => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", file.DisplayName)); },
+                    e => { throw new InvalidOperationException(string.Format("Unable to open file {0}.", file.DisplayName), e); }
                 );
 
             // Init the UI from the cache. We want to do one or the other
