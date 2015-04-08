@@ -103,8 +103,8 @@ namespace IWalker.ViewModels
         {
             // Fetch the guy from the local cache. MeetingLoader will actually return a continuous stream
             // of updates (when there is a difference) if we are close to the meeting time.
-            var ldrCmd = ReactiveCommand.Create();
-            var ldrCmdReady = ldrCmd
+            UpdateData = ReactiveCommand.Create();
+            var ldrCmdReady = UpdateData
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
                 .Catch(MeetingLoadFailed(meeting))
                 .Publish();
@@ -167,7 +167,7 @@ namespace IWalker.ViewModels
 
             // Start everything off.
             ldrCmdReady.Connect();
-            ldrCmd.Execute(null);
+            //ldrCmd.Execute(null);
         }
 
         /// <summary>
@@ -207,7 +207,12 @@ namespace IWalker.ViewModels
             Debug.WriteLine("  Display now contains {0} Sessions.", Sessions.Count);
         }
 
-
+        /// <summary>
+        /// Update. Do this so all subscriptions (like to ToProperties) have been done
+        /// before triggering.
+        /// </summary>
+        public ReactiveCommand<object> UpdateData { get; private set; }
+        
         /// <summary>
         /// Track the home screen.
         /// </summary>

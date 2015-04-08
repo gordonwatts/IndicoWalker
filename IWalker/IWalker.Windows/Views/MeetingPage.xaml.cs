@@ -1,6 +1,8 @@
 ﻿using IWalker.Util;
 using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -28,6 +30,7 @@ namespace IWalker.Views
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.Days, y => y.ConferenceDayPicker.ItemsSource));
                 disposeOfMe(this.Bind(ViewModel, x => x.DisplayDayIndex, y => y.ConferenceDayPicker.SelectedIndex));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.Days.Count, y => y.ConferenceDayPicker.Visibility, cnt => cnt <= 1 ? Visibility.Collapsed : Visibility.Visible));
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).Subscribe(vm => vm.UpdateData.Execute(null)));
             });
         }
 
