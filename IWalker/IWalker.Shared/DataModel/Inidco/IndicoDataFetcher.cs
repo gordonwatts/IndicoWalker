@@ -3,6 +3,7 @@ using IWalker.Util;
 using System;
 using System.IO;
 using System.Threading.Tasks;
+using Windows.Web.Http;
 using Windows.Web.Http.Headers;
 
 namespace IWalker.DataModel.Inidco
@@ -47,8 +48,9 @@ namespace IWalker.DataModel.Inidco
         /// Fetch the response message for a URI.
         /// </summary>
         /// <param name="uri"></param>
+        /// <param name="method">What method should be used</param>
         /// <returns></returns>
-        private async Task<Windows.Web.Http.HttpResponseMessage> FetchURIResponse(Uri uri)
+        private async Task<Windows.Web.Http.HttpResponseMessage> FetchURIResponse(Uri uri, HttpMethod method = null)
         {
             if (!_loadedCERNCert)
             {
@@ -62,7 +64,7 @@ namespace IWalker.DataModel.Inidco
 
             // Do the actual loading. Hopefully with the CERN cert already in there!
 
-            var r = await CERNSSO.WebAccess.GetWebResponse(uri);
+            var r = await CERNSSO.WebAccess.GetWebResponse(uri, method);
             return r;
         }
 
@@ -72,7 +74,7 @@ namespace IWalker.DataModel.Inidco
         /// <returns></returns>
         internal async Task<HttpContentHeaderCollection> GetContentHeadersFromUrl(Uri uri)
         {
-            var r = await FetchURIResponse(uri);
+            var r = await FetchURIResponse(uri, HttpMethod.Head);
             return r.Content.Headers;
         }
     }
