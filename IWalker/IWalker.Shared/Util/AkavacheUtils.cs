@@ -73,7 +73,7 @@ namespace IWalker.Util
                 .SelectMany(_ => fetchFunc())
                 .SelectMany(x => This.InsertObject<T>(key, x, absoluteExpiration).Select(_ => x));
 
-            var items = fetchFromCache.Concat(fetchFromRemote).Multicast(new ReplaySubject<T>()).RefCount();
+            var items = fetchFromCache.Concat(fetchFromRemote);
 
             // Once we have these, we also have to kick off a second set of fetches for our retry sequence.
             if (retrySequence == null)
@@ -114,7 +114,7 @@ namespace IWalker.Util
             var fetchFromCache = Observable.Defer(() => This.GetObject<T>(key))
                 .Catch<T, KeyNotFoundException>(_ => Observable.Empty<T>());
 
-            var items = fetchFromCache.Multicast(new ReplaySubject<T>()).RefCount();
+            var items = fetchFromCache;
 
             // Once we have these, we also have to kick off a second set of fetches for our retry sequence.
             if (requestSequence == null)

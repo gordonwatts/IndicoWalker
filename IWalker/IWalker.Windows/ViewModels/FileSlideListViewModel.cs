@@ -8,7 +8,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
 using Windows.Data.Pdf;
 using Windows.Storage.Streams;
 namespace IWalker.ViewModels
@@ -85,7 +84,8 @@ namespace IWalker.ViewModels
                         checkForSlides.SelectMany(o => f.GetFileFromCache()))
                 );
 
-                // Change them into files
+                // Change them into files.
+                // Recast is currently needed or the file isn't properly re-sent around.
                 var files = renderPDF
                     .SelectMany(async sf =>
                     {
@@ -101,7 +101,7 @@ namespace IWalker.ViewModels
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
                             return Tuple.Create((string)null, (PdfDocument)null);
                         }
-                    }).Multicast(new ReplaySubject<Tuple<string, PdfDocument>>()).RefCount();
+                    });
 
                 // The files are used to go after the items we display
                 var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), files));
