@@ -30,9 +30,9 @@ namespace IWalker.Views
                     }));
 
                 // Run the master/detail stuff
-                Observable.FromEventPattern<ItemClickEventArgs>(CategoryNames, "ItemClick")
+                disposeOfMe(Observable.FromEventPattern<ItemClickEventArgs>(CategoryNames, "ItemClick")
                     .Select(args => args.EventArgs.ClickedItem)
-                    .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
+                    .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args)));
 
                 // Each time the page is shown, make sure to update the list.
                 ViewModel.UpdateCategoryList.Execute(null);
