@@ -74,6 +74,7 @@ namespace IWalker.ViewModels
 
             // Look the render up in the cache. If miss, then do the render
             var newImage = renderRequest
+                .WriteLine("Looking for image for page {0}", page.Index)
                 .SelectMany(szPixels => Blobs.LocalStorage.GetOrFetchObject<byte[]>(MakeCacheKey(page.Index, szPixels.Item1, szPixels.Item2, cacheTag),
                     async () =>
                     {
