@@ -80,6 +80,7 @@ namespace IWalker.ViewModels
                         var ms = new MemoryStream();
                         var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
                         var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
+                        Debug.WriteLine("Rendering page {0}", page.Index);
                         await _page.RenderToStreamAsync(ra, opt);
                         return ms.ToArray();
                     },
