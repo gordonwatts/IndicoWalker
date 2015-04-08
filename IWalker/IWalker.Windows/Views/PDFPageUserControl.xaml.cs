@@ -1,7 +1,9 @@
-﻿using IWalker.ViewModels;
+﻿using IWalker.Util;
+using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using Windows.Foundation;
 using Windows.UI.Xaml;
@@ -40,14 +42,17 @@ namespace IWalker.Views
 
                 // Now, when something about our size and rendering stuff changes, we need
                 // to shoot off a rendering request. Don't do it if we have already requested it, however!
-                disposeOfMe(this.Events().SizeChanged.Select(a => RespectRenderingDimension)
-                    .Merge(this.WhenAny(x => x.ShowPDF, x => RespectRenderingDimension))
-                    .Delay(TimeSpan.FromSeconds(1)).ObserveOn(RxApp.MainThreadScheduler)
-                    .Where(x => ShowPDF)
-                    .Where(t => ViewModel != null)
+                disposeOfMe(this.Events().SizeChanged.Select(a => default(Unit))
+                    .Merge(this.WhenAny(x => x.ShowPDF, x => default(Unit)))
+                    .Throttle(TimeSpan.FromMilliseconds(500))
+                    .StartWith(default(Unit))
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Where(_ => ShowPDF)
+                    .Where(_ => ViewModel != null)
+                    .WriteLine("Going to ask for a image to be rendered")
+                    .Select(_ => RespectRenderingDimension)
                     .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
                     .DistinctUntilChanged()
-                    .Throttle(TimeSpan.FromMilliseconds(500))
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(t => ViewModel.RenderImage.Execute(t)));
             });

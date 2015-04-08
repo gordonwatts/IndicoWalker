@@ -74,6 +74,7 @@ namespace IWalker.Util
             // When the scroller is loaded and when people scroll, we
             // must update who is in and who is out.
             _host.ViewChanged += hostViewChanged;
+            _host.LayoutUpdated += hostLayoutUpdated;
             _host.Loaded += hostLoaded;
         }
 
@@ -84,6 +85,17 @@ namespace IWalker.Util
         {
             _host.ViewChanged -= hostViewChanged;
             _host.Loaded -= hostLoaded;
+            _host.LayoutUpdated -= hostLayoutUpdated;
+        }
+
+        /// <summary>
+        /// When the layout gets updated
+        /// </summary>
+        /// <param name="sender"></param>
+        /// <param name="e"></param>
+        void hostLayoutUpdated(object sender, object e)
+        {
+            UpdateWhoIsInViewPort();
         }
 
         /// <summary>
