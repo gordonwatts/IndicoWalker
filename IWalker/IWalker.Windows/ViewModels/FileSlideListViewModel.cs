@@ -104,7 +104,11 @@ namespace IWalker.ViewModels
                     })
                     .Replay(1);
 
-                // The files are used to go after the items we display
+                // The files are used to go after the items we display.
+                // TODO: The replay above is required in order to make sure that there is somethign to look at below. However,
+                // this means that every single talk is held in memory when it is being viewed - perhaps not really the right thing to do, especially
+                // in large meetings. It might be better to re-request the talk when this gets created, and re-do the render. That would mean
+                // altering the logic above so it could be re-run for the below lazy (at a later time) instantiation.
                 var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), files));
 
                 // The pages now must be changed into thumb-nails for display.
