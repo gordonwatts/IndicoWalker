@@ -7,7 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Threading.Tasks;
 
-namespace Test_MRUDatabase
+namespace Test_MRUDatabase.DataModel.MRU
 {
     [TestClass]
     public class BasicUsage
@@ -154,6 +154,20 @@ namespace Test_MRUDatabase
             Assert.AreEqual("meeting 9", lastM.Title);
         }
 
+        [TestMethod]
+        public async Task UpdateMeetingTitle()
+        {
+            // When we update the MRU, it shouldn't create a new entry! :-)
+            var c = new MRUDatabaseAccess();
+            var m = GenerateSimpleMeeting(DateTime.Now);
+            await c.MarkVisitedNow(m);
+            (m as dummyMeeting).Title = "new title";
+            await c.MarkVisitedNow(m);
+            var allMeetings = await (await c.QueryMRUDB()).ToListAsync();
+            Assert.AreEqual(1, allMeetings.Count);
+            Assert.AreEqual("new title", allMeetings[0].Title);
+        }
+
         /// <summary>
         /// Generate a really simple meeting locally.
         /// </summary>
@@ -177,9 +191,11 @@ namespace Test_MRUDatabase
                 _start = start;
                 _id = id;
             }
+
             public string Title
             {
                 get { return _title; }
+                set { _title = value; }
             }
 
             public ISession[] Sessions

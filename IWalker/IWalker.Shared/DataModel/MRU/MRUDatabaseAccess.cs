@@ -57,6 +57,11 @@ namespace IWalker.DataModel.MRU
             {
                 // Just update a pre-existing object.
                 entry.LastLookedAt = DateTime.Now;
+
+                // And update all the other fields
+                entry.Title = m.Title;
+                entry.StartTime = m.StartTime;
+
                 await _db.AsyncConnection.UpdateAsync(entry);
             }
         }
