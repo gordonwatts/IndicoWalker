@@ -116,8 +116,9 @@ namespace IWalker.ViewModels
                 .SelectMany(_ => file.GetFileFromCache())
                 .SelectMany(async stream =>
                 {
-                    var fname = string.Format("{1}-{0}.{2}", await file.GetCacheCreateTime(), file.DisplayName, file.FileType).CleanFilename();
-                    var folder = file.UniqueKey.CleanFilename();
+                    var fname = string.Format("{0}.{1}", file.DisplayName.CleanFilename(), file.FileType).CleanFilename();
+                    var fdate = await file.GetCacheCreateTime();
+                    var folder = fdate.HasValue ? fdate.Value.ToString().CleanFilename() : "Unknown Cache Time";
 
                     // Write the file. If it is already written, then we will just return it (e.g. assume it is the same).
                     // 0x800700B7 (-2147024713) is the error code for file already exists.
