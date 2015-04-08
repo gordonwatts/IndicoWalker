@@ -21,17 +21,17 @@ namespace IWalker.Views
             this.WhenActivated(disposeOfMe =>
             {
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel));
+
+                // If they mousedown or tap and release in this image, then we want to open
+                // the full screen display starting from this image.
+                var pressed = PDFPageUC.Events().PointerPressed;
+                var released = PDFPageUC.Events().PointerReleased;
+                var when = from pd in pressed
+                           from pu in released
+                           select Unit.Default;
+                disposeOfMe(when.Subscribe(e => ViewModel.OpenFullView.Execute(null)));
             });
 
-            // If they mousedown or tap and release in this image, then we want to open
-            // the full screen display starting from this image.
-            var pressed = PDFPageUC.Events().PointerPressed;
-            var released = PDFPageUC.Events().PointerReleased;
-            var when = from pd in pressed
-                       from pu in released
-                       select Unit.Default;
-            when
-                .Subscribe(e => ViewModel.OpenFullView.Execute(null));
         }
 
         /// <summary>
