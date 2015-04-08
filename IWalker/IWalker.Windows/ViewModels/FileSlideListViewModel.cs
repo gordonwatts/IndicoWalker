@@ -101,7 +101,8 @@ namespace IWalker.ViewModels
                             Debug.WriteLine(string.Format("Error rendering PDF document: '{0}'", e.Message));
                             return Tuple.Create((string)null, (PdfDocument)null);
                         }
-                    });
+                    })
+                    .Replay(1);
 
                 // The files are used to go after the items we display
                 var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), files));
@@ -128,6 +129,7 @@ namespace IWalker.ViewModels
 
                 // Wire it up!
                 pages.Connect();
+                files.Connect();
 
                 // TODO: Normally this would not kick off a download, but in this case
                 // we will until we get a real background store in there. Then we can kick this
