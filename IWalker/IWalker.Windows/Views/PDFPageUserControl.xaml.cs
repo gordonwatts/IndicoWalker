@@ -1,5 +1,4 @@
-﻿using IWalker.Util;
-using IWalker.ViewModels;
+﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.IO;
@@ -44,12 +43,10 @@ namespace IWalker.Views
                 // to shoot off a rendering request. Don't do it if we have already requested it, however!
                 disposeOfMe(this.Events().SizeChanged.Select(a => default(Unit))
                     .Merge(this.WhenAny(x => x.ShowPDF, x => default(Unit)))
-                    .Throttle(TimeSpan.FromMilliseconds(500))
-                    .StartWith(default(Unit))
+                    .Buffer(TimeSpan.FromMilliseconds(250)).Where(l => l != null && l.Count > 0).Select(l => default(Unit))
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Where(_ => ShowPDF)
                     .Where(_ => ViewModel != null)
-                    .WriteLine("Going to ask for a image to be rendered")
                     .Select(_ => RespectRenderingDimension)
                     .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
                     .DistinctUntilChanged()
