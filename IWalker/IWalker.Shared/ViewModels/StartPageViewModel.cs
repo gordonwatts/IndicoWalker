@@ -186,7 +186,7 @@ namespace IWalker.ViewModels
         private void SetMRUMeetings(IEnumerable<MRU> meetings)
         {
             RecentMeetings.MakeListLookLike(meetings,
-                (oItem, dItem) => oItem.IDRef == dItem.IDRef,
+                (oItem, dItem) => oItem.IDRef == dItem.IDRef && oItem.StartTime == dItem.StartTime && oItem.Title == dItem.Title,
                 dItem => dItem
                 );
         }
