@@ -18,15 +18,18 @@ namespace IWalker.Views
         public CategoryURIUserControl()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.MeetingList, y => y.MeetingList.ItemsSource);
-            this.ObservableForProperty(x => x.ViewModel)
-                .Select(x => x.Value)
-                .Where(x => x != null)
-                .Subscribe(vm =>
-                {
-                    vm.MeetingToVisit
-                        .Subscribe(m => Locator.Current.GetService<RoutingState>().Navigate.Execute(m));
-                });
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.MeetingList, y => y.MeetingList.ItemsSource));
+                disposeOfMe(this.ObservableForProperty(x => x.ViewModel)
+                    .Select(x => x.Value)
+                    .Where(x => x != null)
+                    .Subscribe(vm =>
+                    {
+                        disposeOfMe(vm.MeetingToVisit
+                            .Subscribe(m => Locator.Current.GetService<RoutingState>().Navigate.Execute(m)));
+                    }));
+            });
         }
 
         /// <summary>

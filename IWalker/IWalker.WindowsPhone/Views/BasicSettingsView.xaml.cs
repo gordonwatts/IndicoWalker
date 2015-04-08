@@ -2,7 +2,6 @@
 using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.ApplicationModel.Activation;
 using Windows.Storage.Pickers;
@@ -18,65 +17,58 @@ namespace IWalker.Views
     /// </summary>
     public sealed partial class BasicSettingsView : Page, IViewFor<BasicSettingsViewModel>
     {
-        /// <summary>
-        /// Track subscriptions we want to kill off.
-        /// </summary>
-        private CompositeDisposable _ridOfMe = new CompositeDisposable();
-
         public BasicSettingsView()
         {
             this.InitializeComponent();
 
             // Feedback for the user.
-            this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text);
-            this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text);
-            this.Bind(ViewModel, x => x.AutoDownload, x => x.AutoDownload.IsOn);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text));
+                disposeOfMe(this.Bind(ViewModel, x => x.AutoDownload, x => x.AutoDownload.IsOn));
 
-            // The Indico API key part of the model
-            this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel);
-            this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource);
-            this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
-                .Where(x => ViewModel != null)
-                .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x));
+                // The Indico API key part of the model
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource));
+                disposeOfMe(this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
+                    .Where(x => ViewModel != null)
+                    .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x)));
 
-            // When they click find, we have to locate a file and go from there.
-            _ridOfMe.Add(
-                Observable.FromEventPattern(FindCert, "Click")
-                .Select(a => new FileOpenPicker().ForCert())
-                .Subscribe(op => op.PickSingleFileAndContinue())
-                );
+                // When they click find, we have to locate a file and go from there.
+                disposeOfMe(Observable.FromEventPattern(FindCert, "Click")
+                    .Select(a => new FileOpenPicker().ForCert())
+                    .Subscribe(op => op.PickSingleFileAndContinue())
+                    );
 
-            // WHen the click on delete cache clear everything out.
+                // WHen the click on delete cache clear everything out.
 
-            _ridOfMe.Add(
-                Observable.FromEventPattern(ClearCache, "Click")
-                .Subscribe(a =>
-                {
-                    Blobs.LocalStorage.InvalidateAll();
-                }));
+                disposeOfMe(Observable.FromEventPattern(ClearCache, "Click")
+                    .Subscribe(a =>
+                    {
+                        Blobs.LocalStorage.InvalidateAll();
+                    }));
 
-            // This is Windows phone, so after the above we will have to wait until we
-            // resume the app.
-            var phoneFileList = IWalker.Util.AutoSuspendHelper.IsActivated
-                .Where(args => args.Kind == ActivationKind.PickFileContinuation)
-                .Cast<FileOpenPickerContinuationEventArgs>()
-                .Select(f => f.Files)
-                .Subscribe(files => ViewModel.LoadFiles.Execute(Tuple.Create(files, Password.Password)));
+                // This is Windows phone, so after the above we will have to wait until we
+                // resume the app.
+                disposeOfMe(IWalker.Util.AutoSuspendHelper.IsActivated
+                    .Where(args => args.Kind == ActivationKind.PickFileContinuation)
+                    .Cast<FileOpenPickerContinuationEventArgs>()
+                    .Select(f => f.Files)
+                    .Subscribe(files => ViewModel.LoadFiles.Execute(Tuple.Create(files, Password.Password))));
 
-            // Make sure to get rid of any connections we had to make ad-hoc.
-            _ridOfMe.Add(Observable.FromEventPattern(this, "Unloaded")
-                .Subscribe(a => _ridOfMe.Dispose()));
+                // Setup the expiration options. We use this clumsy method b.c. we want
+                // to avoid ReactiveUI's auto view lookup - we are just going to use ToString for this...
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .Subscribe(x =>
+                    {
+                        ClearCacheAgenda.ItemsSource = x == null ? null : x.CacheDecayOptions;
+                        ClearCacheTalkFiles.ItemsSource = x == null ? null : x.CacheDecayOptions;
+                    }));
+                disposeOfMe(this.Bind(ViewModel, x => x.CacheDecayAgendas, x => x.ClearCacheAgenda.SelectedItem));
+                disposeOfMe(this.Bind(ViewModel, x => x.CacheDecayFiles, x => x.ClearCacheTalkFiles.SelectedItem));
+            });
 
-            // Setup the expiration options. We use this clumsy method b.c. we want
-            // to avoid ReactiveUI's auto view lookup - we are just going to use ToString for this...
-            this.WhenAny(x => x.ViewModel, x => x.Value)
-                .Subscribe(x =>
-                {
-                    ClearCacheAgenda.ItemsSource = x == null ? null : x.CacheDecayOptions;
-                    ClearCacheTalkFiles.ItemsSource = x == null ? null : x.CacheDecayOptions;
-                });
-            this.Bind(ViewModel, x => x.CacheDecayAgendas, x => x.ClearCacheAgenda.SelectedItem);
-            this.Bind(ViewModel, x => x.CacheDecayFiles, x => x.ClearCacheTalkFiles.SelectedItem);
 
         }
 

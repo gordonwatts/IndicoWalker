@@ -1,7 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -15,30 +14,28 @@ namespace IWalker.Views
     /// </summary>
     public sealed partial class StartPage : Page, IViewFor<StartPageViewModel>
     {
-        private CompositeDisposable _removeMe = new CompositeDisposable();
-
         public StartPage()
         {
             this.InitializeComponent();
 
-            this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl);
-            this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl));
+                disposeOfMe(this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text));
 
-            this.Bind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext);
-            this.Bind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext);
-            this.Loaded += StartPage_Loaded;
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext));
 
-            // Do the navagation when we need it here.
-            _removeMe.Add(Observable.FromEventPattern<RoutedEventArgs>(GoToSettingsPage, "Click")
-                .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new BasicSettingsViewModel(ViewModel.HostScreen))));
-            _removeMe.Add(Observable.FromEventPattern(this, "Unloaded")
-                .Subscribe(a => _removeMe.Dispose()));
-        }
+                // Do the navagation when we need it here.
+                disposeOfMe(Observable.FromEventPattern<RoutedEventArgs>(GoToSettingsPage, "Click")
+                    .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new BasicSettingsViewModel(ViewModel.HostScreen))));
 
-        void StartPage_Loaded(object sender, RoutedEventArgs e)
-        {
-            ViewModel.LoadRecentMeetings
-                .Execute(null);
+                // Update everything
+                ViewModel.LoadRecentMeetings
+                    .Execute(null);
+                ViewModel.UpdateUpcomingMeetings
+                    .Execute(null);
+            });
         }
 
         /// <summary>

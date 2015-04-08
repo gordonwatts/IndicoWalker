@@ -17,8 +17,12 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
             backButton.WireAsBackButton();
-            this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel);
-            this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel);
+
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel));
+            });
         }
 
         /// <summary>

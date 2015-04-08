@@ -17,13 +17,16 @@ namespace IWalker.Views
             this.InitializeComponent();
 
             // Bind everything together we need.
-            this.Bind(ViewModel, x => x.MeetingTitle, y => y.MeetingTitle.Text);
-            this.Bind(ViewModel, x => x.StartTime, y => y.StartTime.Text);
-            this.OneWayBind(ViewModel, x => x.Sessions, y => y.SessionList.ItemsSource);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.MeetingTitle, y => y.MeetingTitle.Text));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.StartTime, y => y.StartTime.Text));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Sessions, y => y.SessionList.ItemsSource));
 
-            this.OneWayBind(ViewModel, x => x.Days, y => y.ConferenceDayPicker.ItemsSource);
-            this.Bind(ViewModel, x => x.DisplayDayIndex, y => y.ConferenceDayPicker.SelectedIndex);
-            this.OneWayBind(ViewModel, x => x.Days.Count, y => y.ConferenceDayPicker.Visibility, cnt => cnt <= 1 ? Visibility.Collapsed : Visibility.Visible);
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Days, y => y.ConferenceDayPicker.ItemsSource));
+                disposeOfMe(this.Bind(ViewModel, x => x.DisplayDayIndex, y => y.ConferenceDayPicker.SelectedIndex));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Days.Count, y => y.ConferenceDayPicker.Visibility, cnt => cnt <= 1 ? Visibility.Collapsed : Visibility.Visible));
+            });
         }
 
         /// <summary>

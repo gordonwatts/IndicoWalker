@@ -15,7 +15,10 @@ namespace IWalker.Views
         public FileSlidesUserControl()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource));
+            });
         }
 
         /// <summary>

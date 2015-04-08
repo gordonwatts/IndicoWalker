@@ -15,9 +15,12 @@ namespace IWalker.Views
         public CategoryPageView()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel);
-            this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel);
-            this.OneWayBind(ViewModel, x => x.CategoryListing.ErrorsVM, y => y.ErrorDisplay.ViewModel);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryListing, y => y.CategoryView.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryConfig, y => y.CategoryConfigView.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryListing.ErrorsVM, y => y.ErrorDisplay.ViewModel));
+            });
         }
 
         /// <summary>

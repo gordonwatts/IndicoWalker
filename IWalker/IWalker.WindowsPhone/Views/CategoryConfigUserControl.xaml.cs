@@ -15,29 +15,33 @@ namespace IWalker.Views
         public CategoryConfigUserControl()
         {
             this.InitializeComponent();
-            this.Bind(ViewModel, x => x.IsSubscribed, y => y.Subscribe.IsOn);
-            this.Bind(ViewModel, x => x.IsDisplayedOnMainPage, y => y.Displayed.IsOn);
-            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitle.Content);
-            this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitleEdit.Text);
 
-            // When they click on the main item, swap control visibility
-            Observable.FromEventPattern(AgendaListTitle, "Click")
-                .Subscribe(_ =>
-                {
-                    AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                    AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                });
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.Bind(ViewModel, x => x.IsSubscribed, y => y.Subscribe.IsOn));
+                disposeOfMe(this.Bind(ViewModel, x => x.IsDisplayedOnMainPage, y => y.Displayed.IsOn));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitle.Content));
+                disposeOfMe(this.Bind(ViewModel, x => x.CategoryTitle, y => y.AgendaListTitleEdit.Text));
 
-            // And when they are done with the new name
-            var rtnHit = Observable.FromEventPattern<KeyRoutedEventArgs>(AgendaListTitleEdit, "KeyUp")
-                .Where(kargs => kargs.EventArgs.Key == Windows.System.VirtualKey.Enter);
+                // When they click on the main item, swap control visibility
+                disposeOfMe(Observable.FromEventPattern(AgendaListTitle, "Click")
+                    .Subscribe(_ =>
+                    {
+                        AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                        AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                    }));
 
-            rtnHit
-                .Subscribe(_ =>
-                {
-                    AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
-                    AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-                });
+                // And when they are done with the new name
+                var rtnHit = Observable.FromEventPattern<KeyRoutedEventArgs>(AgendaListTitleEdit, "KeyUp")
+                    .Where(kargs => kargs.EventArgs.Key == Windows.System.VirtualKey.Enter);
+
+                disposeOfMe(rtnHit
+                    .Subscribe(_ =>
+                    {
+                        AgendaListTitle.Visibility = Windows.UI.Xaml.Visibility.Visible;
+                        AgendaListTitleEdit.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+                    }));
+            });
         }
 
         /// <summary>

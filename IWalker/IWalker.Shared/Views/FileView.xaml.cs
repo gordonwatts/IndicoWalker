@@ -12,10 +12,13 @@ namespace IWalker.Views
         public FileView()
         {
             this.InitializeComponent();
-            this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick);
-            this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility);
-            this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive);
-            this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text));
+            });
         }
 
         public FileUserControlViewModel ViewModel

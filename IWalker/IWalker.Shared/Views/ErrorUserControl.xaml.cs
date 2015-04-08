@@ -15,21 +15,26 @@ namespace IWalker.Views
         public ErrorUserControl()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.ErrorSeen, y => y.DisplayError.Visibility);
-            this.ObservableForProperty(x => x.ViewModel)
-                .Select(vmop => vmop.Value)
-                .Where(vm => vm != null)
-                .Subscribe(vm =>
-                {
-                    vm.DisplayErrors.Subscribe(msg =>
+
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ErrorSeen, y => y.DisplayError.Visibility));
+                disposeOfMe(this.ObservableForProperty(x => x.ViewModel)
+                    .Select(vmop => vmop.Value)
+                    .Where(vm => vm != null)
+                    .Subscribe(vm =>
                     {
-                        var dlg = new MessageDialog(msg, "Error Encountered Loading Category");
+                        vm.DisplayErrors.Subscribe(msg =>
+                        {
+                            var dlg = new MessageDialog(msg, "Error Encountered Loading Category");
 #pragma warning disable 4014
-                        dlg.ShowAsync();
+                            dlg.ShowAsync();
 #pragma warning restore 4014
-                    });
-                });
-            this.BindCommand(ViewModel, x => x.ViewRequest, y => y.DisplayError);
+                        });
+                    }));
+                disposeOfMe(this.BindCommand(ViewModel, x => x.ViewRequest, y => y.DisplayError));
+            });
+
             DisplayError.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
         }
 

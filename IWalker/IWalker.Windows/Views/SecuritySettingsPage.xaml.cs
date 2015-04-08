@@ -3,7 +3,6 @@ using IWalker.ViewModels;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
-using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.Storage;
 using Windows.Storage.Pickers;
@@ -19,43 +18,37 @@ namespace IWalker.Views
     /// </summary>
     public sealed partial class SecuritySettingsPage : Page, IViewFor<BasicSettingsViewModel>
     {
-        /// <summary>
-        /// Track the eventual dispose we will have to do of the hanging
-        /// subscriptions.
-        /// </summary>
-        private CompositeDisposable _ridOfMe = new CompositeDisposable();
-
         public SecuritySettingsPage()
         {
             this.InitializeComponent();
 
             // Feedback for the user.
-            this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text);
-            this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text);
-            backButton.WireAsBackButton();
+            this.WhenActivated(disposeOfMe =>
+            {
 
-            // When they click find, we have to locate a file and go from there.
-            var basicFindFile = Observable.FromEventPattern(FindCert, "Click")
-                .Select(a => new FileOpenPicker().ForCert())
-                .SelectMany(op => op.PickSingleFileAsync());
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Error, x => x.ErrorMessage.Text));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Status, x => x.StatusMessage.Text));
+                backButton.WireAsBackButton();
 
-            // The Indico API key part of the model
-            this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel);
-            this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource);
-            this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
-                .Where(x => ViewModel != null)
-                .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x));
+                // When they click find, we have to locate a file and go from there.
+                var basicFindFile = Observable.FromEventPattern(FindCert, "Click")
+                    .Select(a => new FileOpenPicker().ForCert())
+                    .SelectMany(op => op.PickSingleFileAsync());
 
-            // This is the store, so as soon as we have that stuff, we can cycle straight into doing this.
-            _ridOfMe.Add(
-                basicFindFile
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(files => ViewModel.LoadFiles.Execute(Tuple.Create(new StorageFile[] { files } as IReadOnlyList<StorageFile>, Password.Password)))
-            );
+                // The Indico API key part of the model
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.IndicoApiKey, y => y.AddUpdateUserControl.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ApiKeysForIndico, y => y.ApiKeyList.ItemsSource));
+                disposeOfMe(this.WhenAny(x => x.ApiKeyList.SelectedItem, x => x.Value)
+                    .Where(x => ViewModel != null)
+                    .Subscribe(x => ViewModel.ShowIndicoApiKey.Execute(x)));
 
-            // Make sure to get rid of any connections we had to make ad-hoc.
-            _ridOfMe.Add(Observable.FromEventPattern(this, "Unloaded")
-                .Subscribe(a => _ridOfMe.Dispose()));
+                // This is the store, so as soon as we have that stuff, we can cycle straight into doing this.
+                disposeOfMe(
+                    basicFindFile
+                        .ObserveOn(RxApp.MainThreadScheduler)
+                        .Subscribe(files => ViewModel.LoadFiles.Execute(Tuple.Create(new StorageFile[] { files } as IReadOnlyList<StorageFile>, Password.Password)))
+                );
+            });
         }
 
         /// <summary>

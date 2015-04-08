@@ -11,8 +11,11 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
 
-            this.Bind(ViewModel, x => x.Title, y => y.TalkTitle.Text);
-            this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Title, y => y.TalkTitle.Text));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource));
+            });
         }
 
         /// <summary>

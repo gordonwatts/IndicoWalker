@@ -18,18 +18,23 @@ namespace IWalker.Views
         public CategoryAllPageView()
         {
             this.InitializeComponent();
-            backButton.WireAsBackButton();
-            this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource);
-            this.Bind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel);
-            this.Bind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel);
-            this.OneWayBind(ViewModel, x => x.ValidCategorySelected, y => y.DetailsGrid.Visibility);
-            this.OneWayBind(ViewModel, x => x.CategoryFullListVM.ErrorsVM, y => y.ErrorListing.ViewModel);
 
-            // Run the master/detail stuff
-            Observable.FromEventPattern<SelectionChangedEventArgs>(CategoryNames, "SelectionChanged")
-                .Where(args => args.EventArgs.AddedItems.Count > 0)
-                .Select(args => args.EventArgs.AddedItems[0])
-                .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ConfigViewModel, y => y.CatConfig.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryFullListVM, y => y.CatListing.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ValidCategorySelected, y => y.DetailsGrid.Visibility));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryFullListVM.ErrorsVM, y => y.ErrorListing.ViewModel));
+
+                // Run the master/detail stuff
+                disposeOfMe(Observable.FromEventPattern<SelectionChangedEventArgs>(CategoryNames, "SelectionChanged")
+                    .Where(args => args.EventArgs.AddedItems.Count > 0)
+                    .Select(args => args.EventArgs.AddedItems[0])
+                    .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args)));
+            });
+            backButton.WireAsBackButton();
+
         }
 
         /// <summary>

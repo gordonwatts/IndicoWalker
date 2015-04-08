@@ -27,9 +27,11 @@ namespace IWalker.Views
         public TalkFileCollectionUserControl()
         {
             this.InitializeComponent();
-            //this.OneWayBind(ViewModel, x => x.Title, y => y.FileName.Text);
-            this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource);
-            this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
+            });
         }
 
         /// <summary>

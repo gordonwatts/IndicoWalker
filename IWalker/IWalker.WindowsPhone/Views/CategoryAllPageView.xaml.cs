@@ -17,23 +17,26 @@ namespace IWalker.Views
         public CategoryAllPageView()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource);
-            this.ObservableForProperty(x => x.ViewModel)
-                .Select(vm => vm.Value)
-                .Where(vm => vm != null)
-                .Subscribe(vm =>
-                {
-                    vm.ViewCategory
-                        .Subscribe(nextCi => ViewModel.HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(ViewModel.HostScreen, nextCi.MeetingList)));
-                });
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.ListOfCalendars, y => y.CategoryNames.ItemsSource));
+                disposeOfMe(this.ObservableForProperty(x => x.ViewModel)
+                    .Select(vm => vm.Value)
+                    .Where(vm => vm != null)
+                    .Subscribe(vm =>
+                    {
+                        disposeOfMe(vm.ViewCategory
+                            .Subscribe(nextCi => ViewModel.HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(ViewModel.HostScreen, nextCi.MeetingList))));
+                    }));
 
-            // Run the master/detail stuff
-            Observable.FromEventPattern<ItemClickEventArgs>(CategoryNames, "ItemClick")
-                .Select(args => args.EventArgs.ClickedItem)
-                .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
+                // Run the master/detail stuff
+                Observable.FromEventPattern<ItemClickEventArgs>(CategoryNames, "ItemClick")
+                    .Select(args => args.EventArgs.ClickedItem)
+                    .Subscribe(args => ViewModel.ShowCategoryDetails.Execute(args));
 
-            // Each time the page is shown, make sure to update the list.
-            this.WhenActivated(_ => ViewModel.UpdateCategoryList.Execute(null));
+                // Each time the page is shown, make sure to update the list.
+                ViewModel.UpdateCategoryList.Execute(null);
+            });
         }
 
         /// <summary>

@@ -20,119 +20,122 @@ namespace IWalker.Views
         public FullTalkAsStripView()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
 
-            // If the ESC key or backbutton is hit, we want to navigate back.
-            var keyrelease = SlideStrip.Events().KeyDown
-                .Where(keys => ViewModel != null);
+                // If the ESC key or backbutton is hit, we want to navigate back.
+                var keyrelease = SlideStrip.Events().KeyDown
+                    .Where(keys => ViewModel != null);
 
-            keyrelease
-                .Where(keys => keys.Key == VirtualKey.Escape)
-                .Do(keys => keys.Handled = true)
-                .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
+                keyrelease
+                    .Where(keys => keys.Key == VirtualKey.Escape)
+                    .Do(keys => keys.Handled = true)
+                    .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
 
-            backButton.WireAsBackButton();
+                backButton.WireAsBackButton();
 
-            // Forward and backwards arrows.
-            // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
-            // get a scroll to the item we want. So we need to aggregate those while running.
-            var isScrollInProgress = theScrollViewer
-                .Events().ViewChanged
-                .Select(sc => sc.IsIntermediate);
+                // Forward and backwards arrows.
+                // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
+                // get a scroll to the item we want. So we need to aggregate those while running.
+                var isScrollInProgress = theScrollViewer
+                    .Events().ViewChanged
+                    .Select(sc => sc.IsIntermediate);
 
-            var keysByScrolling = keyrelease
-                    .Select(k => Tuple.Create(k, calcKeyMoveRequest(k)))
-                    .Where(k => k.Item2 != 0)
-                    .Do(k => k.Item1.Handled = true)
-                    .Select(k => k.Item2)
-                    .BatchByStream(isScrollInProgress);
+                var keysByScrolling = keyrelease
+                        .Select(k => Tuple.Create(k, calcKeyMoveRequest(k)))
+                        .Where(k => k.Item2 != 0)
+                        .Do(k => k.Item1.Handled = true)
+                        .Select(k => k.Item2)
+                        .BatchByStream(isScrollInProgress);
 
-            keysByScrolling
-                .Where(info => !info.Item1)
-                .Subscribe(info => info.Item2.Subscribe(delta => ViewModel.PageMove.Execute(calcCurrentPage() + delta)));
+                keysByScrolling
+                    .Where(info => !info.Item1)
+                    .Subscribe(info => info.Item2.Subscribe(delta => ViewModel.PageMove.Execute(calcCurrentPage() + delta)));
 
-            keysByScrolling
-                .Where(info => info.Item1)
-                .SelectMany(async info => await info.Item2.Sum())
-                .Where(d => d != 0)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(delta => ViewModel.PageMove.Execute(delta + calcCurrentPage()));
+                keysByScrolling
+                    .Where(info => info.Item1)
+                    .SelectMany(async info => await info.Item2.Sum())
+                    .Where(d => d != 0)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(delta => ViewModel.PageMove.Execute(delta + calcCurrentPage()));
 
-            // We can't tell what size things are in here (which we need for scrolling, etc.) until
-            // we have a clue as to what the layout is. So, we have to wait for that to go.
-            var widthOfItemsChanged = SlideStrip.Events().LayoutUpdated
-                .Where(args => _slideStartLocations == null)
-                .Select(args => SlideStrip.ActualWidth)
-                .Throttle(TimeSpan.FromMilliseconds(100))
-                .Select(args => Unit.Default)
-                .DistinctUntilChanged();
+                // We can't tell what size things are in here (which we need for scrolling, etc.) until
+                // we have a clue as to what the layout is. So, we have to wait for that to go.
+                var widthOfItemsChanged = SlideStrip.Events().LayoutUpdated
+                    .Where(args => _slideStartLocations == null)
+                    .Select(args => SlideStrip.ActualWidth)
+                    .Throttle(TimeSpan.FromMilliseconds(100))
+                    .Select(args => Unit.Default)
+                    .DistinctUntilChanged();
 
-            // And when we get asked to bring a page into view...
-            this.WhenAny(x => x.ViewModel, x => x.Value)
-                .Where(x => x != null)
-                .Subscribe(vm =>
-                {
-                    vm.MoveToPage
-                        .CombineLatest(widthOfItemsChanged, (pn, width) => pn)
-                        .ObserveOn(RxApp.MainThreadScheduler)
-                        .Where(pn => SlideStrip.ContainerFromIndex(0) != null)
-                        .Select(pn => getSlideEdge(pn))
-                        .Subscribe(loc =>
-                        {
-                            if (_orientation == FullPanelOrientation.Horizontal)
-                            {
-                                theScrollViewer.ChangeView(loc, null, null);
-                            }
-                            else
-                            {
-                                theScrollViewer.ChangeView(null, loc, null);
-                            }
-                        });
-                });
-
-            // Make the back button visible if there is any movement - scrolling or otherwise.
-            var buttonRelatedMovement =
-                Observable.Merge(
-                    this.Events().PointerMoved.Select(x => Unit.Default),
-                    this.Events().Tapped.Select(x => Unit.Default)
-                );
-
-            var makeVisible = buttonRelatedMovement
-                .Select(x => true);
-
-            var makeInvisible = buttonRelatedMovement
-                .Select(x => Observable.Return(false).Delay(TimeSpan.FromSeconds(3)))
-                .Switch();
-
-            Observable.Merge(makeVisible, makeInvisible)
-                .DistinctUntilChanged()
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
-            backButton.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
-
-            // Setup the rendering helper - when they are in frame, cause a rendering to happen. When they
-            // are out of frame, then turn off showing everything!
-            _holder = new OnScreenTrackingHelper(
-                theScrollViewer,
-                (uiElement, inViewPort) =>
-                {
-                    if (uiElement is PDFPageUserControl)
+                // And when we get asked to bring a page into view...
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .Where(x => x != null)
+                    .Subscribe(vm =>
                     {
-                        (uiElement as PDFPageUserControl).ShowPDF = inViewPort;
+                        vm.MoveToPage
+                            .CombineLatest(widthOfItemsChanged, (pn, width) => pn)
+                            .ObserveOn(RxApp.MainThreadScheduler)
+                            .Where(pn => SlideStrip.ContainerFromIndex(0) != null)
+                            .Select(pn => getSlideEdge(pn))
+                            .Subscribe(loc =>
+                            {
+                                if (_orientation == FullPanelOrientation.Horizontal)
+                                {
+                                    theScrollViewer.ChangeView(loc, null, null);
+                                }
+                                else
+                                {
+                                    theScrollViewer.ChangeView(null, loc, null);
+                                }
+                            });
+                    }));
+
+                // Make the back button visible if there is any movement - scrolling or otherwise.
+                var buttonRelatedMovement =
+                    Observable.Merge(
+                        this.Events().PointerMoved.Select(x => Unit.Default),
+                        this.Events().Tapped.Select(x => Unit.Default)
+                    );
+
+                var makeVisible = buttonRelatedMovement
+                    .Select(x => true);
+
+                var makeInvisible = buttonRelatedMovement
+                    .Select(x => Observable.Return(false).Delay(TimeSpan.FromSeconds(3)))
+                    .Switch();
+
+                Observable.Merge(makeVisible, makeInvisible)
+                    .DistinctUntilChanged()
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Subscribe(v => backButton.Visibility = v ? Windows.UI.Xaml.Visibility.Visible : Windows.UI.Xaml.Visibility.Collapsed);
+                backButton.Visibility = Windows.UI.Xaml.Visibility.Collapsed;
+
+                // Setup the rendering helper - when they are in frame, cause a rendering to happen. When they
+                // are out of frame, then turn off showing everything!
+                _holder = new OnScreenTrackingHelper(
+                    theScrollViewer,
+                    (uiElement, inViewPort) =>
+                    {
+                        if (uiElement is PDFPageUserControl)
+                        {
+                            (uiElement as PDFPageUserControl).ShowPDF = inViewPort;
+                        }
                     }
-                }
-                ) { ItemsWaitingInTheWings = 2 };
+                    ) { ItemsWaitingInTheWings = 2 };
 
-            this.Events().Unloaded
-                .Subscribe(t => _holder.Unload());
+                this.Events().Unloaded
+                    .Subscribe(t => _holder.Unload());
 
-            // We want to capture key strokes, etc. By default we don't have
-            // the focus, so grab it.
-            this.Events().Loaded
-                .Subscribe(t => Focus(Windows.UI.Xaml.FocusState.Programmatic));
+                // We want to capture key strokes, etc. By default we don't have
+                // the focus, so grab it.
+                this.Events().Loaded
+                    .Subscribe(t => Focus(Windows.UI.Xaml.FocusState.Programmatic));
 
-            // The orientation of this pannel will affect how we calc the arrow key stuff.
-            _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
+                // The orientation of this pannel will affect how we calc the arrow key stuff.
+                _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
+            });
         }
 
         /// <summary>

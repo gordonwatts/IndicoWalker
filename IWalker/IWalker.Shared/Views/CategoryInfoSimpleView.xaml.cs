@@ -25,7 +25,10 @@ namespace IWalker.Views
         public CategoryInfoSimpleView()
         {
             this.InitializeComponent();
-            this.OneWayBind(ViewModel, x => x.CategoryTitle, y => y.CategoryTitle.Text);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.CategoryTitle, y => y.CategoryTitle.Text));
+            });
         }
 
         /// <summary>

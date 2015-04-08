@@ -1,7 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using Windows.Foundation;
@@ -27,7 +26,8 @@ namespace IWalker.Views
                 .Where(vm => vm != null)
                 .Subscribe(vm => vm.ImageStream
                     .ObserveOn(RxApp.MainThreadScheduler)
-                    .SelectMany(async imageStream => {
+                    .SelectMany(async imageStream =>
+                    {
                         imageStream.Seek(0, SeekOrigin.Begin);
                         var bm = new BitmapImage();
                         await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
@@ -59,9 +59,15 @@ namespace IWalker.Views
         /// <returns></returns>
         protected override Size MeasureOverride(Size availableSize)
         {
-            Debug.Assert(ViewModel != null);
-            var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
-            return new Size(requestedSize.Item1, requestedSize.Item2);
+            if (ViewModel != null)
+            {
+                var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
+                return new Size(requestedSize.Item1, requestedSize.Item2);
+            }
+            else
+            {
+                return base.MeasureOverride(availableSize);
+            }
         }
 
         /// <summary>

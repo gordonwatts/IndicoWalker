@@ -30,14 +30,17 @@ namespace IWalker.Views
             this.InitializeComponent();
 
             // Hook up everything
-            this.BindCommand(ViewModel, x => x.AddUpdateCommand, y => y.AddUpdateButton);
-            this.OneWayBind(ViewModel, x => x.AddOrUpdateText, y => y.AddUpdateButton.Content);
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.BindCommand(ViewModel, x => x.AddUpdateCommand, y => y.AddUpdateButton));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.AddOrUpdateText, y => y.AddUpdateButton.Content));
 
-            this.BindCommand(ViewModel, x => x.DeleteCommand, y => y.DeleteButton);
+                disposeOfMe(this.BindCommand(ViewModel, x => x.DeleteCommand, y => y.DeleteButton));
 
-            this.Bind(ViewModel, x => x.SiteName, y => y.SiteTextBox.Text);
-            this.Bind(ViewModel, x => x.ApiKey, y => y.ApiKeyTextBox.Text);
-            this.Bind(ViewModel, x => x.SecretKey, y => y.SecretKeyTextBox.Text);
+                disposeOfMe(this.Bind(ViewModel, x => x.SiteName, y => y.SiteTextBox.Text));
+                disposeOfMe(this.Bind(ViewModel, x => x.ApiKey, y => y.ApiKeyTextBox.Text));
+                disposeOfMe(this.Bind(ViewModel, x => x.SecretKey, y => y.SecretKeyTextBox.Text));
+            });
         }
 
         /// <summary>
