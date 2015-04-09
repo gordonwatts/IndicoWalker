@@ -452,5 +452,13 @@ namespace IWalker.DataModel.Inidco
         {
             return AgendaInfo.IsValid(url);
         }
+
+        /// <summary>
+        /// Return the URL of the conference that can be opened in a web browser.
+        /// </summary>
+        public string WebURL
+        {
+            get { return _info.ConferenceUrl; }
+        }
     }
 }

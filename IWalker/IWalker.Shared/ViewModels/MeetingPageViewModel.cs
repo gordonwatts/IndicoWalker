@@ -9,6 +9,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using Windows.System;
 using Windows.UI.Popups;
 
 namespace IWalker.ViewModels
@@ -167,7 +168,11 @@ namespace IWalker.ViewModels
 
             // Start everything off.
             ldrCmdReady.Connect();
-            //ldrCmd.Execute(null);
+
+            // If they want to see it in the browser
+            OpenMeetingInBrowser = ReactiveCommand.Create();
+            OpenMeetingInBrowser
+                .Subscribe(_ => Launcher.LaunchUriAsync(new Uri(meeting.WebURL)));
         }
 
         /// <summary>
@@ -263,5 +268,10 @@ namespace IWalker.ViewModels
         {
             get { return "/meeting"; }
         }
+
+        /// <summary>
+        /// Fire to open the meeting in the browser.
+        /// </summary>
+        public ReactiveCommand<object> OpenMeetingInBrowser { get; private set; }
     }
 }

@@ -31,6 +31,7 @@ namespace IWalker.Views
                 disposeOfMe(this.Bind(ViewModel, x => x.DisplayDayIndex, y => y.ConferenceDayPicker.SelectedIndex));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.Days.Count, y => y.ConferenceDayPicker.Visibility, cnt => cnt <= 1 ? Visibility.Collapsed : Visibility.Visible));
                 disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).Subscribe(vm => vm.UpdateData.Execute(null)));
+                disposeOfMe(this.BindCommand(ViewModel, x => x.OpenMeetingInBrowser, y => y.OpenInBrowser));
             });
         }
 

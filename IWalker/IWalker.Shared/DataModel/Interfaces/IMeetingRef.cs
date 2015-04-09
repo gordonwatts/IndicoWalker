@@ -18,5 +18,10 @@ namespace IWalker.DataModel.Interfaces
         /// </summary>
         /// <returns></returns>
         string AsReferenceString();
+
+        /// <summary>
+        /// Get the URL for a meeting that can be used to view the meeting in a web browser.
+        /// </summary>
+        string WebURL { get; }
     }
 }

@@ -44,7 +44,7 @@
             			</DataTemplate>
             		</ComboBox.ItemTemplate>
             	</ComboBox>
-            	<AppBarButton HorizontalAlignment="Center" Icon="Globe" Label="" VerticalAlignment="Center" Margin="0,20,0,0" ToolTipService.ToolTip="Open Meeting Web Page"/>
+            	<AppBarButton x:Name="OpenInBrowser" HorizontalAlignment="Center" Icon="Globe" Label="" VerticalAlignment="Center" Margin="0,20,0,0" ToolTipService.ToolTip="Open Meeting Web Page"/>
             </StackPanel>
         </Grid>
         <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
