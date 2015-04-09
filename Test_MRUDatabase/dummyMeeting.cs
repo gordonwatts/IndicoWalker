@@ -166,6 +166,12 @@ namespace Test_MRUDatabase
         }
 
         public int NumberOfTimesFetched { get; set; }
+
+
+        public string WebURL
+        {
+            get { throw new NotImplementedException(); }
+        }
     }
 
 

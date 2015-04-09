@@ -1,16 +1,12 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
 using IWalker.Util;
-using IWalker.ViewModels;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
-using ReactiveUI;
 using ReactiveUI.Testing;
 using Splat;
 using System;
-using System.Diagnostics;
-using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Windows.Foundation;
@@ -256,6 +252,12 @@ namespace Test_MRUDatabase.ViewModels
 
             private readonly Func<IMeeting, int, IMeeting> _callback;
             public int Count { get; set; }
+
+
+            public string WebURL
+            {
+                get { throw new NotImplementedException(); }
+            }
         }
 
         /// <summary>
