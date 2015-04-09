@@ -36,13 +36,16 @@
                             IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
                 <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Bottom" Margin="0,5,0,0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
             </StackPanel>
-            <ComboBox x:Name="ConferenceDayPicker" Grid.Column="1" HorizontalAlignment="Right" VerticalAlignment="Center">
-                <ComboBox.ItemTemplate>
-                    <DataTemplate>
-                            <TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left" Grid.Column="0"/>
-                    </DataTemplate>
-                </ComboBox.ItemTemplate>
-            </ComboBox>
+            <StackPanel Grid.Column="1" Margin="0" Orientation="Horizontal" HorizontalAlignment="Right">
+            	<ComboBox x:Name="ConferenceDayPicker" HorizontalAlignment="Center" VerticalAlignment="Center">
+            		<ComboBox.ItemTemplate>
+            			<DataTemplate>
+            				<TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left" Grid.Column="0"/>
+            			</DataTemplate>
+            		</ComboBox.ItemTemplate>
+            	</ComboBox>
+            	<AppBarButton HorizontalAlignment="Center" Icon="Globe" Label="" VerticalAlignment="Center" Margin="0,20,0,0" ToolTipService.ToolTip="Open Meeting Web Page"/>
+            </StackPanel>
         </Grid>
         <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
             <ItemsControl x:Name="SessionList"/>
