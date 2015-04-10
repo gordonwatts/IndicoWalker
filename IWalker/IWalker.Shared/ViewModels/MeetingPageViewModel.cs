@@ -119,6 +119,10 @@ namespace IWalker.ViewModels
                 .Select(dt => dt.ToString())
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
+            ldrCmdReady
+                .Select(m => m.Sessions.SelectMany(s => s.Talks).Count() == 0 && m.Sessions.Length <= 1)
+                .ToProperty(this, x => x.MeetingIsEmpty, out _meetingIsEmpty, false, RxApp.MainThreadScheduler);
+
             var ldrSessions = ldrCmdReady
                 .Select(m => m.Sessions)
                 .Where(s => s != null && s.Length > 0);
@@ -242,6 +246,15 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<string> _startTime;
 
         /// <summary>
+        /// Get a bool indicating the meeting has no talks in it.
+        /// </summary>
+        public bool MeetingIsEmpty
+        {
+            get { return _meetingIsEmpty.Value; }
+        }
+        private ObservableAsPropertyHelper<bool> _meetingIsEmpty;
+
+        /// <summary>
         /// Get the list of talks
         /// </summary>
         public ReactiveList<SessionUserControlViewModel> Sessions { get; private set; }
@@ -268,6 +281,7 @@ namespace IWalker.ViewModels
         {
             get { return "/meeting"; }
         }
+
 
         /// <summary>
         /// Fire to open the meeting in the browser.
