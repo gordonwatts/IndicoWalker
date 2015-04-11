@@ -118,7 +118,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="AkavacheSqliteLinkerOverride.cs" />
-    <Compile Include="DataModel\MRU\BasicUsage.cs" />
+    <Compile Include="DataModel\MRU\t_BasicUsage.cs" />
     <Compile Include="DataModel\Categories\t_CategoryDB.cs" />
     <Compile Include="DataModel\Indico\t_IndicoApiKeyAccess.cs" />
     <Compile Include="DataModel\Indico\t_IndicoMeetingRef.cs" />

@@ -10,7 +10,7 @@ using System.Threading.Tasks;
 namespace Test_MRUDatabase.DataModel.MRU
 {
     [TestClass]
-    public class BasicUsage
+    public class t_BasicUsage
     {
         [TestInitialize]
         public async Task Setup()
