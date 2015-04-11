@@ -63,11 +63,12 @@ namespace IWalker.Views
                 // We can't tell what size things are in here (which we need for scrolling, etc.) until
                 // we have a clue as to what the layout is. So, we have to wait for that to go.
                 var widthOfItemsChanged = SlideStrip.Events().LayoutUpdated
-                    .Where(args => _slideStartLocations == null)
-                    .Select(args => SlideStrip.ActualWidth)
+                    .Select(_ => SlideStrip.ActualHeight)
                     .Throttle(TimeSpan.FromMilliseconds(100))
-                    .Select(args => Unit.Default)
                     .DistinctUntilChanged();
+
+                disposeOfMe(widthOfItemsChanged
+                    .Subscribe(_ => _slideStartLocations = null));
 
                 // And when we get asked to bring a page into view...
                 disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
