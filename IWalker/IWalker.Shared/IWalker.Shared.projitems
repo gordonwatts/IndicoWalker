@@ -34,6 +34,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Model.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\ModelHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\MRU\MRUDatabaseAccess.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\MRU\MRUSettingsCache.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\AutoSuspendHelper.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\BackgroundTasks.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Blobs.cs" />
