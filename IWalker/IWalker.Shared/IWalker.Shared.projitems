@@ -57,6 +57,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryConfigViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryURIViewModel.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\IFileDownloadController.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TalkFileCollectionUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ErrorUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileUserControlViewModel.cs" />
