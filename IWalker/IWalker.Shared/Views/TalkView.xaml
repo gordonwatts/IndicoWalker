@@ -18,7 +18,7 @@
         <ItemsControl x:Name="FileNameList" Grid.Row="1">
             <ItemsControl.ItemsPanel>
                 <ItemsPanelTemplate>
-                    <VariableSizedWrapGrid Orientation="Horizontal"/>
+                    <ItemsWrapGrid Orientation="Horizontal"/>
                 </ItemsPanelTemplate>
             </ItemsControl.ItemsPanel>
         </ItemsControl>
