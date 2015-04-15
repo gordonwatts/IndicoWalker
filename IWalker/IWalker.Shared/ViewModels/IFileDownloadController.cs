@@ -4,9 +4,11 @@ using IWalker.Util;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Text;
+using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -19,6 +21,16 @@ namespace IWalker.ViewModels
     /// </remarks>
     public class IFileDownloadController : ReactiveObject
     {
+        /// <summary>
+        /// This will trigger a download or an update of the file from the web.
+        /// </summary>
+        /// <remarks>
+        /// All errors (e.g. offline, etc.) are caught.
+        /// If the file is cached, then we will look to see if there is an update.
+        /// IsDownloading will be updated as appropriate. So will IsDownloaded.
+        /// </remarks>
+        public ReactiveCommand<bool> DownloadOrUpdate { get; private set; }
+
         /// <summary>
         /// True if data is being downloaded as we speak
         /// </summary>
@@ -50,10 +62,72 @@ namespace IWalker.ViewModels
             _file = file;
             _cache = cache == null ? Blobs.LocalStorage : cache;
 
+            // Download or update the file.
+            DownloadOrUpdate = ReactiveCommand.CreateAsyncObservable(_ =>
+                _cache.GetCreatedAt(_file.UniqueKey)
+                .Select(dt => dt.HasValue));
+
+            var cacheUpdateRequired = DownloadOrUpdate
+                .Where(isCached => isCached)
+                .SelectMany(_ => CheckForUpdate())
+                .Where(isNewOneEB => isNewOneEB)
+                .Select(_ => default(Unit));
+
+            var firstDownloadRequired = DownloadOrUpdate
+                .Where(isCached => !isCached)
+                .Select(_ => default(Unit));
+
+            var downloadSuccessful =
+                Observable.Merge(cacheUpdateRequired, firstDownloadRequired)
+                .SelectMany(_ => Download())
+                .SelectMany(data => _cache.InsertObject(_file.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                .Select(_ => true);
+
             // Track the status of the download
-            _cache.GetCreatedAt(_file.UniqueKey)
-                .Select(dt => dt.HasValue)
+            var initiallyCached = _cache.GetCreatedAt(_file.UniqueKey)
+                .Select(dt => dt.HasValue);
+
+            Observable.Merge(initiallyCached, downloadSuccessful)
                 .ToProperty(this, x => x.IsDownloaded, out _isDownloaded, false);
+        }
+
+        /// <summary>
+        /// Get the date the web server returns for a file and compare that
+        /// with the current headers.
+        /// </summary>
+        /// <returns></returns>
+        private IObservable<bool> CheckForUpdate()
+        {
+            return _cache.GetObject<Tuple<string, byte[]>>(_file.UniqueKey)
+                .Zip(Observable.FromAsync(() => _file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+                .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
+                .Catch(Observable.Return(false));
+        }
+
+        /// <summary>
+        /// Fetch the data for the file. Return the data as a byte array and also the
+        /// date of last update (as seen in the header).
+        /// </summary>
+        /// <returns></returns>
+        /// <remarks>
+        /// TODO: This could currently make two requests to the URL - one to get the data and the other to
+        /// get the file header date. We should be able to combine this as one.
+        /// </remarks>
+        private async Task<Tuple<string, byte[]>> Download()
+        {
+            // Get the file stream, and write it out.
+            var ms = new MemoryStream();
+            using (var dataStream = await _file.GetFileStream())
+            {
+                await dataStream.BaseStream.CopyToAsync(ms);
+            }
+
+            // Get the date from the header that we will need to stash
+            var timeStamp = await _file.GetFileDate();
+
+            // This is what needs to be cached.
+            var ar = ms.ToArray();
+            return Tuple.Create(timeStamp, ar);
         }
 
         /// <summary>
