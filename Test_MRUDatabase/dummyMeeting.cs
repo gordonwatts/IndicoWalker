@@ -2,6 +2,9 @@
 using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
+using System.IO;
+using System.Reactive.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase
@@ -111,37 +114,54 @@ namespace Test_MRUDatabase
         }
     }
 
+    // A dummy file.
     class dummyFile : IFile
     {
-        public bool IsValid
+        public int Called { get; private set; }
+        private string _name;
+        private string _url;
+        public dummyFile(string url = "bogus", string name = "talk.pdf")
         {
-            get { return true; }
+            _name = name;
+            _url = url;
+            Called = 0;
+            DateToReturn = "this is the first";
+            GetStream = () => Observable.FromAsync(() => Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url).AsTask())
+                .SelectMany(f => f.OpenStreamForReadAsync())
+                .Select(reader => new StreamReader(reader));
+
         }
 
-        public string FileType
+        public bool IsValid { get { return true; } }
+
+        public string FileType { get { return "pdf"; } }
+
+        public string UniqueKey { get { return _name; } }
+
+        public Func<IObservable<StreamReader>> GetStream { get; set; }
+
+        public IObservable<StreamReader> GetFileStream()
         {
-            get { return "pdf"; }
+            Called++;
+            if (GetStream == null)
+            {
+                throw new NotImplementedException();
+            }
+            else
+            {
+                return GetStream();
+            }
         }
 
-        public string UniqueKey
-        {
-            get { return "talk1.pdf"; }
-        }
+        public string DisplayName { get { return _name; } }
 
-        public Task<System.IO.StreamReader> GetFileStream()
+        /// <summary>
+        /// Date stamp to return.
+        /// </summary>
+        public string DateToReturn { get; set; }
+        public IObservable<string> GetFileDate()
         {
-            throw new NotImplementedException();
-        }
-
-        public string DisplayName
-        {
-            get { return "talk1.pdf"; }
-        }
-
-
-        public Task<string> GetFileDate()
-        {
-            throw new NotImplementedException();
+            return Observable.Return(DateToReturn);
         }
     }
 
@@ -154,6 +174,7 @@ namespace Test_MRUDatabase
         {
             NumberOfTimesFetched = 0;
         }
+
         public Task<IMeeting> GetMeeting()
         {
             NumberOfTimesFetched++;
@@ -165,9 +186,11 @@ namespace Test_MRUDatabase
             return "meeting1";
         }
 
+        [JsonIgnore]
         public int NumberOfTimesFetched { get; set; }
 
 
+        [JsonIgnore]
         public string WebURL
         {
             get { throw new NotImplementedException(); }

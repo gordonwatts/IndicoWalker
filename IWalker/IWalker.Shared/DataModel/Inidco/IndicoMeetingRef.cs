@@ -6,6 +6,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -290,11 +291,9 @@ namespace IWalker.DataModel.Inidco
             /// Return a stream that can be used to read over the net.
             /// </summary>
             /// <returns></returns>
-            public async Task<StreamReader> GetFileStream()
+            public IObservable<StreamReader> GetFileStream()
             {
-                // Get the file, save it to the proper location, and then return it.
-                Debug.WriteLine("  Doing download for {0}", _aFile.URL);
-                return await IndicoDataFetcher.Fetcher.GetDataFromURL(new Uri(_aFile.URL));
+                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetDataFromURL(new Uri(_aFile.URL)));
             }
 
             /// <summary>
@@ -328,12 +327,10 @@ namespace IWalker.DataModel.Inidco
             /// Given the URL, get the header info.
             /// </summary>
             /// <returns></returns>
-            public async Task<string> GetFileDate()
+            public IObservable<string> GetFileDate()
             {
-                var headers = await IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(new Uri(_aFile.URL));
-                if (!headers.LastModified.HasValue)
-                    return "";
-                return headers.LastModified.Value.ToString();
+                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(new Uri(_aFile.URL)))
+                    .Select(dt => dt.LastModified.HasValue ? dt.LastModified.Value.ToString() : "");
             }
         }
 

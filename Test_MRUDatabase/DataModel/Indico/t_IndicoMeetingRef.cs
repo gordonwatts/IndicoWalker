@@ -4,6 +4,8 @@ using IWalker.DataModel.Interfaces;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.Threading.Tasks;
+using System.Reactive;
+using System.Reactive.Linq;
 
 namespace Test_MRUDatabase.DataModel.Indico
 {

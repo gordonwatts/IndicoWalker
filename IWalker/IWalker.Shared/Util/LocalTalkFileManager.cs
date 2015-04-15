@@ -62,7 +62,7 @@ namespace IWalker.Util
         private static IObservable<bool> CheckForUpdate(this IFile file)
         {
             return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
-                .Zip(Observable.FromAsync(() => file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+                .Zip(file.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
                 .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
         }

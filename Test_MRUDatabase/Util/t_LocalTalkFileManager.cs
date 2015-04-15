@@ -28,7 +28,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public void TestForNoFile()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = df.GetFileFromCache();
             string r = null;
             f.Subscribe(
@@ -43,7 +43,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task TestForGettingFile()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = await df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -56,7 +56,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task GetFileOfCorrectLength()
         {
-            var df = new dummmyFile("test.pdf", "test") as IFile;
+            var df = new dummyFile("test.pdf", "test") as IFile;
             var f = df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -71,7 +71,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task GetFileOfCorrectLengthTwice()
         {
-            var df = new dummmyFile("test.pdf", "test") as IFile;
+            var df = new dummyFile("test.pdf", "test") as IFile;
             var f1 = df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -92,7 +92,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task WriteSecondFileToDisk()
         {
-            var df = new dummmyFile("test.pdf", "test") as IFile;
+            var df = new dummyFile("test.pdf", "test") as IFile;
             var f1 = df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -116,7 +116,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CheckPDFFromFirstDownload()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -127,7 +127,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CheckPDFFromSeconmdDownload()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -142,12 +142,12 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CheckCachedUpdateWorks()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = await df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
 
-            df.SetDate("forget me not");
+            df.DateToReturn = "forget me not";
             f = await df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -158,7 +158,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task UpdateSequenceNoChanges()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             // There is a race condition in the Akavache - when the requests come too fast, the SQL insertion can't keep up.
             // Not obvious how to "lock things out".
             var f = await df.GetAndUpdateFileUponRequest(Observable.Interval(TimeSpan.FromMilliseconds(300)).Take(2).Select(_ => default(Unit)))
@@ -171,13 +171,13 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task UpdateSequenceWithChanges()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var seq = Observable.Interval(TimeSpan.FromSeconds(1))
                 .Select(_ => 1)
                 .Take(2)
                 .Scan((a, b) => a + b)
                 .Select(index => new string[] { "1", "2" }[index - 1])
-                .Do(s => df.SetDate(s))
+                .Do(s => df.DateToReturn = s)
                 .Select(_ => default(Unit));
 
 
@@ -191,7 +191,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CheckCacheUpdateNotRequired()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = await df.GetAndUpdateFileOnce()
                 .ToList()
                 .FirstAsync();
@@ -225,7 +225,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task GetFileFromCache()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f1 = df.GetAndUpdateFileOnce();
             var raStream1 = await f1;
 
@@ -238,7 +238,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task GetFileFromCacheWithUpdate()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f1 = df.GetAndUpdateFileOnce();
             var raStream1 = await f1;
 
@@ -251,7 +251,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CreationTimeNothingCreated()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var r = await df.GetCacheCreateTime();
             Assert.IsNull(r);
         }
@@ -259,7 +259,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task CreatingTimeAfterCache()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f1 = await df.GetAndUpdateFileOnce();
 
             var r = await df.GetCacheCreateTime();
@@ -269,7 +269,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task UpdateOnceNoCache()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             var f = await df.UpdateFileOnce();
             Assert.IsNotNull(f);
             Assert.AreEqual(1, df.Called);
@@ -282,7 +282,7 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task UpdateOnceWithCache()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             await df.GetAndUpdateFileOnce();
 
             var f = await df.UpdateFileOnce()
@@ -295,9 +295,9 @@ namespace Test_MRUDatabase
         [TestMethod]
         public async Task UpdateOnceWithCacheAndUpdate()
         {
-            var df = new dummmyFile("test.pdf", "test");
+            var df = new dummyFile("test.pdf", "test");
             await df.GetAndUpdateFileOnce();
-            df.SetDate("must update now");
+            df.DateToReturn = "must update now";
 
             var f = await df.UpdateFileOnce()
                 .ToList()
@@ -305,56 +305,5 @@ namespace Test_MRUDatabase
             Assert.IsNotNull(f);
             Assert.AreEqual(1, f.Count);
         }
-
-        class dummmyFile : IFile
-        {
-            public int Called { get; private set; }
-            private string _name;
-            private string _url;
-            public dummmyFile(string url, string name)
-            {
-                _name = name;
-                _url = url;
-                Called = 0;
-            }
-
-            public bool IsValid { get { return true; } }
-
-            public string FileType { get { return "pdf"; } }
-
-            public string UniqueKey { get { return _name; } }
-
-            public async Task<StreamReader> GetFileStream()
-            {
-                Called++;
-                Debug.WriteLine("Doing download at {0}", DateTime.Now);
-                var f = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url);
-                var reader = await f.OpenStreamForReadAsync();
-                return new StreamReader(reader);
-            }
-
-            public string DisplayName { get { return _name; } }
-
-            public string _date = "this is now";
-
-            /// <summary>
-            /// Return a dummy date string.
-            /// </summary>
-            /// <returns></returns>
-            public Task<string> GetFileDate()
-            {
-                return Task.Factory.StartNew(() => _date);
-            }
-
-            /// <summary>
-            /// Reset the date
-            /// </summary>
-            /// <param name="str"></param>
-            internal void SetDate(string str)
-            {
-                _date = str;
-            }
-        }
-
     }
 }

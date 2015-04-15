@@ -1,4 +1,5 @@
-﻿using System.IO;
+﻿using System;
+using System.IO;
 using System.Threading.Tasks;
 using Windows.Storage;
 
@@ -34,7 +35,7 @@ namespace IWalker.DataModel.Interfaces
         /// Return the stream that we can use to read the file
         /// </summary>
         /// <returns></returns>
-        Task<StreamReader> GetFileStream();
+        IObservable<StreamReader> GetFileStream();
 
         /// <summary>
         /// Return the display name of a file (generally the name without the type).
@@ -46,6 +47,6 @@ namespace IWalker.DataModel.Interfaces
         /// update. Return as a string (a != comparison will be done).
         /// </summary>
         /// <returns></returns>
-        Task<string> GetFileDate();
+        IObservable<string> GetFileDate();
     }
 }
