@@ -84,10 +84,12 @@ namespace IWalker.ViewModels
                 .Select(_ => true);
 
             // Track the status of the download
-            var initiallyCached = _cache.GetCreatedAt(_file.UniqueKey)
+            // Note the concat when we combine - we very much want this to run
+            // in order, no matter what latencies get caught up in the system.
+            var initiallyCached = _cache.GetObjectCreatedAt<Tuple<string, byte[]>>(_file.UniqueKey)
                 .Select(dt => dt.HasValue);
 
-            Observable.Merge(initiallyCached, downloadSuccessful)
+            Observable.Concat(initiallyCached, downloadSuccessful)
                 .ToProperty(this, x => x.IsDownloaded, out _isDownloaded, false);
         }
 
@@ -99,7 +101,7 @@ namespace IWalker.ViewModels
         private IObservable<bool> CheckForUpdate()
         {
             return _cache.GetObject<Tuple<string, byte[]>>(_file.UniqueKey)
-                .Zip(Observable.FromAsync(() => _file.GetFileDate()), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+                .Zip(_file.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
                 .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
         }
