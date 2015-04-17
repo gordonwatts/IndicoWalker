@@ -55,6 +55,13 @@ namespace IWalker.ViewModels
         private ObservableAsPropertyHelper<bool> _isDownloaded;
 
         /// <summary>
+        /// Fires each time a new version of the file is available in the cache.
+        /// It will fire when there is an update. This fires only when a file
+        /// has been downloaded and is available in the cache.
+        /// </summary>
+        public IObservable<Unit> FileDownloadedAndCached { get; private set; }
+
+        /// <summary>
         /// Create the download controller for this file
         /// </summary>
         /// <param name="file"></param>
@@ -90,6 +97,8 @@ namespace IWalker.ViewModels
                 .Select(_ => true)
                 .Publish();
             downloadSuccessful.Connect();
+
+            FileDownloadedAndCached = downloadSuccessful.Select(_ => default(Unit));
 
             // When we are downloading, set the IsDownloading to true.
             Observable

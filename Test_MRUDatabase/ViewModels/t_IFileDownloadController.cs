@@ -56,8 +56,12 @@ namespace Test_MRUDatabase.ViewModels
             var vm = new IFileDownloadController(f, new dummyCache());
             var dummy = vm.IsDownloaded;
 
+            int downloadUpdateCount = 0;
+            vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
+
             vm.DownloadOrUpdate.Execute(null);
             Assert.IsTrue(vm.IsDownloaded);
+            Assert.AreEqual(1, downloadUpdateCount);
         }
 
         [TestMethod]
@@ -74,8 +78,34 @@ namespace Test_MRUDatabase.ViewModels
             var vm = new IFileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
+            int downloadUpdateCount = 0;
+            vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
+
             vm.DownloadOrUpdate.Execute(null);
             Assert.IsTrue(vm.IsDownloaded);
+            Assert.AreEqual(1, downloadUpdateCount);
+        }
+
+        [TestMethod]
+        public void TriggerNoFileDownloadCached()
+        {
+            var f = new dummyFile();
+
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            f.GetStream = () => Observable.Return(new StreamReader(mr));
+
+            var dc = new dummyCache();
+            dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2 }));
+            var vm = new IFileDownloadController(f, dc);
+            var dummy = vm.IsDownloaded;
+
+            int downloadUpdateCount = 0;
+            vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
+
+            vm.DownloadOrUpdate.Execute(null);
+            Assert.IsTrue(vm.IsDownloaded);
+            Assert.AreEqual(0, downloadUpdateCount);
         }
 
         [TestMethod]
