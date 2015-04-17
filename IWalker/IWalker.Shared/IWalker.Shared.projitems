@@ -42,6 +42,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\DebugUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ExpirationOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Files.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\LINQHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ListOrdering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\LocalTalkFileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\MeetingListRefUtils.cs" />
@@ -58,6 +59,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryPageViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\CategoryURIViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileDownloadController.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)ViewModels\PDFFile.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\TalkFileCollectionUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\ErrorUserControlViewModel.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)ViewModels\FileUserControlViewModel.cs" />

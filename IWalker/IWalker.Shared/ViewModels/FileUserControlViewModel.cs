@@ -61,7 +61,7 @@ namespace IWalker.ViewModels
 
             // Extract from cache or download it.
             // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.
-            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => file.GetFileFromCache());
+            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => file.GetFileFromCache(Blobs.LocalStorage));
             ReactiveCommand<IRandomAccessStream> cmdDownloadNow = null;
             if (file.IsValid)
             {
@@ -113,7 +113,7 @@ namespace IWalker.ViewModels
             // Requires us to write a file to the local cache.
             ClickedUs
                 .Where(_ => _fileNotCached.Value == false)
-                .SelectMany(_ => file.GetFileFromCache())
+                .SelectMany(_ => file.GetFileFromCache(Blobs.LocalStorage))
                 .SelectMany(async stream =>
                 {
                     var fname = string.Format("{0}.{1}", file.DisplayName.CleanFilename(), file.FileType).CleanFilename();

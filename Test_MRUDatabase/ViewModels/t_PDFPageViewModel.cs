@@ -71,18 +71,5 @@ namespace Test_MRUDatabase.ViewModels
 
             Assert.IsTrue(finished);
         }
-
-        /// <summary>
-        /// Load up a PDF document.
-        /// </summary>
-        /// <param name="p"></param>
-        /// <returns></returns>
-        private async Task<PdfDocument> GetPDF(string p)
-        {
-            var f = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(p);
-            var reader = await f.OpenStreamForReadAsync();
-            var pdf = await PdfDocument.LoadFromStreamAsync(System.IO.WindowsRuntimeStreamExtensions.AsRandomAccessStream(reader));
-            return pdf;
-        }
     }
 }

@@ -72,9 +72,9 @@ namespace IWalker.Util
         /// sequence is returned.
         /// </summary>
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
-        public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file)
+        public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file, IBlobCache cache)
         {
-            return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
+            return cache.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
                     .Do(by => Debug.WriteLine("Got a file from cache of size {0} bytes", by.Item2.Length))
                     .Select(by => by.Item2.AsRORAByteStream())
                     .Catch<IRandomAccessStream, KeyNotFoundException>(e => Observable.Empty<IRandomAccessStream>());

@@ -70,7 +70,7 @@ namespace IWalker.ViewModels
                 }
 
                 // If the file is already downloaded, then we should do an update check right away.
-                var fetchIfThere = f.GetFileFromCache()
+                var fetchIfThere = f.GetFileFromCache(Blobs.LocalStorage)
                     .Select(_ => default(Unit));
 
                 updateTalkFile = fetchIfThere.Concat(updateTalkFile);
@@ -81,7 +81,7 @@ namespace IWalker.ViewModels
                 var renderPDF = ReactiveCommand.CreateAsyncObservable<IRandomAccessStream>(_ =>
                     Observable.Merge(
                         f.GetAndUpdateFileUponRequest(updateTalkFile),
-                        checkForSlides.SelectMany(o => f.GetFileFromCache()))
+                        checkForSlides.SelectMany(o => f.GetFileFromCache(Blobs.LocalStorage)))
                 );
 
                 // Change them into files.

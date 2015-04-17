@@ -29,7 +29,7 @@ namespace Test_MRUDatabase
         public void TestForNoFile()
         {
             var df = new dummyFile("test.pdf", "test");
-            var f = df.GetFileFromCache();
+            var f = df.GetFileFromCache(Blobs.LocalStorage);
             string r = null;
             f.Subscribe(
                 a => r = "SHould not have gotten anything",
@@ -77,7 +77,7 @@ namespace Test_MRUDatabase
                 .FirstAsync();
             var raStream1 = await f1;
 
-            var f2 = df.GetFileFromCache()
+            var f2 = df.GetFileFromCache(Blobs.LocalStorage)
                 .ToList()
                 .FirstAsync();
 
@@ -98,7 +98,7 @@ namespace Test_MRUDatabase
                 .FirstAsync();
             var raStream1 = await f1;
 
-            var f2 = df.GetFileFromCache()
+            var f2 = df.GetFileFromCache(Blobs.LocalStorage)
                 .ToList()
                 .FirstAsync();
             var raStream = await f2;
@@ -229,7 +229,7 @@ namespace Test_MRUDatabase
             var f1 = df.GetAndUpdateFileOnce();
             var raStream1 = await f1;
 
-            var f2 = df.GetFileFromCache();
+            var f2 = df.GetFileFromCache(Blobs.LocalStorage);
             var raStream = await f2;
 
             Assert.AreEqual(1, df.GetStreamCalled);

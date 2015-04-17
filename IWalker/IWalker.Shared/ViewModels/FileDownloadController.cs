@@ -62,17 +62,27 @@ namespace IWalker.ViewModels
         public IObservable<Unit> FileDownloadedAndCached { get; private set; }
 
         /// <summary>
+        /// The file we are looking at
+        /// </summary>
+        public IFile File { get; private set; }
+
+        /// <summary>
+        /// The cache we use - so others can reference it as this is where our files will be stored.
+        /// </summary>
+        public IBlobCache Cache { get; private set; }
+
+        /// <summary>
         /// Create the download controller for this file
         /// </summary>
         /// <param name="file"></param>
         public FileDownloadController(IFile file, IBlobCache cache = null)
         {
-            _file = file;
-            _cache = cache == null ? Blobs.LocalStorage : cache;
+            File = file;
+            Cache = cache ?? Blobs.LocalStorage;
 
             // Download or update the file.
             DownloadOrUpdate = ReactiveCommand.CreateAsyncObservable(_ =>
-                _cache.GetObjectCreatedAt<Tuple<string,byte[]>>(_file.UniqueKey)
+                Cache.GetObjectCreatedAt<Tuple<string,byte[]>>(File.UniqueKey)
                 .Select(dt => dt.HasValue));
 
             var cacheUpdateRequired = DownloadOrUpdate
@@ -93,7 +103,7 @@ namespace IWalker.ViewModels
             var downloadSuccessful =
                 downloadRequired
                 .SelectMany(_ => Download())
-                .SelectMany(data => _cache.InsertObject(_file.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
                 .Select(_ => true)
                 .Publish();
             downloadSuccessful.Connect();
@@ -108,7 +118,7 @@ namespace IWalker.ViewModels
             // Track the status of the download
             // Note the concatenate when we combine - we very much want this to run
             // in order, no matter what latencies get caught up in the system.
-            var initiallyCached = _cache.GetObjectCreatedAt<Tuple<string, byte[]>>(_file.UniqueKey)
+            var initiallyCached = Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey)
                 .Select(dt => dt.HasValue);
 
             Observable.Concat(initiallyCached, downloadSuccessful)
@@ -122,8 +132,8 @@ namespace IWalker.ViewModels
         /// <returns></returns>
         private IObservable<bool> CheckForUpdate()
         {
-            return _cache.GetObject<Tuple<string, byte[]>>(_file.UniqueKey)
-                .Zip(_file.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+            return Cache.GetObject<Tuple<string, byte[]>>(File.UniqueKey)
+                .Zip(File.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
                 .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
         }
@@ -141,28 +151,17 @@ namespace IWalker.ViewModels
         {
             // Get the file stream, and write it out.
             var ms = new MemoryStream();
-            using (var dataStream = await _file.GetFileStream())
+            using (var dataStream = await File.GetFileStream())
             {
                 await dataStream.BaseStream.CopyToAsync(ms);
             }
 
             // Get the date from the header that we will need to stash
-            var timeStamp = await _file.GetFileDate();
+            var timeStamp = await File.GetFileDate();
 
             // This is what needs to be cached.
             var ar = ms.ToArray();
             return Tuple.Create(timeStamp, ar);
         }
-
-        /// <summary>
-        /// The file we control
-        /// </summary>
-        private IFile _file;
-
-        /// <summary>
-        /// Cache used to load everything up
-        /// </summary>
-        private IBlobCache _cache;
-
     }
 }
