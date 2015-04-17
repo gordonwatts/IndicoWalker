@@ -1,17 +1,16 @@
 ﻿using Akavache;
+using IWalker.Util;
 using IWalker.ViewModels;
+using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using ReactiveUI;
+using ReactiveUI.Testing;
 using System;
 using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Concurrency;
-using System.Reactive.Linq;
-using System.Text;
-using ReactiveUI.Testing;
-using System.Threading.Tasks;
-using ReactiveUI;
 using System.IO;
 using System.Reactive;
+using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -77,6 +76,167 @@ namespace Test_MRUDatabase.ViewModels
 
             vm.DownloadOrUpdate.Execute(null);
             Assert.IsTrue(vm.IsDownloaded);
+        }
+
+        [TestMethod]
+        public void DownloadInProgressIsSet()
+        {
+            var f = new dummyFile();
+
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            f.GetStream = () => Observable.Return(new StreamReader(mr));
+
+            var dc = new dummyCache();
+            var vm = new IFileDownloadController(f, dc);
+            int isDownloadingCounter = 0;
+            vm.WhenAny(x => x.IsDownloading, x => x.Value)
+                .Subscribe(_ => isDownloadingCounter++);
+            var dummy = vm.IsDownloaded;
+            var dummy1 = vm.IsDownloading;
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            // It should have gone from false to true, and back to false.
+            Assert.AreEqual(2, isDownloadingCounter);
+        }
+
+        [TestMethod]
+        public async Task IsDownloadingFlipsCorrectly()
+        {
+            await new TestScheduler().With(async sched =>
+            {
+                // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
+                var f = new dummyFile();
+
+                f.GetStream = () =>
+                {
+                    var data = new byte[] { 0, 1, 2, 3 };
+                    var mr = new MemoryStream(data);
+                    return Observable.Return(new StreamReader(mr)).WriteLine("created stream reader").Delay(TimeSpan.FromMilliseconds(100), sched).WriteLine("done with delay for stream reader");
+                };
+
+                var dc = new dummyCache();
+                var vm = new IFileDownloadController(f, dc);
+                var dummy = vm.IsDownloaded;
+                var dummy1 = vm.IsDownloading;
+
+                Assert.IsFalse(vm.IsDownloading);
+                vm.DownloadOrUpdate.Execute(null);
+
+                // Since the download is synchronous, it should get here just fine.
+                sched.AdvanceByMs(10);
+                Assert.IsTrue(vm.IsDownloading);
+                Assert.IsFalse(vm.IsDownloaded);
+
+                // And run past the end
+                sched.AdvanceByMs(200);
+
+                //TODO: Not clear why this is required (the delay), but it is!
+                await Task.Delay(200);
+                Assert.IsTrue(vm.IsDownloaded);
+                Assert.IsFalse(vm.IsDownloading);
+            });
+        }
+
+        [TestMethod]
+        public void DownloadCalledOnceOnNewFile()
+        {
+            var f = new dummyFile();
+
+            f.GetStream = () =>
+            {
+                var data = new byte[] { 0, 1, 2, 3 };
+                var mr = new MemoryStream(data);
+                return Observable.Return(new StreamReader(mr));
+            };
+
+            var dc = new dummyCache();
+            var vm = new IFileDownloadController(f, dc);
+            int isDownloadingCounter = 0;
+            vm.WhenAny(x => x.IsDownloading, x => x.Value)
+                .Subscribe(_ => isDownloadingCounter++);
+            var dummy = vm.IsDownloaded;
+            var dummy1 = vm.IsDownloading;
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            Assert.AreEqual(1, f.GetStreamCalled);
+        }
+
+        [TestMethod]
+        public void DownloadCalledOnceOnCacheUpdate()
+        {
+            var f = new dummyFile();
+
+            f.GetStream = () =>
+            {
+                var data = new byte[] { 0, 1, 2, 3 };
+                var mr = new MemoryStream(data);
+                return Observable.Return(new StreamReader(mr));
+            };
+
+            var dc = new dummyCache();
+            dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
+            var vm = new IFileDownloadController(f, dc);
+            int isDownloadingCounter = 0;
+            vm.WhenAny(x => x.IsDownloading, x => x.Value)
+                .Subscribe(_ => isDownloadingCounter++);
+            var dummy = vm.IsDownloaded;
+            var dummy1 = vm.IsDownloading;
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            Assert.AreEqual(1, f.GetStreamCalled);
+        }
+
+        [TestMethod]
+        public void DownloadNotCalledOnceOnCacheUpdate()
+        {
+            var f = new dummyFile();
+
+            f.GetStream = () =>
+            {
+                var data = new byte[] { 0, 1, 2, 3 };
+                var mr = new MemoryStream(data);
+                return Observable.Return(new StreamReader(mr));
+            };
+
+            var dc = new dummyCache();
+            var theDateString = "this is now";
+            dc.InsertObject(f.UniqueKey, Tuple.Create(theDateString, new byte[] { 0, 1 }));
+            f.DateToReturn = theDateString;
+            var vm = new IFileDownloadController(f, dc);
+
+            int isDownloadingCounter = 0;
+            vm.WhenAny(x => x.IsDownloading, x => x.Value)
+                .Subscribe(_ => isDownloadingCounter++);
+            var dummy = vm.IsDownloaded;
+            var dummy1 = vm.IsDownloading;
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            Assert.AreEqual(0, f.GetStreamCalled);
+        }
+
+        /// <summary>
+        /// Make sure the get data is not called too much (since it will generate a web
+        /// request).
+        /// </summary>
+        [TestMethod]
+        public void CheckDateCalledOnceCacheEmpty()
+        {
+            Assert.Inconclusive();
+        }
+
+        /// <summary>
+        /// Make sure the get data is not called too much (since it will generate a web
+        /// request).
+        /// </summary>
+        [TestMethod]
+        public void CheckDateCalledOnceCacheFilled()
+        {
+            Assert.Inconclusive();
         }
 
         /// <summary>
