@@ -320,6 +320,29 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsTrue(value);
         }
 
+        [TestMethod]
+        public void CtorHasNothingAccessedNoCache()
+        {
+            var f = new dummyFile();
+            var dc = new dummyCache();
+            var vm = new IFileDownloadController(f, dc);
+
+            Assert.AreEqual(0, f.GetDateCalled);
+            Assert.AreEqual(0, f.GetStreamCalled);
+        }
+
+        [TestMethod]
+        public void CtorHasNothingAccessedCache()
+        {
+            var f = new dummyFile();
+            var dc = new dummyCache();
+            dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2, 3 }));
+            var vm = new IFileDownloadController(f, dc);
+
+            Assert.AreEqual(0, f.GetDateCalled);
+            Assert.AreEqual(0, f.GetStreamCalled);
+        }
+
         private class dummyCache : IBlobCache
         {
             private Dictionary<string, dummyCacheInfo> _lines;
