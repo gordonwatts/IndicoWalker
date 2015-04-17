@@ -20,7 +20,7 @@ namespace IWalker.ViewModels
     /// <remarks>
     /// There should only be one of these at any time for a particular file.
     /// </remarks>
-    public class IFileDownloadController : ReactiveObject
+    public class FileDownloadController : ReactiveObject
     {
         /// <summary>
         /// This will trigger a download or an update of the file from the web.
@@ -65,7 +65,7 @@ namespace IWalker.ViewModels
         /// Create the download controller for this file
         /// </summary>
         /// <param name="file"></param>
-        public IFileDownloadController(IFile file, IBlobCache cache = null)
+        public FileDownloadController(IFile file, IBlobCache cache = null)
         {
             _file = file;
             _cache = cache == null ? Blobs.LocalStorage : cache;

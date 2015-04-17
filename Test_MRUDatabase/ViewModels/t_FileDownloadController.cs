@@ -15,7 +15,7 @@ using System.Threading.Tasks;
 namespace Test_MRUDatabase.ViewModels
 {
     [TestClass]
-    public class t_IFileDownloadController
+    public class t_FileDownloadController
     {
         [TestInitialize]
         public void TestSetup()
@@ -27,7 +27,7 @@ namespace Test_MRUDatabase.ViewModels
         public void NoFileDownloadedIsNotCached()
         {
             var f = new dummyFile();
-            var vm = new IFileDownloadController(f, new dummyCache());
+            var vm = new FileDownloadController(f, new dummyCache());
             var dummy = vm.IsDownloaded;
             Assert.IsFalse(vm.IsDownloaded);
         }
@@ -38,7 +38,7 @@ namespace Test_MRUDatabase.ViewModels
             var f = new dummyFile();
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
             
             Assert.IsTrue(vm.IsDownloaded);
@@ -53,7 +53,7 @@ namespace Test_MRUDatabase.ViewModels
             var mr = new MemoryStream(data);
             f.GetStream = () => Observable.Return(new StreamReader(mr));
 
-            var vm = new IFileDownloadController(f, new dummyCache());
+            var vm = new FileDownloadController(f, new dummyCache());
             var dummy = vm.IsDownloaded;
 
             int downloadUpdateCount = 0;
@@ -75,7 +75,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now, new byte[] { 0, 1, 2 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
             int downloadUpdateCount = 0;
@@ -97,7 +97,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
             int downloadUpdateCount = 0;
@@ -118,7 +118,7 @@ namespace Test_MRUDatabase.ViewModels
             f.GetStream = () => Observable.Return(new StreamReader(mr));
 
             var dc = new dummyCache();
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Subscribe(_ => isDownloadingCounter++);
@@ -147,7 +147,7 @@ namespace Test_MRUDatabase.ViewModels
                 };
 
                 var dc = new dummyCache();
-                var vm = new IFileDownloadController(f, dc);
+                var vm = new FileDownloadController(f, dc);
                 var dummy = vm.IsDownloaded;
                 var dummy1 = vm.IsDownloading;
 
@@ -182,7 +182,7 @@ namespace Test_MRUDatabase.ViewModels
             };
 
             var dc = new dummyCache();
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Subscribe(_ => isDownloadingCounter++);
@@ -208,7 +208,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Subscribe(_ => isDownloadingCounter++);
@@ -236,7 +236,7 @@ namespace Test_MRUDatabase.ViewModels
             var theDateString = "this is now";
             dc.InsertObject(f.UniqueKey, Tuple.Create(theDateString, new byte[] { 0, 1 }));
             f.DateToReturn = theDateString;
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
 
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
@@ -266,7 +266,7 @@ namespace Test_MRUDatabase.ViewModels
             };
 
             var dc = new dummyCache();
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Subscribe(_ => isDownloadingCounter++);
@@ -296,7 +296,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Subscribe(_ => isDownloadingCounter++);
@@ -355,7 +355,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             var f = new dummyFile();
             var dc = new dummyCache();
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
 
             Assert.AreEqual(0, f.GetDateCalled);
             Assert.AreEqual(0, f.GetStreamCalled);
@@ -367,7 +367,7 @@ namespace Test_MRUDatabase.ViewModels
             var f = new dummyFile();
             var dc = new dummyCache();
             dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2, 3 }));
-            var vm = new IFileDownloadController(f, dc);
+            var vm = new FileDownloadController(f, dc);
 
             Assert.AreEqual(0, f.GetDateCalled);
             Assert.AreEqual(0, f.GetStreamCalled);

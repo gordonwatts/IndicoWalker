@@ -136,7 +136,7 @@
     <Compile Include="ViewModels\t_CategoryPageViewModel.cs" />
     <Compile Include="ViewModels\t_ErrorUserControLViewModel.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
-    <Compile Include="ViewModels\t_IFileDownloadController.cs" />
+    <Compile Include="ViewModels\t_FileDownloadController.cs" />
     <Compile Include="ViewModels\t_MeetingPageViewModel.cs" />
     <Compile Include="ViewModels\t_PDFPageViewModel.cs" />
     <Compile Include="ViewModels\t_SessionUserControlViewModel.cs" />
