@@ -117,14 +117,14 @@ namespace Test_MRUDatabase
     // A dummy file.
     class dummyFile : IFile
     {
-        public int Called { get; private set; }
+        public int GetStreamCalled { get; private set; }
         private string _name;
         private string _url;
         public dummyFile(string url = "bogus", string name = "talk.pdf")
         {
             _name = name;
             _url = url;
-            Called = 0;
+            GetStreamCalled = 0;
             DateToReturn = "this is the first";
             GetStream = () => Observable.FromAsync(() => Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url).AsTask())
                 .SelectMany(f => f.OpenStreamForReadAsync())
@@ -142,7 +142,7 @@ namespace Test_MRUDatabase
 
         public IObservable<StreamReader> GetFileStream()
         {
-            Called++;
+            GetStreamCalled++;
             if (GetStream == null)
             {
                 throw new NotImplementedException();

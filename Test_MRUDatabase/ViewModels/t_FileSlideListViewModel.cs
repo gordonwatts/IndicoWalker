@@ -38,7 +38,7 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.FirstAsync();
 
             Assert.AreEqual(10, list.Count);
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -63,7 +63,7 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.FirstAsync();
             Assert.AreEqual(10, list.Count);
 
-            Assert.AreEqual(3, df.Called);
+            Assert.AreEqual(3, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -89,7 +89,7 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.FirstAsync();
             Assert.AreEqual(10, list.Count);
 
-            Assert.AreEqual(2, df.Called);
+            Assert.AreEqual(2, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -113,7 +113,7 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.FirstAsync();
             Assert.AreEqual(10, list.Count);
 
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -136,7 +136,7 @@ namespace Test_MRUDatabase.ViewModels
             await vm.DoneBuilding.Timeout(TimeSpan.FromMilliseconds(100), Observable.Return(default(Unit)));
             Assert.AreEqual(0, list.Count);
 
-            Assert.AreEqual(0, df.Called);
+            Assert.AreEqual(0, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -158,7 +158,7 @@ namespace Test_MRUDatabase.ViewModels
 
             await vm.DoneBuilding.FirstAsync();
 
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -222,7 +222,7 @@ namespace Test_MRUDatabase.ViewModels
             Task.WaitAll(allImages);
 
             // Make sure we had to download the file only once.
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
     }
 }

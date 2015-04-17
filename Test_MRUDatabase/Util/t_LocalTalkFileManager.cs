@@ -37,7 +37,7 @@ namespace Test_MRUDatabase
                 );
 
             Assert.AreEqual(null, r);
-            Assert.AreEqual(0, df.Called);
+            Assert.AreEqual(0, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -50,7 +50,7 @@ namespace Test_MRUDatabase
             Assert.IsNotNull(f);
             Assert.AreEqual(1, f.Count);
             Assert.IsNotNull(f[0]);
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -232,7 +232,7 @@ namespace Test_MRUDatabase
             var f2 = df.GetFileFromCache();
             var raStream = await f2;
 
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -245,7 +245,7 @@ namespace Test_MRUDatabase
             var f2 = df.GetAndUpdateFileOnce();
             var raStream = await f2;
 
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -272,7 +272,7 @@ namespace Test_MRUDatabase
             var df = new dummyFile("test.pdf", "test");
             var f = await df.UpdateFileOnce();
             Assert.IsNotNull(f);
-            Assert.AreEqual(1, df.Called);
+            Assert.AreEqual(1, df.GetStreamCalled);
             // Make sure it has been cached as well.
             var o = await Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(df.UniqueKey);
             Assert.IsNotNull(o);
