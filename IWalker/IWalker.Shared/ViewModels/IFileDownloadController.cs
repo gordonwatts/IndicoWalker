@@ -4,6 +4,7 @@ using IWalker.Util;
 using ReactiveUI;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -64,7 +65,7 @@ namespace IWalker.ViewModels
 
             // Download or update the file.
             DownloadOrUpdate = ReactiveCommand.CreateAsyncObservable(_ =>
-                _cache.GetCreatedAt(_file.UniqueKey)
+                _cache.GetObjectCreatedAt<Tuple<string,byte[]>>(_file.UniqueKey)
                 .Select(dt => dt.HasValue));
 
             var cacheUpdateRequired = DownloadOrUpdate
@@ -77,14 +78,24 @@ namespace IWalker.ViewModels
                 .Where(isCached => !isCached)
                 .Select(_ => default(Unit));
 
+            var downloadRequired =
+                Observable.Merge(cacheUpdateRequired, firstDownloadRequired);
+
             var downloadSuccessful =
-                Observable.Merge(cacheUpdateRequired, firstDownloadRequired)
+                downloadRequired
                 .SelectMany(_ => Download())
                 .SelectMany(data => _cache.InsertObject(_file.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
-                .Select(_ => true);
+                .Select(_ => true)
+                .Publish();
+            downloadSuccessful.Connect();
+
+            // When we are downloading, set the IsDownloading to true.
+            Observable
+                .Merge(downloadSuccessful.Select(_ => false), downloadRequired.Select(_ => true))
+                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
             // Track the status of the download
-            // Note the concat when we combine - we very much want this to run
+            // Note the concatenate when we combine - we very much want this to run
             // in order, no matter what latencies get caught up in the system.
             var initiallyCached = _cache.GetObjectCreatedAt<Tuple<string, byte[]>>(_file.UniqueKey)
                 .Select(dt => dt.HasValue);
