@@ -72,7 +72,9 @@ namespace IWalker.ViewModels
                 .Where(isCached => isCached)
                 .SelectMany(_ => CheckForUpdate())
                 .Where(isNewOneEB => isNewOneEB)
-                .Select(_ => default(Unit));
+                .Select(_ => default(Unit))
+                .Publish();
+            cacheUpdateRequired.Connect();
 
             var firstDownloadRequired = DownloadOrUpdate
                 .Where(isCached => !isCached)

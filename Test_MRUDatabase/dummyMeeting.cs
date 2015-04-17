@@ -125,6 +125,7 @@ namespace Test_MRUDatabase
             _name = name;
             _url = url;
             GetStreamCalled = 0;
+            GetDateCalled = 0;
             DateToReturn = "this is the first";
             GetStream = () => Observable.FromAsync(() => Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url).AsTask())
                 .SelectMany(f => f.OpenStreamForReadAsync())
@@ -161,8 +162,11 @@ namespace Test_MRUDatabase
         public string DateToReturn { get; set; }
         public IObservable<string> GetFileDate()
         {
+            GetDateCalled++;
             return Observable.Return(DateToReturn);
         }
+
+        public int GetDateCalled { get; private set; }
     }
 
     /// <summary>
