@@ -74,20 +74,14 @@ namespace IWalker.ViewModels
                 .Replay(1);
 
             // Now we can parcel out that information.
-
             _pdfDocument
                 .WriteLine("About to update the number of pages")
                 .Select(doc => (int)doc.PageCount)
                 .WriteLine(np => string.Format("Updating the number of pages as {0}", np))
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0, RxApp.MainThreadScheduler);
 
-            //TODO: Now that above _pdfDocument is Replay, perhaps this doesn't need to be?
-            var connectedDocumentSubscription = _pdfDocument
-                .AsUnit()
-                .Replay(1);
-            PDFDocumentUpdated = connectedDocumentSubscription
-                .WriteLine("Just got PDF update to the PDFDocumentUpdated observable");
-            connectedDocumentSubscription.Connect();
+            PDFDocumentUpdated = _pdfDocument
+                .AsUnit();
 
             _pdfDocument.Connect();
         }
