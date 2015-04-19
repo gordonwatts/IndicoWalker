@@ -28,7 +28,11 @@ namespace Test_MRUDatabase
             {
                 _lines = new Dictionary<string, dummyCacheInfo>();
             }
+            NumberTimesGetCalled = 0;
         }
+
+        public int NumberTimesGetCalled { get; private set; }
+
         public IObservable<System.Reactive.Unit> Flush()
         {
             throw new NotImplementedException();
@@ -36,6 +40,7 @@ namespace Test_MRUDatabase
 
         public IObservable<byte[]> Get(string key)
         {
+            NumberTimesGetCalled++;
             if (!_lines.ContainsKey(key))
             {
                 throw new KeyNotFoundException();

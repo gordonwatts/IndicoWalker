@@ -2,6 +2,7 @@
 using IWalker.Util;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
@@ -54,22 +55,26 @@ namespace IWalker.ViewModels
             var newFile = fileSource
                 .FileDownloadedAndCached;
 
+            // Load it up as a real PDF document. Make sure we don't do it more than once.
+            // Note the publish below - otherwise we will miss it going by if it happens too
+            // fast.
             var pdfDocument = Observable.Merge(isDownloaded, newFile)
                 .SelectMany(_ => fileSource.Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(fileSource.File.UniqueKey))
                 .DistinctUntilChanged(info => info.Value)
                 .SelectMany(info => fileSource.File.GetFileFromCache(fileSource.Cache))
                 .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
+                .Do(doc => Debug.WriteLine("Done with document initial rendering"))
+                .Catch<PdfDocument, Exception>(ex => Observable.Empty<PdfDocument>())
                 .Publish();
-            pdfDocument.Connect();
 
             // Now we can parcel out that information.
 
             pdfDocument
                 .Select(doc => (int)doc.PageCount)
-                .ToProperty(this, x => x.NumberOfPages, out _nPages, 0);
+                .ToProperty(this, x => x.NumberOfPages, out _nPages, 0, RxApp.MainThreadScheduler);
 
-            PDFDocumentUpdated = pdfDocument.AsUnit();
 
+            pdfDocument.Connect();
         }
     }
 }
