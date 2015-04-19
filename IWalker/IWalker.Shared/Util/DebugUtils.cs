@@ -20,5 +20,18 @@ namespace IWalker.Util
         {
             return source.Do(x => Debug.WriteLine(message, args));
         }
+
+        /// <summary>
+        /// Helper to write a debug message
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="messageGenerator"></param>
+        /// <param name="args"></param>
+        /// <returns></returns>
+        public static IObservable<T> WriteLine<T>(this IObservable<T> source, Func<T, string> messageGenerator, params object[] args)
+        {
+            return source.Do(x => Debug.WriteLine(messageGenerator(x), args));
+        }
     }
 }

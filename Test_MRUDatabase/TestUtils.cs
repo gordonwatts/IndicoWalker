@@ -33,14 +33,16 @@ namespace Test_MRUDatabase
             var f = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(p);
             var len = (int) (await f.GetBasicPropertiesAsync()).Size;
             var data = new byte[len];
-            var reader = await f.OpenStreamForReadAsync();
+            using (var reader = await f.OpenStreamForReadAsync())
+            {
 
-            var bytesRead = await reader.ReadAsync(data, 0, len);
+                var bytesRead = await reader.ReadAsync(data, 0, len);
 
-            if (bytesRead != len)
-                throw new InvalidOperationException();
-           
-            return data;
+                if (bytesRead != len)
+                    throw new InvalidOperationException();
+
+                return data;
+            }
         }
     }
 }

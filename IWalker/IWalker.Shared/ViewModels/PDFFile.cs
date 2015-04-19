@@ -22,6 +22,7 @@ namespace IWalker.ViewModels
             get { return _nPages.Value; }
         }
         private ObservableAsPropertyHelper<int> _nPages;
+        private System.Reactive.Subjects.IConnectableObservable<PdfDocument> _pdfDocument;
 
         /// <summary>
         /// Mostly for testing, fires when we have a new PDF document ready
@@ -37,7 +38,8 @@ namespace IWalker.ViewModels
         /// <returns></returns>
         public IObservable<PdfPage> GetPageStream(int pageNumber)
         {
-            throw new InvalidOperationException();
+            return _pdfDocument
+                .Select(doc => doc.GetPage((uint) pageNumber));
         }
 
         /// <summary>
@@ -58,23 +60,36 @@ namespace IWalker.ViewModels
             // Load it up as a real PDF document. Make sure we don't do it more than once.
             // Note the publish below - otherwise we will miss it going by if it happens too
             // fast.
-            var pdfDocument = Observable.Merge(isDownloaded, newFile)
+            _pdfDocument = Observable.Merge(isDownloaded, newFile)
                 .SelectMany(_ => fileSource.Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(fileSource.File.UniqueKey))
                 .DistinctUntilChanged(info => info.Value)
                 .SelectMany(info => fileSource.File.GetFileFromCache(fileSource.Cache))
                 .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
                 .Do(doc => Debug.WriteLine("Done with document initial rendering"))
-                .Catch<PdfDocument, Exception>(ex => Observable.Empty<PdfDocument>())
-                .Publish();
+                .Catch<PdfDocument, Exception>(ex =>
+                {
+                    Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
+                    return Observable.Empty<PdfDocument>();
+                })
+                .Replay(1);
 
             // Now we can parcel out that information.
 
-            pdfDocument
+            _pdfDocument
+                .WriteLine("About to update the number of pages")
                 .Select(doc => (int)doc.PageCount)
+                .WriteLine(np => string.Format("Updating the number of pages as {0}", np))
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0, RxApp.MainThreadScheduler);
 
+            //TODO: Now that above _pdfDocument is Replay, perhaps this doesn't need to be?
+            var connectedDocumentSubscription = _pdfDocument
+                .AsUnit()
+                .Replay(1);
+            PDFDocumentUpdated = connectedDocumentSubscription
+                .WriteLine("Just got PDF update to the PDFDocumentUpdated observable");
+            connectedDocumentSubscription.Connect();
 
-            pdfDocument.Connect();
+            _pdfDocument.Connect();
         }
     }
 }
