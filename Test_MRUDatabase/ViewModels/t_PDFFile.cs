@@ -293,27 +293,5 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(getCalls, dc.NumberTimesGetCalled);
         }
 
-        [TestMethod]
-        public async Task GetFileViaUpdateCache()
-        {
-            // We get an image, then a file update occurs, and we get the new file and do the "render".
-            Assert.Inconclusive();
-        }
-
-        [TestMethod]
-        public async Task GetNumberOfPagesWhenCached()
-        {
-            // If we have cached the number of pages for this file, then we shouldn't
-            // need to render at all.
-            Assert.Inconclusive();
-        }
-
-        [TestMethod]
-        public async Task NumberCacheLookupsSmall()
-        {
-            // Examine log files and make sure all those cache lookups are actually needed.
-            Assert.Inconclusive();
-        }
-
     }
 }
