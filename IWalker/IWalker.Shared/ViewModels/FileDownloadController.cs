@@ -30,7 +30,7 @@ namespace IWalker.ViewModels
         /// If the file is cached, then we will look to see if there is an update.
         /// IsDownloading will be updated as appropriate. So will IsDownloaded.
         /// </remarks>
-        public ReactiveCommand<bool> DownloadOrUpdate { get; private set; }
+        public ReactiveCommand<object> DownloadOrUpdate { get; private set; }
 
         /// <summary>
         /// True if data is being downloaded as we speak
@@ -81,11 +81,12 @@ namespace IWalker.ViewModels
             Cache = cache ?? Blobs.LocalStorage;
 
             // Download or update the file.
-            DownloadOrUpdate = ReactiveCommand.CreateAsyncObservable(_ =>
-                Cache.GetObjectCreatedAt<Tuple<string,byte[]>>(File.UniqueKey)
-                .Select(dt => dt.HasValue));
+            DownloadOrUpdate = ReactiveCommand.Create();
+            var hasCachedValue = DownloadOrUpdate
+                .SelectMany(_ => Cache.GetObjectCreatedAt<Tuple<string,byte[]>>(File.UniqueKey))
+                .Select(dt => dt.HasValue);
 
-            var cacheUpdateRequired = DownloadOrUpdate
+            var cacheUpdateRequired = hasCachedValue
                 .Where(isCached => isCached)
                 .SelectMany(_ => CheckForUpdate())
                 .Where(isNewOneEB => isNewOneEB)
@@ -93,7 +94,7 @@ namespace IWalker.ViewModels
                 .Publish();
             cacheUpdateRequired.Connect();
 
-            var firstDownloadRequired = DownloadOrUpdate
+            var firstDownloadRequired = hasCachedValue
                 .Where(isCached => !isCached)
                 .Select(_ => default(Unit));
 
