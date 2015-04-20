@@ -139,6 +139,18 @@ namespace Test_MRUDatabase.ViewModels
             // Now, make sure that we still get a "1" out of the update guy.
         }
 
+        /// <summary>
+        /// This test is currently failing when run on its own:
+        ///   - Adding print statements can change its behavior (in PDFFile.cs)
+        ///   - Running in the debugger can change its behavior
+        ///   - If you dump out the # of pages in the page number calc, just before
+        ///     the NumberOfPages property is set in the ToProperty, you'll often see that fire. But
+        ///     the property isn't actually updated as far as the test (below) is concerned.
+        /// This feels like a deadlock or race condition. I'm going to leave this along for now
+        /// and see how it works in real life. But I'd love to know what is causing it!
+        /// TOOD: Fix this.
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task CachedFileGetsUpdated()
         {

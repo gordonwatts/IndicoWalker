@@ -78,7 +78,7 @@ namespace IWalker.ViewModels
                         Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
                         return Observable.Empty<PdfDocument>();
                     })
-                    .Replay(1).ConnectAfterSubscription();
+                    .PublishLast().ConnectAfterSubscription();
 
             // Finally, build the combination of these two guys.
             _pdfAndCacheKey = cacheKey
