@@ -215,7 +215,6 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(5, (int) page.Index);
         }
 
-#if false
         [TestMethod]
         public async Task GetImagesViaCacheSequence()
         {
@@ -230,30 +229,31 @@ namespace Test_MRUDatabase.ViewModels
                 throw new InvalidOperationException();
             };
 
-            // Install original data in cache
+            // For this to work, we need the # of pages in the cache already.
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
+            await dc.InsertObject(f.UniqueKey, Tuple.Create("old date", data)).FirstAsync();
+            var dtc = await dc.GetObjectCreatedAt<Tuple<string, byte[]>>(f.UniqueKey).FirstAsync();
+
+            var cacheStem = string.Format("talk.pdf-{0}", dtc.Value.ToString());
+            await dc.InsertObject(cacheStem + "-NumberOfPages", 10).FirstAsync();
 
             // Create VM's and hook them up.
             var vm = new FileDownloadController(f, dc);
             var pf = new PDFFile(vm);
             var dummy1 = pf.NumberOfPages;
-            bool gotit = false;
-            pf.PDFDocumentUpdated.Subscribe(_ => gotit = true);
-
-            // Start it off
-            vm.DownloadOrUpdate.Execute(null);
 
             // Get the cache info and the items from it, we are really only
             // interested in the first item.
-            var cacheInfo = await pf.GetPageStreamAndCacheInfo().FirstAsync();
+            var cacheInfo = await pf
+                .GetPageStreamAndCacheInfo(5)
+                .Timeout(TimeSpan.FromSeconds(2), Observable.Return<Tuple<string, IObservable<PdfPage>>>(null))
+                .FirstAsync();
 
-            Assert.AreEqual("bogus", cacheInfo.Item2);
+            Assert.IsNotNull(cacheInfo);
+            Assert.AreEqual(cacheStem, cacheInfo.Item1);
 
-            // Now, make sure that we've not tried to render or download the PDF file.
-            Assert.IsFalse(gotit);
+            Assert.AreEqual(1, dc.NumberTimesGetCalled);
         }
-#endif
 
         [TestMethod]
         public async Task GetFIleViaCacheSequence()
