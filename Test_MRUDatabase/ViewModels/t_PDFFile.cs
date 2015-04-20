@@ -107,52 +107,6 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(3, dc.NumberTimesGetCalled);
         }
 
-#if false
-        [TestMethod]
-        public async Task DownloadedFiresEvenWhenLateSubscribe()
-        {
-            var data = await TestUtils.GetFileAsBytes("test.pdf");
-            GC.Collect();
-            Debug.WriteLine("Using test.pdf which is {0} bytes long.", data.Length);
-
-            await new TestScheduler().With(async sched =>
-            {
-                var f = new dummyFile();
-                f.GetStream = () =>
-                {
-                    throw new InvalidOperationException();
-                };
-
-                // Install original data in cache
-                var dc = new dummyCache();
-                await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
-                GC.Collect();
-
-                // Create VM's and hook them up.
-                var vm = new FileDownloadController(f, dc);
-                var pf = new PDFFile(vm);
-                var dummy1 = pf.NumberOfPages;
-                GC.Collect();
-
-                // Start it off
-                vm.DownloadOrUpdate.Execute(null);
-                sched.AdvanceByMs(100);
-                GC.Collect();
-                await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
-                    .Do(y => Debug.WriteLine("Looking at a page count of {0}", y))
-                    .Where(y => y != 0)
-                    .Take(1)
-                    .WriteLine("Got a number of pages - time to sign off")
-                    .FirstAsync();
-                Assert.AreEqual(10, pf.NumberOfPages);
-
-                // Now, make sure that we still get a "1" out of the update guy.
-                bool goit = false;
-                pf.PDFDocumentUpdated.Subscribe(_ => goit = true);
-                Assert.IsTrue(goit);
-            });
-        }
-
         [TestMethod]
         public async Task CheckTest2()
         {
@@ -177,15 +131,12 @@ namespace Test_MRUDatabase.ViewModels
             await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
                 .Where(y => y != 0)
                 .Take(1)
+                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
                 .FirstAsync();
 
             Assert.AreEqual(6, pf.NumberOfPages);
 
             // Now, make sure that we still get a "1" out of the update guy.
-            bool goit = false;
-            pf.PDFDocumentUpdated.Subscribe(_ => goit = true);
-            Assert.IsTrue(goit);
-            GC.Collect();
         }
 
         [TestMethod]
@@ -211,14 +162,13 @@ namespace Test_MRUDatabase.ViewModels
             var pf = new PDFFile(vm);
             var dummy1 = pf.NumberOfPages;
 
-            pf.PDFDocumentUpdated.Subscribe(_ => Debug.WriteLine("Just got a PDF update: {0}", pf.NumberOfPages));
-
             // Start it off
             vm.DownloadOrUpdate.Execute(null);
             await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
                 .Do(v => Debug.WriteLine("Got value {0} for pages {1}", v, pf.NumberOfPages))
                 .Where(y => y != 0)
                 .Take(1)
+                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
                 .FirstAsync();
             Assert.AreEqual(10, pf.NumberOfPages);
             Debug.WriteLine("Got the first file through");
@@ -231,10 +181,10 @@ namespace Test_MRUDatabase.ViewModels
             await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
                 .Where(y => y != 10)
                 .Take(1)
+                .Timeout(TimeSpan.FromSeconds(2), Observable.Return(0))
                 .FirstAsync();
             Assert.AreEqual(6, pf.NumberOfPages);
         }
-#endif
 #if false
         [TestMethod]
         public async Task MonitorPageUpdate()
