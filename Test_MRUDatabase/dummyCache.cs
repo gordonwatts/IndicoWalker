@@ -45,6 +45,7 @@ namespace Test_MRUDatabase
             NumberTimesGetCalled++;
             if (!_lines.ContainsKey(key))
             {
+                Debug.WriteLine("  -> Nothing in cache.");
                 return Observable.Throw<byte[]>(new KeyNotFoundException());
             }
             return Observable.Return(_lines[key].Data);
@@ -60,6 +61,7 @@ namespace Test_MRUDatabase
             Debug.WriteLine("Trying to get object created at for key {0}", key);
             if (!_lines.ContainsKey(key))
             {
+                Debug.WriteLine("  -> Nothing in cache.");
                 return Observable.Return((DateTimeOffset?)null);
             }
             return Observable.Return<DateTimeOffset?>(_lines[key].DateCreated);
