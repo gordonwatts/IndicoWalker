@@ -185,7 +185,7 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
             Assert.AreEqual(6, pf.NumberOfPages);
         }
-#if false
+
         [TestMethod]
         public async Task MonitorPageUpdate()
         {
@@ -203,12 +203,19 @@ namespace Test_MRUDatabase.ViewModels
 
             vm.DownloadOrUpdate.Execute(null);
 
+            await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
+                .Where(y => y != 0)
+                .Take(1)
+                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
+                .FirstAsync();
             Assert.AreEqual(10, pf.NumberOfPages);
 
-            var pupdate = await pf.GetPageStream(1).FirstAsync();
-            Assert.AreEqual(1, (int) pupdate.Index);
+            var pupdate = await pf.GetPageStreamAndCacheInfo(5).FirstAsync();
+            var page = await pupdate.Item2.FirstAsync();
+            Assert.AreEqual(5, (int) page.Index);
         }
 
+#if false
         [TestMethod]
         public async Task GetImagesViaCacheSequence()
         {
