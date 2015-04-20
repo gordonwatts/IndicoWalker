@@ -67,7 +67,7 @@ namespace IWalker.ViewModels
             // -> The Take(1) is to make sure we do this only once. Otherwise this sequence will remain open forever,
             //    and that will cause problems with the GetOrFetchObject, which expects to use only the last time in the sequence
             //    it looks at!
-            var pdfObservable = Observable.Defer(() =>
+            var pdfObservable =
                     fileSource.WhenAny(x => x.IsDownloaded, x => x.Value)
                     .Where(downhere => downhere == true)
                     .Take(1)
@@ -78,8 +78,7 @@ namespace IWalker.ViewModels
                         Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
                         return Observable.Empty<PdfDocument>();
                     })
-                    .Replay(1).RefCount()
-                );
+                    .Replay(1).ConnectAfterSubscription();
 
             // Finally, build the combination of these two guys.
             _pdfAndCacheKey = cacheKey

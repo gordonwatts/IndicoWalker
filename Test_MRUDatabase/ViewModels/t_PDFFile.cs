@@ -256,18 +256,41 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public async Task GetFIleViaCacheSequence()
-        {
-            // Pretend a cache miss, and fetch the file to do the render.
-            Assert.Inconclusive();
-        }
-
-        [TestMethod]
-        public async Task GetFIleViaCacheSequenceTwice()
+        public async Task GetFileViaCacheSequenceTwice()
         {
             // Pretend a cache miss, and fetch the file to do the render. ANd then
             // do it again.
-            Assert.Inconclusive();
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+            var dc = new dummyCache();
+            var vm = new FileDownloadController(f, dc);
+
+            var pf = new PDFFile(vm);
+            var dummy1 = pf.NumberOfPages;
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
+                .Where(y => y != 0)
+                .Take(1)
+                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
+                .FirstAsync();
+            Assert.AreEqual(10, pf.NumberOfPages);
+
+            var pupdate = await pf.GetPageStreamAndCacheInfo(5).FirstAsync();
+
+            // First rendering
+            var page = await pupdate.Item2.FirstAsync();
+
+            // Get the # of times we've done a data lookup. And this shouldn't change when we get it again.
+            var getCalls = dc.NumberTimesGetCalled;
+            Debug.WriteLine("Get was called {0} times after first page was rendered.", getCalls);
+            var pageAgain = await pupdate.Item2.FirstAsync();
+            Assert.AreEqual(getCalls, dc.NumberTimesGetCalled);
         }
 
         [TestMethod]

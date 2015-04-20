@@ -131,6 +131,7 @@
     <Compile Include="t_Akavache.cs" />
     <Compile Include="Util\dummyScreen.cs" />
     <Compile Include="Util\t_AkavacheUtils.cs" />
+    <Compile Include="Util\t_ConnectAfterSubscriptionUtils.cs" />
     <Compile Include="Util\t_LocalTalkFileManager.cs" />
     <Compile Include="Util\t_ListOrdering.cs" />
     <Compile Include="ViewModels\t_AddOrUpdateIndicoApiKeyViewModel.cs" />
