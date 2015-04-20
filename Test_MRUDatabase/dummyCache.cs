@@ -1,6 +1,7 @@
 ﻿using Akavache;
 using System;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -40,10 +41,11 @@ namespace Test_MRUDatabase
 
         public IObservable<byte[]> Get(string key)
         {
+            Debug.WriteLine("Trying to get data for {0}", key);
             NumberTimesGetCalled++;
             if (!_lines.ContainsKey(key))
             {
-                throw new KeyNotFoundException();
+                return Observable.Throw<byte[]>(new KeyNotFoundException());
             }
             return Observable.Return(_lines[key].Data);
         }
@@ -55,6 +57,7 @@ namespace Test_MRUDatabase
 
         public IObservable<DateTimeOffset?> GetCreatedAt(string key)
         {
+            Debug.WriteLine("Trying to get object created at for key {0}", key);
             if (!_lines.ContainsKey(key))
             {
                 return Observable.Return((DateTimeOffset?)null);
@@ -64,6 +67,7 @@ namespace Test_MRUDatabase
 
         public IObservable<System.Reactive.Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
         {
+            Debug.WriteLine("Inserting data for key {0} - {1} bytes", key, data.Length);
             _lines[key] = new dummyCacheInfo() { DateCreated = DateTime.Now, Data = data };
             return Observable.Return(default(Unit));
         }

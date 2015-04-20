@@ -23,30 +23,35 @@ namespace Test_MRUDatabase.ViewModels
     {
 
         [TestMethod]
-        public async Task DownloadFile()
+        public async Task DownloadFileNoP()
         {
-            var f = new dummyFile();
-            var data = await TestUtils.GetFileAsBytes("test.pdf");
-            f.GetStream = () =>
+            await new TestScheduler().With(async sched =>
             {
-                return Observable.Return(new StreamReader(new MemoryStream(data)));
-            };
-            var dc = new dummyCache();
-            var vm = new FileDownloadController(f, dc);
+                var f = new dummyFile();
+                var data = await TestUtils.GetFileAsBytes("test.pdf");
+                f.GetStream = () =>
+                {
+                    return Observable.Return(new StreamReader(new MemoryStream(data)));
+                };
+                var dc = new dummyCache();
+                var vm = new FileDownloadController(f, dc);
 
-            var pf = new PDFFile(vm);
-            var dummy1 = pf.NumberOfPages;
-            bool gotit = false;
-            pf.PDFDocumentUpdated.Subscribe(_ => gotit = true);
+                var pf = new PDFFile(vm);
+                var dummy1 = pf.NumberOfPages;
 
-            vm.DownloadOrUpdate.Execute(null);
+                vm.DownloadOrUpdate.Execute(null);
 
-            Assert.AreEqual(10, pf.NumberOfPages);
-            Assert.IsTrue(gotit);
+                await pf.WhenAny(x => x.NumberOfPages, x => x.Value)
+                    .Where(x => x != 0)
+                    .FirstAsync();
+
+                Assert.AreEqual(10, pf.NumberOfPages);
+            });
         }
 
+#if false
         [TestMethod]
-        public async Task DownloadFileFromCache()
+        public async Task DownloadFileFromCacheNoPNotThereYet()
         {
             var f = new dummyFile();
             var data = await TestUtils.GetFileAsBytes("test.pdf");
@@ -73,6 +78,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsTrue(gotit);
         }
 
+#endif
         // Was ok
         [TestMethod]
         public async Task CheckCacheLookupHappensOnce()
@@ -106,6 +112,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(2, dc.NumberTimesGetCalled);
         }
 
+#if false
         [TestMethod]
         public async Task DownloadedFiresEvenWhenLateSubscribe()
         {
@@ -232,7 +239,8 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
             Assert.AreEqual(6, pf.NumberOfPages);
         }
-
+#endif
+#if false
         [TestMethod]
         public async Task MonitorPageUpdate()
         {
@@ -254,6 +262,82 @@ namespace Test_MRUDatabase.ViewModels
 
             var pupdate = await pf.GetPageStream(1).FirstAsync();
             Assert.AreEqual(1, (int) pupdate.Index);
+        }
+
+        [TestMethod]
+        public async Task GetImagesViaCacheSequence()
+        {
+            // We want to make sure that if there is a cache image we never try to load
+            // the file. This involves just getting the cache key, and if that doesn't
+            // cause a fetch, we are good.
+
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                throw new InvalidOperationException();
+            };
+
+            // Install original data in cache
+            var dc = new dummyCache();
+            await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
+
+            // Create VM's and hook them up.
+            var vm = new FileDownloadController(f, dc);
+            var pf = new PDFFile(vm);
+            var dummy1 = pf.NumberOfPages;
+            bool gotit = false;
+            pf.PDFDocumentUpdated.Subscribe(_ => gotit = true);
+
+            // Start it off
+            vm.DownloadOrUpdate.Execute(null);
+
+            // Get the cache info and the items from it, we are really only
+            // interested in the first item.
+            var cacheInfo = await pf.GetPageStreamAndCacheInfo().FirstAsync();
+
+            Assert.AreEqual("bogus", cacheInfo.Item2);
+
+            // Now, make sure that we've not tried to render or download the PDF file.
+            Assert.IsFalse(gotit);
+        }
+#endif
+
+        [TestMethod]
+        public async Task GetFIleViaCacheSequence()
+        {
+            // Pretend a cache miss, and fetch the file to do the render.
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public async Task GetFIleViaCacheSequenceTwice()
+        {
+            // Pretend a cache miss, and fetch the file to do the render. ANd then
+            // do it again.
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public async Task GetFileViaUpdateCache()
+        {
+            // We get an image, then a file update occurs, and we get the new file and do the "render".
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public async Task GetNumberOfPagesWhenCached()
+        {
+            // If we have cached the number of pages for this file, then we shouldn't
+            // need to render at all.
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public async Task NumberCacheLookupsSmall()
+        {
+            // Examine log files and make sure all those cache lookups are actually needed.
+            Assert.Inconclusive();
         }
 
     }

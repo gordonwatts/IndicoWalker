@@ -22,24 +22,16 @@ namespace IWalker.ViewModels
             get { return _nPages.Value; }
         }
         private ObservableAsPropertyHelper<int> _nPages;
-        private System.Reactive.Subjects.IConnectableObservable<PdfDocument> _pdfDocument;
 
         /// <summary>
-        /// Mostly for testing, fires when we have a new PDF document ready
-        /// to be looked at.
+        /// Return PdfPage and cache key. The PdfPage will render only once per subscription. THe cache key
+        /// can be used to cache images in our local data db.
         /// </summary>
-        public IObservable<Unit> PDFDocumentUpdated { get; private set; }
-
-        /// <summary>
-        /// Return a stream of PDF pages, which will be updated each time
-        /// the file is updated.
-        /// </summary>
-        /// <param name="pageNumber"></param>
         /// <returns></returns>
-        public IObservable<PdfPage> GetPageStream(int pageNumber)
+        public IObservable<Tuple<string, IObservable<PdfPage>>> GetPageStreamAndCacheInfo(int index)
         {
-            return _pdfDocument
-                .Select(doc => doc.GetPage((uint) pageNumber));
+            return _pdfAndCacheKey
+                .Select(info => Tuple.Create(info.Item1, info.Item2.Select(doc => doc.GetPage((uint)index))));
         }
 
         /// <summary>
@@ -60,30 +52,47 @@ namespace IWalker.ViewModels
             // Load it up as a real PDF document. Make sure we don't do it more than once.
             // Note the publish below - otherwise we will miss it going by if it happens too
             // fast.
-            _pdfDocument = Observable.Merge(isDownloaded, newFile)
+            var cacheKey = Observable.Merge(isDownloaded, newFile)
                 .SelectMany(_ => fileSource.Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(fileSource.File.UniqueKey))
-                .DistinctUntilChanged(info => info.Value)
-                .SelectMany(info => fileSource.File.GetFileFromCache(fileSource.Cache))
-                .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
-                .Do(doc => Debug.WriteLine("Done with document initial rendering"))
-                .Catch<PdfDocument, Exception>(ex =>
-                {
-                    Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
-                    return Observable.Empty<PdfDocument>();
-                })
-                .Replay(1);
+                .Select(date => string.Format("{0}-{1}", fileSource.File.UniqueKey, date.ToString()))
+                .DistinctUntilChanged();
 
-            // Now we can parcel out that information.
-            _pdfDocument
-                .WriteLine("About to update the number of pages")
-                .Select(doc => (int)doc.PageCount)
-                .WriteLine(np => string.Format("Updating the number of pages as {0}", np))
+            // This will render a document each time it is called. Note the
+            // the Replay at the end. We want to use the same file for everyone. And, each time
+            // a new file comes through, the cacheKey should be updated, and that should cause
+            // this to be re-subscribed. So this is good ONLY FOR ONE FILE at a time. Re-subscribe to
+            // get a new version of the file.
+            // -> Check that we don't need a RefCount - if we did, we'd have to be careful that getting the # of pages
+            // didn't cause one load, and then the rendering caused another load. The sequence might matter...
+            var pdfObservable = Observable.Defer(() =>
+                    fileSource.File.GetFileFromCache(fileSource.Cache)
+                    .WriteLine(a => "hi")
+                    .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
+                    .WriteLine(a => "hi")
+                    .Catch<PdfDocument, Exception>(ex =>
+                    {
+                        Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
+                        return Observable.Empty<PdfDocument>();
+                    })
+                    .Replay(1).RefCount()
+                );
+
+            // Finally, build the combination of these two guys.
+            _pdfAndCacheKey = cacheKey
+                .Select(key => Tuple.Create(key, pdfObservable));
+
+            // The number of pages is complex in that we will need to fetch the file and render it if we've not already
+            // cached it.
+
+            //Func<IObservable<PdfDocument>, IObservable<int>> fetchNumberOfPages = docs => docs.Select(d => 10);
+            Func<IObservable<PdfDocument>, IObservable<int>> fetchNumberOfPages = docs => docs.Select(d => (int)d.PageCount);
+            _pdfAndCacheKey
+                .SelectMany(info => fileSource.Cache.GetOrFetchObject(string.Format("{0}-NumberOfPages", info.Item1),
+                                    () => fetchNumberOfPages(info.Item2),
+                                    DateTime.Now + Settings.CacheFilesTime))
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0, RxApp.MainThreadScheduler);
-
-            PDFDocumentUpdated = _pdfDocument
-                .AsUnit();
-
-            _pdfDocument.Connect();
         }
+
+        public IObservable<Tuple<string, IObservable<PdfDocument>>> _pdfAndCacheKey { get; set; }
     }
 }
