@@ -64,11 +64,15 @@ namespace IWalker.ViewModels
             // get a new version of the file.
             // -> Check that we don't need a RefCount - if we did, we'd have to be careful that getting the # of pages
             // didn't cause one load, and then the rendering caused another load. The sequence might matter...
+            // -> The Take(1) is to make sure we do this only once. Otherwise this sequence will remain open forever,
+            //    and that will cause problems with the GetOrFetchObject, which expects to use only the last time in the sequence
+            //    it looks at!
             var pdfObservable = Observable.Defer(() =>
-                    fileSource.File.GetFileFromCache(fileSource.Cache)
-                    .WriteLine(a => "hi")
+                    fileSource.WhenAny(x => x.IsDownloaded, x => x.Value)
+                    .Where(downhere => downhere == true)
+                    .Take(1)
+                    .SelectMany(_ => fileSource.File.GetFileFromCache(fileSource.Cache))
                     .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
-                    .WriteLine(a => "hi")
                     .Catch<PdfDocument, Exception>(ex =>
                     {
                         Debug.WriteLine("The PDF rendering failed: {0}", ex.Message);
@@ -83,14 +87,12 @@ namespace IWalker.ViewModels
 
             // The number of pages is complex in that we will need to fetch the file and render it if we've not already
             // cached it.
-
-            //Func<IObservable<PdfDocument>, IObservable<int>> fetchNumberOfPages = docs => docs.Select(d => 10);
             Func<IObservable<PdfDocument>, IObservable<int>> fetchNumberOfPages = docs => docs.Select(d => (int)d.PageCount);
             _pdfAndCacheKey
                 .SelectMany(info => fileSource.Cache.GetOrFetchObject(string.Format("{0}-NumberOfPages", info.Item1),
                                     () => fetchNumberOfPages(info.Item2),
                                     DateTime.Now + Settings.CacheFilesTime))
-                .ToProperty(this, x => x.NumberOfPages, out _nPages, 0, RxApp.MainThreadScheduler);
+                .ToProperty(this, x => x.NumberOfPages, out _nPages, 0);
         }
 
         public IObservable<Tuple<string, IObservable<PdfDocument>>> _pdfAndCacheKey { get; set; }

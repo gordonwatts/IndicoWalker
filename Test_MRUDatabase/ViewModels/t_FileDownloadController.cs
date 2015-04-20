@@ -17,12 +17,6 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_FileDownloadController
     {
-        [TestInitialize]
-        public void TestSetup()
-        {
-
-        }
-
         [TestMethod]
         public void NoFileDownloadedIsNotCached()
         {
@@ -128,6 +122,7 @@ namespace Test_MRUDatabase.ViewModels
             vm.DownloadOrUpdate.Execute(null);
 
             // It should have gone from false to true, and back to false.
+            // TODO: fix this failure, but not sure why it is failing right now.
             Assert.AreEqual(2, isDownloadingCounter);
         }
 
