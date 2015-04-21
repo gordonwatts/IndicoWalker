@@ -13,25 +13,195 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_PDFPageViewModel
     {
-#if false
-        // TODO: This test seems to hang for some reason.
+
         [TestMethod]
-        public async Task HorizontalRender()
+        public async Task MakeSureNothingRenderedWhenNoImage()
         {
-            var pdf = await GetPDF("test.pdf");
-            var pdfVM = new PDFPageViewModel(pdf.GetPage(1));
+            // The exact image we need is in the cache. So we should never make a
+            // request to load the PDF file or PdfDocument.
+            
+            Assert.Inconclusive();
+        }
 
-            // Watch what comes back.
-            var lastImagePromise = pdfVM.ImageStream.Where(i => i != null).FirstAsync();
+        [TestMethod]
+        public async Task RenderNormalPdfImageHorizontal()
+        {
+            // Normal sequence of things when there is no image cached.
+            // WHen this VM isn't attached to a actual View, we should not
+            // trigger any loading or similar. All should remain very quiet.
+            // (e.g. lazy loading).
 
-            // Render...
-            pdfVM.RenderImage.Execute(Tuple.Create(PDFPageViewModel.RenderingDimension.Horizontal, (double)150, (double)150));
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            int timesLoaded = 0;
+            f.GetStream = () =>
+            {
+                timesLoaded++;
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
 
-            var lastImage = await lastImagePromise;
-            Assert.IsNotNull(pdfVM.ImageStream);
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            var pf = new PDFFile(vm);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            // Subscribe so we can "get" the image.
+            MemoryStream lastImage = null;
+            pdfVM.ImageStream.Subscribe(img => lastImage = img);
+            Assert.IsNull(lastImage);
+
+            // Render, and make sure things "worked"
+            pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double) 100, (double) 100));
+            vm.DownloadOrUpdate.Execute(null);
+
+            await Task.Delay(2000);
+            Assert.AreEqual(1, timesLoaded);
+            Assert.AreEqual(3, dc.NumberTimesGetCalled); // Once for data, once for size cache, and once again for data file.
             Assert.IsNotNull(lastImage);
         }
 
+        [TestMethod]
+        public async Task RenderNormalRenderEarlyTrigger()
+        {
+            // Normal sequence of things when there is no image cached.
+            // WHen this VM isn't attached to a actual View, we should not
+            // trigger any loading or similar. All should remain very quiet.
+            // (e.g. lazy loading).
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            int timesLoaded = 0;
+            f.GetStream = () =>
+            {
+                timesLoaded++;
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            vm.DownloadOrUpdate.Execute(null); // It shouldn't matter where this line happens.
+            var pf = new PDFFile(vm);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            // Subscribe so we can "get" the image.
+            MemoryStream lastImage = null;
+            pdfVM.ImageStream.Subscribe(img => lastImage = img);
+            Assert.IsNull(lastImage);
+
+            // Render, and make sure things "worked"
+            pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
+
+            await Task.Delay(2000);
+            Assert.AreEqual(1, timesLoaded);
+            Assert.AreEqual(3, dc.NumberTimesGetCalled); // Once for data, once for size cache, and once again for data file.
+            Assert.IsNotNull(lastImage);
+        }
+
+        [TestMethod]
+        public async Task LoadVMButNoImageNoLoad()
+        {
+            // WHen this VM isn't attached to a actual View, we should not
+            // trigger any loading or similar. All should remain very quiet.
+            // (e.g. lazy loading).
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            int timesLoaded = 0;
+            f.GetStream = () =>
+            {
+                timesLoaded++;
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            var pf = new PDFFile(vm);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            Assert.AreEqual(0, timesLoaded);
+        }
+
+        [TestMethod]
+        public async Task LoadVMButNoImageLoad()
+        {
+            // WHen this VM isn't attached to a actual View, we should not
+            // trigger any loading or similar. All should remain very quiet.
+            // (e.g. lazy loading).
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            int timesLoaded = 0;
+            f.GetStream = () =>
+            {
+                timesLoaded++;
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            vm.DownloadOrUpdate.Execute(null);
+            var pf = new PDFFile(vm);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            Assert.AreEqual(1, timesLoaded);
+            Assert.AreEqual(0, dc.NumberTimesGetCalled);
+        }
+
+        [TestMethod]
+        public async Task LoadVMButNoImageLoadWithRenderRequeset()
+        {
+            // WHen this VM isn't attached to a actual View, we should not
+            // trigger any loading or similar. All should remain very quiet.
+            // (e.g. lazy loading).
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            int timesLoaded = 0;
+            f.GetStream = () =>
+            {
+                timesLoaded++;
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            vm.DownloadOrUpdate.Execute(null);
+            var pf = new PDFFile(vm);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            // Do a render, but nothing should happen since we've not subscribed to the image list.
+            pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, 100, 100));
+
+            Assert.AreEqual(1, timesLoaded);
+            Assert.AreEqual(0, dc.NumberTimesGetCalled);
+        }
+
+#if false
         [TestMethod]
         public async Task TestUIMethod()
         {

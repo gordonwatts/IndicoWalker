@@ -6,28 +6,29 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
+using Windows.Foundation;
 
 namespace IWalker.ViewModels
 {
     /// <summary>
-    /// Represents an image that is all or part of a PDF page.
+    /// Represents a single page in a PDF file.
     /// This guy supports:
-    /// - Whatever size the image is, that is the size that is rendered
+    ///   - Whatever size the image is, that is the size that is rendered
+    ///   - Caching of images already rendered (so they don't have to be re-rendered).
+    ///   - If the page is updated after we are up, update the image.
     /// </summary>
     /// <remarks>
     /// It would be nice to support:
     /// - Only render the portion visible
+    /// - Support zooming
     /// </remarks>
     public class PDFPageViewModel : ReactiveObject
     {
-        /// <summary>
-        /// The PDF page that we are responsible for.
-        /// </summary>
-        private PdfPage _page;
-
+        private IBlobCache _cache;
         /// <summary>
         /// The image we are going to use for the display control. We will
         /// render to this guym, and send a new one (or an old one) each time.
+        /// No rendering will occur unless this guy is subscribed to.
         /// </summary>
         public IObservable<MemoryStream> ImageStream { get; private set; }
 
@@ -54,44 +55,66 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Initialize with the page that we should track.
         /// </summary>
-        /// <param name="page">Page to render</param>
-        /// <param name="cacheTag">The extra tag to add to images we cache (like the date of file creation)</param>
-        /// <remarks>We do not prepare the PDF document for rendering ahead of time (calling PreparePageAsync)</remarks>
-        public PDFPageViewModel(PdfPage page, string cacheTag)
+        /// <param name="pageInfo">A stream of cache tags and the PDF pages associated with it.</param>
+        /// <remarks>We are really only interested in the first PdfPage we get - and we will re-subscribe, but not hold onto it.</remarks>
+        public PDFPageViewModel(IObservable<Tuple<string, IObservable<PdfPage>>> pageInfo, IBlobCache cache = null)
         {
-            Debug.Assert(page != null);
-            _page = page;
+            _cache = cache ?? Blobs.LocalStorage;
 
-            // If there is a rendering request, create the appropriate frame given our PDF page.
-            // Make sure that we don't re-render the same size, and also
-            // make sure that if there are lots of changes at once, we slow down a little bit.
+            // Render an image when:
+            //   - We have at least one render request
+            //   - ImageStream is subscribed to
+            //   - the file or page updates somehow (new pageInfo iteration).
+            //
+            // Always pull from the cache first, but if that doesn't work, then render and place
+            // in the cache.
+
             RenderImage = ReactiveCommand.Create();
             var renderRequest = RenderImage
                 .Cast<Tuple<RenderingDimension, double, double>>()
-                .Select(t => CalcRenderingSize(t.Item1, t.Item2, t.Item2))
-                .Where(d => d != null)
-                .Select(trp => Tuple.Create((int)trp.Item1, (int)trp.Item2));
+                .Where(info => (info.Item1 == RenderingDimension.Horizontal && info.Item2 > 0)
+                    || (info.Item1 == RenderingDimension.Vertical && info.Item3 > 0)
+                    || (info.Item1 == RenderingDimension.MustFit && info.Item2 > 0 && info.Item3 > 0)
+                );
 
-            // Look the render up in the cache. If miss, then do the render
-            var newImage = renderRequest
-                .WriteLine("Looking for image for page {0}", page.Index)
-                .SelectMany(szPixels => Blobs.LocalStorage.GetOrFetchObject<byte[]>(MakeCacheKey(page.Index, szPixels.Item1, szPixels.Item2, cacheTag),
-                    async () =>
-                    {
+            ImageStream = 
+                Observable.CombineLatest(pageInfo, renderRequest, (pinfo, rr) => Tuple.Create(pinfo.Item1, pinfo.Item2, rr.Item1, rr.Item2, rr.Item3))
+                .SelectMany(info => _cache.GetOrFetchObject<Size>(MakeSizeCacheKey(info.Item1),
+                    () => info.Item2.Take(1).Select(pdf => pdf.Size),
+                    DateTime.Now + Settings.PageCacheTime)
+                    .Select(sz => Tuple.Create(info.Item1, info.Item2, CalcRenderingSize(info.Item3, info.Item4, info.Item5, sz))))
+                .SelectMany(info => _cache.GetOrFetchObject<byte[]>(MakePageCacheKey(info.Item1, info.Item3),
+                    () => info.Item2.SelectMany(pdfPg => {
                         var ms = new MemoryStream();
                         var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
-                        var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)szPixels.Item1, DestinationHeight = (uint)szPixels.Item2 };
-                        Debug.WriteLine("Rendering page {0}", page.Index);
-                        await _page.RenderToStreamAsync(ra, opt);
-                        return ms.ToArray();
-                    },
-                    DateTime.Now + Settings.PageCacheTime))
+                        var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)info.Item3.Item1, DestinationHeight = (uint)info.Item3.Item2 };
+                        return Observable.FromAsync(() => pdfPg.RenderToStreamAsync(ra).AsTask())
+                            .Select(_ => ms.ToArray());
+                    }),
+                    DateTime.Now + Settings.PageCacheTime
+                    ))
                 .Select(bytes => new MemoryStream(bytes));
+        }
 
-            // Save all image changes so the UI knows to update!
-            var finalImpage = newImage.Publish();
-            ImageStream = finalImpage;
-            finalImpage.Connect();
+        /// <summary>
+        /// Create an image cache key
+        /// </summary>
+        /// <param name="pageCacheKey"></param>
+        /// <param name="renderSize"></param>
+        /// <returns></returns>
+        private string MakePageCacheKey(string pageCacheKey, Tuple<int, int> renderSize)
+        {
+            return string.Format("{0}-w{1}-h{2}", pageCacheKey, renderSize.Item1, renderSize.Item2);
+        }
+
+        /// <summary>
+        /// We need to cache the size of the page so we don't need the actual PDF page.
+        /// </summary>
+        /// <param name="normalCacheKey"></param>
+        /// <returns></returns>
+        private string MakeSizeCacheKey(string normalCacheKey)
+        {
+            return normalCacheKey + "-DefaultPageSize";
         }
 
         /// <summary>
@@ -115,18 +138,18 @@ namespace IWalker.ViewModels
         /// <param name="width">Width of the area, or 0 or infinity</param>
         /// <param name="height">Height of the area, or 0 or infinity</param>
         /// <returns></returns>
-        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height)
+        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height, Size pageSize)
         {
             switch (orientation)
             {
                 case RenderingDimension.Horizontal:
                     if (width > 0)
-                        return Tuple.Create((int)width, (int)(_page.Size.Height / _page.Size.Width * width));
+                        return Tuple.Create((int)width, (int)(pageSize.Height / pageSize.Width * width));
                     return null;
 
                 case RenderingDimension.Vertical:
                     if (height > 0)
-                        return Tuple.Create((int)(_page.Size.Width / _page.Size.Height * height), (int)height);
+                        return Tuple.Create((int)(pageSize.Width / pageSize.Height * height), (int)height);
                     return null;
 
                 case RenderingDimension.MustFit:
@@ -138,6 +161,7 @@ namespace IWalker.ViewModels
                     Debug.Assert(false);
                     return null;
             }
+            return null;
         }
     }
 }
