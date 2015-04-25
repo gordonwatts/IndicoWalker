@@ -64,7 +64,7 @@ namespace IWalker.ViewModels
             // get a new version of the file.
             // -> Check that we don't need a RefCount - if we did, we'd have to be careful that getting the # of pages
             // didn't cause one load, and then the rendering caused another load. The sequence might matter...
-            // -> The Take(1) is to make sure we do this only once. Otherwise this sequence will remain open forever,
+            // -> The Take(1) is to make sure we do this only once. Otherwise this sequence could remain open forever,
             //    and that will cause problems with the GetOrFetchObject, which expects to use only the last time in the sequence
             //    it looks at!
             var pdfObservable =

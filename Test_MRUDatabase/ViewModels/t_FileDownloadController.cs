@@ -6,9 +6,7 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using System;
-using System.Collections.Generic;
 using System.IO;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
@@ -34,7 +32,7 @@ namespace Test_MRUDatabase.ViewModels
             dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
             var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
-            
+
             Assert.IsTrue(vm.IsDownloaded);
         }
 
@@ -54,6 +52,31 @@ namespace Test_MRUDatabase.ViewModels
             vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
 
             vm.DownloadOrUpdate.Execute(null);
+            Assert.IsTrue(vm.IsDownloaded);
+            Assert.AreEqual(1, downloadUpdateCount);
+        }
+
+        [TestMethod]
+        public async Task TriggerSuccessfulFIleDownloadCheckLate()
+        {
+            var f = new dummyFile();
+
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            f.GetStream = () => Observable.Return(new StreamReader(mr));
+
+            var vm = new FileDownloadController(f, new dummyCache());
+
+            int downloadUpdateCount = 0;
+            vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
+
+            vm.DownloadOrUpdate.Execute(null);
+
+            // ReactiveUI won't cause a "subscription" until this is first accessed.
+            // Make sure that it reflects the fact that it is downloaded, even though
+            // the trigger for this happens earlier.
+            var bogus = vm.IsDownloaded;
+            await Task.Delay(10);
             Assert.IsTrue(vm.IsDownloaded);
             Assert.AreEqual(1, downloadUpdateCount);
         }

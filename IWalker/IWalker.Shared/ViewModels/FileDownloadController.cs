@@ -119,8 +119,9 @@ namespace IWalker.ViewModels
             // Track the status of the download
             // Note the concatenate when we combine - we very much want this to run
             // in order, no matter what latencies get caught up in the system.
-            var initiallyCached = Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey)
-                .Select(dt => dt.HasValue);
+            // This must be run when we are subscribed to, hence the defer.
+            var initiallyCached = Observable.Defer(() => Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey)
+                .Select(dt => dt.HasValue));
 
             Observable.Concat(initiallyCached, downloadSuccessful)
                 .ToProperty(this, x => x.IsDownloaded, out _isDownloaded, false);

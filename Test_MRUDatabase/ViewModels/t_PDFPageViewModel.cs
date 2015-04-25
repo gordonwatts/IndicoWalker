@@ -4,9 +4,7 @@ using System;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Windows.Data.Pdf;
 using Windows.UI.Core;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -19,7 +17,7 @@ namespace Test_MRUDatabase.ViewModels
         {
             // The exact image we need is in the cache. So we should never make a
             // request to load the PDF file or PdfDocument.
-            
+
             Assert.Inconclusive();
         }
 
@@ -56,7 +54,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsNull(lastImage);
 
             // Render, and make sure things "worked"
-            pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double) 100, (double) 100));
+            pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
             vm.DownloadOrUpdate.Execute(null);
 
             await Task.Delay(2000);
@@ -86,7 +84,10 @@ namespace Test_MRUDatabase.ViewModels
             var dc = new dummyCache();
 
             var vm = new FileDownloadController(f, dc);
-            vm.DownloadOrUpdate.Execute(null); // It shouldn't matter where this line happens.
+
+            // It shouldn't matter where the download is triggered from - let it happen early
+            // here before other things are hooked up.
+            vm.DownloadOrUpdate.Execute(null);
             var pf = new PDFFile(vm);
 
             // Now, build the VM
@@ -105,6 +106,16 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(3, dc.NumberTimesGetCalled); // Once for data, once for size cache, and once again for data file.
             Assert.IsNotNull(lastImage);
+        }
+
+        [TestMethod]
+        public async Task RenderAlreadyCachedFile()
+        {
+            // If the file has already been downloaded and installed locally (on a previous
+            // look) then PDF rendering should happen automatically this time, even if
+            // the download isn't triggered.
+
+            Assert.Inconclusive();
         }
 
         [TestMethod]
@@ -226,14 +237,17 @@ namespace Test_MRUDatabase.ViewModels
             bool finished = false;
 
             await Windows.ApplicationModel.Core.CoreApplication
-                .MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () => {
-                try {
-                    a().Wait();
-                    finished = true;
-                } catch (Exception e)
+                .MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
                 {
-                    failure = e;
-                }
+                    try
+                    {
+                        a().Wait();
+                        finished = true;
+                    }
+                    catch (Exception e)
+                    {
+                        failure = e;
+                    }
                 });
 
             if (failure != null)

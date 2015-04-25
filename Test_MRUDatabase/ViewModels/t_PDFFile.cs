@@ -1,20 +1,13 @@
-﻿using IWalker.ViewModels;
+﻿using Akavache;
+using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using System;
-using Akavache;
-using ReactiveUI.Testing;
 using ReactiveUI;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
-using System.Reactive;
-using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using Microsoft.Reactive.Testing;
+using System;
 using System.Diagnostics;
-using IWalker.Util;
+using System.IO;
+using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 using Windows.Data.Pdf;
 
 namespace Test_MRUDatabase.ViewModels
@@ -199,8 +192,9 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public async Task MonitorPageUpdate()
+        public async Task MonitorPageUpdateLateRenderRequest()
         {
+            // In this test we make sure not to access the # of pages.
             var f = new dummyFile();
             var data = await TestUtils.GetFileAsBytes("test.pdf");
             f.GetStream = () =>
@@ -211,20 +205,42 @@ namespace Test_MRUDatabase.ViewModels
             var vm = new FileDownloadController(f, dc);
 
             var pf = new PDFFile(vm);
-            var dummy1 = pf.NumberOfPages;
 
+            // Setup the look before we setup the render.
+            var pupdatetmp = pf.GetPageStreamAndCacheInfo(5).Timeout(TimeSpan.FromSeconds(5)).FirstAsync();
             vm.DownloadOrUpdate.Execute(null);
+            var pupdate = await pupdatetmp;
 
-            await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
-                .Where(y => y != 0)
-                .Take(1)
-                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
-                .FirstAsync();
-            Assert.AreEqual(10, pf.NumberOfPages);
-
-            var pupdate = await pf.GetPageStreamAndCacheInfo(5).FirstAsync();
+            // Make sure what came back looks ok!
+            Assert.IsNotNull(pupdate);
             var page = await pupdate.Item2.FirstAsync();
-            Assert.AreEqual(5, (int) page.Index);
+            Assert.AreEqual(5, (int)page.Index);
+        }
+
+        [TestMethod]
+        public async Task MonitorPageUpdateEarlyRenderRequest()
+        {
+            // In this test we make sure not to access the # of pages.
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+            var dc = new dummyCache();
+            var vm = new FileDownloadController(f, dc);
+
+            var pf = new PDFFile(vm);
+
+            // Run the download (which will complete sychnronosly here), and then schedule the watch
+            // for new items.
+            vm.DownloadOrUpdate.Execute(null);
+            var pupdate = await pf.GetPageStreamAndCacheInfo(5).Timeout(TimeSpan.FromSeconds(5)).FirstAsync();
+
+            // Make sure all that came back is ok.
+            Assert.IsNotNull(pupdate);
+            var page = await pupdate.Item2.FirstAsync();
+            Assert.AreEqual(5, (int)page.Index);
         }
 
         [TestMethod]
