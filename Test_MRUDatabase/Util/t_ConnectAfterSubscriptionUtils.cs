@@ -47,5 +47,21 @@ namespace Test_MRUDatabase.Util
             Assert.IsTrue(wasRun);
         }
 
+        [TestMethod]
+        public void MakeSureSubscribeOnce()
+        {
+            int count = 0;
+            var obs = Observable.Return(10)
+                .WriteLine("In the replay part")
+                .Do(_ => count++)
+                .Replay(1).ConnectAfterSubscription();
+            var v1 = obs.First();
+            var v2 = obs.First();
+
+            Assert.AreEqual(10, v1);
+            Assert.AreEqual(10, v2);
+            Assert.AreEqual(1, count);
+        }
+
     }
 }

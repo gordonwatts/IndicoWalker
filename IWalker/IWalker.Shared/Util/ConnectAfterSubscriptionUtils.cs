@@ -60,7 +60,7 @@ namespace IWalker.Util
                 if (_firstSubscription)
                 {
                     _source.Connect();
-                    _firstSubscription = true;
+                    _firstSubscription = false;
                 }
                 return disp;
             }
