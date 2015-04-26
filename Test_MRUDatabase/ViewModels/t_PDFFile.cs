@@ -232,7 +232,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var pf = new PDFFile(vm);
 
-            // Run the download (which will complete sychnronosly here), and then schedule the watch
+            // Run the download (which will complete synchronously here), and then schedule the watch
             // for new items.
             vm.DownloadOrUpdate.Execute(null);
             var pupdate = await pf.GetPageStreamAndCacheInfo(5).Timeout(TimeSpan.FromSeconds(5)).FirstAsync();
