@@ -61,8 +61,8 @@ namespace IWalker.Util
                 {
                     if (_firstSubscription)
                     {
-                        _source.Connect();
                         _firstSubscription = false;
+                        _source.Connect();
                     }
                 }
                 return disp;
