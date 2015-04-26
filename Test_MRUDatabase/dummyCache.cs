@@ -33,6 +33,7 @@ namespace Test_MRUDatabase
         }
 
         public int NumberTimesGetCalled { get; private set; }
+        public int NumberTimesInsertCalled { get; set; }
 
         public IObservable<System.Reactive.Unit> Flush()
         {
@@ -69,6 +70,7 @@ namespace Test_MRUDatabase
 
         public IObservable<System.Reactive.Unit> Insert(string key, byte[] data, DateTimeOffset? absoluteExpiration = null)
         {
+            NumberTimesInsertCalled++;
             Debug.WriteLine("Inserting data for key {0} - {1} bytes", key, data.Length);
             _lines[key] = new dummyCacheInfo() { DateCreated = DateTime.Now, Data = data };
             return Observable.Return(default(Unit));
@@ -103,6 +105,7 @@ namespace Test_MRUDatabase
         {
             throw new NotImplementedException();
         }
+
     }
 
 }
