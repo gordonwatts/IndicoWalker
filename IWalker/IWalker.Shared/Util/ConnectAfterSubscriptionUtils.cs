@@ -57,10 +57,13 @@ namespace IWalker.Util
             public IDisposable Subscribe(IObserver<T> observer)
             {
                 var disp = _source.Subscribe(observer);
-                if (_firstSubscription)
+                lock (this)
                 {
-                    _source.Connect();
-                    _firstSubscription = false;
+                    if (_firstSubscription)
+                    {
+                        _source.Connect();
+                        _firstSubscription = false;
+                    }
                 }
                 return disp;
             }
