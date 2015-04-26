@@ -67,7 +67,7 @@ namespace IWalker.ViewModels
             // -> The Take(1) is to make sure we do this only once. Otherwise this sequence could remain open forever,
             //    and that will cause problems with the GetOrFetchObject, which expects to use only the last time in the sequence
             //    it looks at!
-            var pdfObservable =
+            Func<IObservable<PdfDocument>> pdfObservableFactory = () =>
                     fileSource.WhenAny(x => x.IsDownloaded, x => x.Value)
                     .Where(downhere => downhere == true)
                     .Take(1)
@@ -82,7 +82,7 @@ namespace IWalker.ViewModels
 
             // Finally, build the combination of these two guys.
             _pdfAndCacheKey = cacheKey
-                .Select(key => Tuple.Create(key, pdfObservable));
+                .Select(key => Tuple.Create(key, pdfObservableFactory())).WriteLine("New cache key");
 
             // The number of pages is complex in that we will need to fetch the file and render it if we've not already
             // cached it.
