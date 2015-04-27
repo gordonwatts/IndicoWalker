@@ -77,14 +77,15 @@ namespace IWalker.ViewModels
                     || (info.Item1 == RenderingDimension.MustFit && info.Item2 > 0 && info.Item3 > 0)
                 );
 
-            ImageStream = 
+            ImageStream =
                 Observable.CombineLatest(pageInfo, renderRequest, (pinfo, rr) => Tuple.Create(pinfo.Item1, pinfo.Item2, rr.Item1, rr.Item2, rr.Item3))
                 .SelectMany(info => _cache.GetOrFetchObject<Size>(MakeSizeCacheKey(info.Item1),
                     () => info.Item2.Take(1).Select(pdf => pdf.Size),
                     DateTime.Now + Settings.PageCacheTime)
                     .Select(sz => Tuple.Create(info.Item1, info.Item2, CalcRenderingSize(info.Item3, info.Item4, info.Item5, sz))))
                 .SelectMany(info => _cache.GetOrFetchObject<byte[]>(MakePageCacheKey(info.Item1, info.Item3),
-                    () => info.Item2.SelectMany(pdfPg => {
+                    () => info.Item2.SelectMany(pdfPg =>
+                    {
                         var ms = new MemoryStream();
                         var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
                         var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)info.Item3.Item1, DestinationHeight = (uint)info.Item3.Item2 };
@@ -161,7 +162,6 @@ namespace IWalker.ViewModels
                     Debug.Assert(false);
                     return null;
             }
-            return null;
         }
     }
 }

@@ -45,15 +45,9 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> ClickedUs { get; private set; }
 
         /// <summary>
-        /// Fires each time we download/update a file (in the cache).
-        /// Will not fire if the file is already in the cache.
-        /// </summary>
-        public IObservable<Unit> DownloadedFile { get; private set; }
-
-        /// <summary>
         /// The controller that takes care of actual file downloading, etc.
         /// </summary>
-        private FileDownloadController _fileDownloader;
+        public FileDownloadController FileDownloader { get; private set; }
 
         /// <summary>
         /// Initialize all of our behaviors.
@@ -65,32 +59,30 @@ namespace IWalker.ViewModels
             DocumentTypeString = file.FileType.ToUpper();
 
             // Setup the actual file downloader
-            _fileDownloader = new FileDownloadController(file);
+            FileDownloader = new FileDownloadController(file);
 
             // Now, hook up our UI indicators to the download control.
 
-            _fileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
+            FileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false, RxApp.MainThreadScheduler);
 
-            _fileDownloader.WhenAny(x => x.IsDownloaded, x => x.Value)
+            FileDownloader.WhenAny(x => x.IsDownloaded, x => x.Value)
                 .Select(x => !x)
                 .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true, RxApp.MainThreadScheduler);
 
-            DownloadedFile = _fileDownloader.FileDownloadedAndCached;
-
             // Allow them to download a file.
-            var canDoDownload = _fileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
+            var canDoDownload = FileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
                 .Select(x => !x);
             ClickedUs = ReactiveCommand.Create(canDoDownload);
 
             ClickedUs
-                .Where(_ => !_fileDownloader.IsDownloaded)
-                .InvokeCommand(_fileDownloader.DownloadOrUpdate);
+                .Where(_ => !FileDownloader.IsDownloaded)
+                .InvokeCommand(FileDownloader.DownloadOrUpdate);
 
             // Opening the file is a bit more complex. It happens only when the user clicks the button a second time.
             // Requires us to write a file to the local cache.
             ClickedUs
-                .Where(_ => _fileDownloader.IsDownloaded)
+                .Where(_ => FileDownloader.IsDownloaded)
                 .SelectMany(_ => file.GetFileFromCache(Blobs.LocalStorage))
                 .SelectMany(async stream =>
                 {
@@ -151,7 +143,7 @@ namespace IWalker.ViewModels
             // fire them both off.
             if (Settings.AutoDownloadNewMeeting)
             {
-                _fileDownloader.DownloadOrUpdate.Execute(null);
+                FileDownloader.DownloadOrUpdate.Execute(null);
             }
         }
 

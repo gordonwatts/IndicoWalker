@@ -44,11 +44,11 @@ namespace IWalker.ViewModels
 
                 TalkFiles.AddRange(allFilesVM.Select(f => f.Item2));
 
-                var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf").FirstOrDefault();
+                var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
                 if (pdf != null)
                 {
                     var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
-                    TalkThumbnails = new FileSlideListViewModel(pdf.Item1, timeSpan, pdf.Item2.DownloadedFile);
+                    TalkThumbnails = new FileSlideListViewModel(pdf.Item2.FileDownloader, timeSpan);
                 }
             }
             else

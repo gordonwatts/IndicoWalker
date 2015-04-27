@@ -1,9 +1,6 @@
 ﻿using ReactiveUI;
 using System;
-using System.IO;
-using System.Reactive.Linq;
 using Windows.Data.Pdf;
-using Windows.UI.Xaml.Media.Imaging;
 
 namespace IWalker.ViewModels
 {
@@ -16,7 +13,7 @@ namespace IWalker.ViewModels
         /// Where we are going if the user clicks on this slide.
         /// </summary>
         /// <remarks>This is only created and allocated if it is required.</remarks>
-        private Lazy<FullTalkAsStripViewModel> fullVM;
+        private Lazy<FullTalkAsStripViewModel> _fullVM;
 
         /// <summary>
         /// The internal view model for the page.
@@ -33,14 +30,10 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="page">The PDF page to be rendered</param>
         /// <remarks>We will call PeparePageAsync on the page</remarks>
-        public SlideThumbViewModel(PdfPage page, Lazy<FullTalkAsStripViewModel> fullVM, int pageNumber, string cacheTag)
+        public SlideThumbViewModel(IObservable<Tuple<string, IObservable<PdfPage>>> pageInfo, Lazy<FullTalkAsStripViewModel> fullVM, int pageNumber)
         {
-            PDFPageVM = new PDFPageViewModel(page, cacheTag);
-            this.fullVM = fullVM;
-
-            // Prepare the slide for rendering.
-            var prepForRender = ReactiveCommand.CreateAsyncTask(_ => page.PreparePageAsync().AsTask());
-            prepForRender.ExecuteAsync().Subscribe();
+            PDFPageVM = new PDFPageViewModel(pageInfo);
+            _fullVM = fullVM;
 
             // And the command to open up a full view of the talk, at max size.
             OpenFullView = ReactiveCommand.Create();
