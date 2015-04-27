@@ -30,7 +30,7 @@ namespace IWalker.Views
             this.WhenActivated(disposeOfMe =>
             {
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
-                //disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
             });
         }
 

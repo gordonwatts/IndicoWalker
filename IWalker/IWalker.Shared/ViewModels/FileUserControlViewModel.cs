@@ -51,6 +51,11 @@ namespace IWalker.ViewModels
         public IObservable<Unit> DownloadedFile { get; private set; }
 
         /// <summary>
+        /// The controller that takes care of actual file downloading, etc.
+        /// </summary>
+        private FileDownloadController _fileDownloader;
+
+        /// <summary>
         /// Initialize all of our behaviors.
         /// </summary>
         /// <param name="file"></param>
@@ -59,60 +64,33 @@ namespace IWalker.ViewModels
             // Save the document type for the UI
             DocumentTypeString = file.FileType.ToUpper();
 
-            // Extract from cache or download it.
-            // -- GetFileFromCache will not send anything along if there is nothing in the cache, so expect that not to fire at all.
-            var cmdLookAtCache = ReactiveCommand.CreateAsyncObservable(token => file.GetFileFromCache(Blobs.LocalStorage));
-            ReactiveCommand<IRandomAccessStream> cmdDownloadNow = null;
-            if (file.IsValid)
-            {
-                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => file.UpdateFileOnce());
-            }
-            else
-            {
-                cmdDownloadNow = ReactiveCommand.CreateAsyncObservable(_ => Observable.Empty<IRandomAccessStream>());
-            }
+            // Setup the actual file downloader
+            _fileDownloader = new FileDownloadController(file);
 
-            // UI Updating
-            // - When we have downloaded already, turn off the little download button.
-            // - During download, run the ring progress bar thing.
-            // We access ".Value" to force the side-effect of causing a subscription. We have to do this, as ToProperty won't
-            // untill the Bind occurs, and the command that we execute below will probably happen before we get a chance.
-            cmdLookAtCache.Concat(cmdDownloadNow)
-                .Select(f => f == null)
-                .WriteLine("Got file {0}.", file.UniqueKey)
-                .Merge<bool>(cmdDownloadNow.IsExecuting.Where(x => x==true).Select(_ => false))
-                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true);
-            var bogus = _fileNotCached.Value;
+            // Now, hook up our UI indicators to the download control.
 
-            var seenFirstFile = cmdLookAtCache
-                .Where(f => f != null)
-                .Select(_ => true);
+            _fileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
+                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false, RxApp.MainThreadScheduler);
 
-            cmdDownloadNow.IsExecuting
-                .CombineLatest(seenFirstFile.StartWith(false), (isExe, seenFF) => isExe && !seenFF)
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
-            bogus = _isDownloading.Value;
+            _fileDownloader.WhenAny(x => x.IsDownloaded, x => x.Value)
+                .Select(x => !x)
+                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true, RxApp.MainThreadScheduler);
 
-            // Notify anyone in the world that is going to care. We can only
-            // fire when there has been a real-update to the file.
+            DownloadedFile = _fileDownloader.FileDownloadedAndCached;
 
-            DownloadedFile = cmdDownloadNow
-                .Select(_ => default(Unit));
-
-
-            // Lets see if they want to download the file.
-            var canDoDownload = cmdDownloadNow.IsExecuting.Select(x => !x);
+            // Allow them to download a file.
+            var canDoDownload = _fileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
+                .Select(x => !x);
             ClickedUs = ReactiveCommand.Create(canDoDownload);
 
             ClickedUs
-                .Where(_ => _fileNotCached.Value == true)
-                .Subscribe(_ => cmdDownloadNow.Execute(null));
+                .Where(_ => !_fileDownloader.IsDownloaded)
+                .InvokeCommand(_fileDownloader.DownloadOrUpdate);
 
             // Opening the file is a bit more complex. It happens only when the user clicks the button a second time.
             // Requires us to write a file to the local cache.
             ClickedUs
-                .Where(_ => _fileNotCached.Value == false)
+                .Where(_ => _fileDownloader.IsDownloaded)
                 .SelectMany(_ => file.GetFileFromCache(Blobs.LocalStorage))
                 .SelectMany(async stream =>
                 {
@@ -171,10 +149,9 @@ namespace IWalker.ViewModels
             // Init the UI from the cache. We want to do one or the other
             // because the download will fetch from the cache first. So no need to
             // fire them both off.
-            cmdLookAtCache.ExecuteAsync().Subscribe();
             if (Settings.AutoDownloadNewMeeting)
             {
-                cmdDownloadNow.ExecuteAsync().Subscribe();
+                _fileDownloader.DownloadOrUpdate.Execute(null);
             }
         }
 
