@@ -30,8 +30,9 @@ namespace IWalker.ViewModels
         /// <returns></returns>
         public IObservable<Tuple<string, IObservable<PdfPage>>> GetPageStreamAndCacheInfo(int index)
         {
+            var postfixCacheName = string.Format("-p{0}", index);
             return _pdfAndCacheKey
-                .Select(info => Tuple.Create(info.Item1, info.Item2.Select(doc => doc.GetPage((uint)index))));
+                .Select(info => Tuple.Create(info.Item1 + postfixCacheName, info.Item2.Select(doc => doc.GetPage((uint)index))));
         }
 
         /// <summary>
@@ -94,6 +95,6 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0);
         }
 
-        public IObservable<Tuple<string, IObservable<PdfDocument>>> _pdfAndCacheKey { get; set; }
+        private IObservable<Tuple<string, IObservable<PdfDocument>>> _pdfAndCacheKey;
     }
 }
