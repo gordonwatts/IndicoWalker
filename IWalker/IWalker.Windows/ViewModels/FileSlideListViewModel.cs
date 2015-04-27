@@ -1,6 +1,7 @@
 ﻿
 using IWalker.Util;
 using ReactiveUI;
+using Splat;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -65,11 +66,14 @@ namespace IWalker.ViewModels
             // Now attach a PDF file to this guy, which we can then use to get at all files.
             var pdfFile = new PDFFile(downloader);
 
+            // A view model to show the whole thing as a strip view.
+            var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
+
             // All we do is sit and watch for the # of pages to change, and when it does, we fix up the list of SlideThumbViewModel.
             pdfFile.WhenAny(x => x.NumberOfPages, x => x.Value)
                 .DistinctUntilChanged()
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(n => SetNumberOfThumbNails(n, pdfFile));
+                .Subscribe(n => SetNumberOfThumbNails(n, pdfFile, fullVM));
         }
 
         /// <summary>
@@ -78,12 +82,12 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="n"></param>
         /// <param name="pdfFile"></param>
-        private void SetNumberOfThumbNails(int n, PDFFile pdfFile)
+        private void SetNumberOfThumbNails(int n, PDFFile pdfFile, Lazy<FullTalkAsStripViewModel> fullVM)
         {
             // Optimize if we are chaning from no slides to many slides.
             if (SlideThumbnails.Count == 0)
             {
-                SlideThumbnails.AddRange(Enumerable.Range(0, n).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), null, i)));
+                SlideThumbnails.AddRange(Enumerable.Range(0, n).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), fullVM, i)));
             }
             else
             {

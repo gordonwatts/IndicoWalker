@@ -4,7 +4,6 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
-using Windows.Data.Pdf;
 
 namespace IWalker.ViewModels
 {
@@ -57,9 +56,9 @@ namespace IWalker.ViewModels
         /// <param name="docSequence"></param>
         /// <param name="initialPage">The page that should be shown when we start up. Zero indexed</param>
         /// <param name="screen">The screen that hosts everything (routing!)</param>
-        public FullTalkAsStripViewModel(IScreen screen, IObservable<Tuple<string, PdfDocument>> docSequence)
+        public FullTalkAsStripViewModel(IScreen screen, PDFFile file)
         {
-            Debug.Assert(docSequence != null);
+            Debug.Assert(file != null);
             Debug.Assert(screen != null);
 
             HostScreen = screen;
@@ -67,13 +66,11 @@ namespace IWalker.ViewModels
             // We basically re-set each time a new file comes down from the top.
 
             Pages = new ReactiveList<PDFPageViewModel>();
-            docSequence
-                .Subscribe(doc =>
-                {
-                    _numberPages = doc.Item2.PageCount;
-                    Pages.Clear();
-                    Pages.AddRange(Enumerable.Range(0, (int)doc.Item2.PageCount).Select(pageNumber => new PDFPageViewModel(doc.Item2.GetPage((uint)pageNumber), doc.Item1)));
-                });
+
+            file.WhenAny(x => x.NumberOfPages, x => x.Value)
+                .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(n => SetNPages(n, file));
 
             // Page navigation. Make sure things are clean and we don't over-burden the UI before
             // we pass the info back to the UI!
@@ -98,6 +95,31 @@ namespace IWalker.ViewModels
             PageMove
                 .Cast<int>()
                 .Subscribe(_moveToPage);
+        }
+
+        /// <summary>
+        /// Configure as n pages
+        /// </summary>
+        /// <param name="n"></param>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private void SetNPages(int n, PDFFile file)
+        {
+            if (Pages.Count == 0)
+            {
+                Pages.AddRange(Enumerable.Range(0, n).Select(i => new PDFPageViewModel(file.GetPageStreamAndCacheInfo(i))));
+            }
+            else
+            {
+                while (Pages.Count > n)
+                {
+                    Pages.RemoveAt(Pages.Count - 1);
+                }
+                while (Pages.Count < n)
+                {
+                    Pages.Add(new PDFPageViewModel(file.GetPageStreamAndCacheInfo(Pages.Count)));
+                }
+            }
         }
 
         /// <summary>
