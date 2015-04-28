@@ -43,6 +43,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\DebugUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ExpirationOptions.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Files.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\IWalkerSize.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\LINQHelpers.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\ListOrdering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\LocalTalkFileManager.cs" />

@@ -6,7 +6,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
-using Windows.Foundation;
 
 namespace IWalker.ViewModels
 {
@@ -79,8 +78,8 @@ namespace IWalker.ViewModels
 
             ImageStream =
                 Observable.CombineLatest(pageInfo, renderRequest, (pinfo, rr) => Tuple.Create(pinfo.Item1, pinfo.Item2, rr.Item1, rr.Item2, rr.Item3))
-                .SelectMany(info => _cache.GetOrFetchObject<Size>(MakeSizeCacheKey(info.Item1),
-                    () => info.Item2.Take(1).Select(pdf => pdf.Size),
+                .SelectMany(info => _cache.GetOrFetchObject<IWalkerSize>(MakeSizeCacheKey(info.Item1),
+                    () => info.Item2.Take(1).Select(pdf => pdf.Size.ToIWalkerSize()),
                     DateTime.Now + Settings.PageCacheTime)
                     .Select(sz => Tuple.Create(info.Item1, info.Item2, CalcRenderingSize(info.Item3, info.Item4, info.Item5, sz))))
                 .SelectMany(info => _cache.GetOrFetchObject<byte[]>(MakePageCacheKey(info.Item1, info.Item3),
@@ -139,7 +138,7 @@ namespace IWalker.ViewModels
         /// <param name="width">Width of the area, or 0 or infinity</param>
         /// <param name="height">Height of the area, or 0 or infinity</param>
         /// <returns></returns>
-        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height, Size pageSize)
+        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height, IWalkerSize pageSize)
         {
             switch (orientation)
             {
