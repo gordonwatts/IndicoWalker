@@ -28,18 +28,40 @@ namespace Test_MRUDatabase.ViewModels
         public async Task TestNumberTimesFileRequested()
         {
             // Make sure the # of times a file is loaded from disk is reasonable.
-            var df = new dummyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
 
+            var df = new dummyFile("test.pdf", "test.pdf");
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+
+            // Initially, everything should be all zeros.
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
 
-            await vm.DoneBuilding.FirstAsync();
+            // Trigger the initial download.
+            dfctl.DownloadOrUpdate.Execute(null);
+
+            await SpinWait(() => list.Count != 0, 200);
 
             Assert.AreEqual(10, list.Count);
             Assert.AreEqual(1, df.GetStreamCalled);
         }
+
+        private async Task SpinWait (Func<bool> test, int maxMiliseconds)
+        {
+            int waited = 0;
+            while (!test() && waited < maxMiliseconds)
+            {
+                await Task.Delay(10);
+                waited += 10;
+            }
+
+            if (!test())
+            {
+                Assert.Fail("Timeout occurred");
+            }
+        }
+
 
         [TestMethod]
         public async Task TestFileUpdated()
@@ -53,17 +75,22 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
 
-            await vm.DoneBuilding.FirstAsync();
-            await vm.DoneBuilding.FirstAsync();
+            dfctl.DownloadOrUpdate.Execute(null);
+            await SpinWait(() => list.Count != 0, 200);
+            await Task.Delay(10);
+
             Assert.AreEqual(10, list.Count);
 
-            Assert.AreEqual(3, df.GetStreamCalled);
+            // 1 - when we do the first GetAndUpdateFileOnce
+            // 2 - when we do the update.
+            Assert.AreEqual(2, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -80,40 +107,19 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
+            dfctl.DownloadOrUpdate.Execute(null);
 
-            await vm.DoneBuilding.FirstAsync();
+            await SpinWait(() => list.Count != 0, 200);
+            await Task.Delay(10);
             Assert.AreEqual(10, list.Count);
 
             Assert.AreEqual(2, df.GetStreamCalled);
-        }
-
-        [TestMethod]
-        public async Task TestFileNoAutoDownloadPinged()
-        {
-            // Cached file, even if no auto upload, should be checked against the internet.
-
-            Settings.AutoDownloadNewMeeting = false;
-
-            var df = new dummyFile("test.pdf", "test.pdf");
-            df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Interval(TimeSpan.FromMilliseconds(300)).Take(1).Select(_ => default(Unit)));
-            await df.GetAndUpdateFileOnce()
-                .ToList()
-                .FirstAsync();
-
-            var list = vm.SlideThumbnails;
-            Assert.IsNotNull(list);
-            Assert.AreEqual(0, list.Count);
-
-            await vm.DoneBuilding.FirstAsync();
-            Assert.AreEqual(10, list.Count);
-
-            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -127,13 +133,13 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
 
-            await vm.DoneBuilding.Timeout(TimeSpan.FromMilliseconds(100), Observable.Return(default(Unit)));
             Assert.AreEqual(0, list.Count);
 
             Assert.AreEqual(0, df.GetStreamCalled);
@@ -150,13 +156,12 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read.
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
-
-            await vm.DoneBuilding.FirstAsync();
 
             Assert.AreEqual(1, df.GetStreamCalled);
         }
@@ -168,10 +173,10 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
-            await vm.DoneBuilding.FirstAsync();
 
             // Listen for everything to be rendered.
             var allImages = list
@@ -199,10 +204,11 @@ namespace Test_MRUDatabase.ViewModels
             // to stress out the simultaneous reading of everything.
 
             var df = new dummyFile("test.pdf", "test.pdf");
-            var vm = new FileSlideListViewModel(df, new TimePeriod(DateTime.Now, DateTime.Now), Observable.Empty<Unit>());
+            var dfctl = new FileDownloadController(df);
+            dfctl.DownloadOrUpdate.Execute(null);
+            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
-            await vm.DoneBuilding.FirstAsync();
 
             // Listen for everything to be rendered.
             var allImages = list
@@ -219,7 +225,7 @@ namespace Test_MRUDatabase.ViewModels
             }
 
             // And now wait for everything.
-            Task.WaitAll(allImages);
+            await Task.WhenAll(allImages);
 
             // Make sure we had to download the file only once.
             Assert.AreEqual(1, df.GetStreamCalled);
