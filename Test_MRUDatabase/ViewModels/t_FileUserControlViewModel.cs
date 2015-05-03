@@ -1,8 +1,12 @@
-﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+﻿using IWalker.Util;
+using IWalker.ViewModels;
+using Microsoft.Reactive.Testing;
+using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using ReactiveUI.Testing;
 using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Text;
+using System.Diagnostics;
+using System.IO;
+using System.Reactive.Linq;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.ViewModels
@@ -10,10 +14,84 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_FileUserControlViewModel
     {
-        [TestMethod]
-        public async Task IsDownloadingSetCorrectly()
+        [TestInitialize]
+        public void SetupTesting()
         {
-            Assert.Inconclusive();
+            // Turn off auto-download to make sure that we control when a download occurs
+            // for various tests.
+            Settings.AutoDownloadNewMeeting = false;
         }
+
+        [TestMethod]
+        public async Task DownloadOccursWhenAsked()
+        {
+            // The file - we can use dummy data b.c. we aren't feeding it to the PDF renderer.
+            var f = new dummyFile();
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            f.GetStream = () => Observable.Return(new StreamReader(mr));
+
+            var dc = new dummyCache();
+            var fucVM = new FileUserControlViewModel(f, dc);
+
+            var t = fucVM.IsDownloading;
+            var fc = fucVM.FileNotCached;
+
+            // Nothing downloaded, nothing in cache.
+            Assert.IsTrue(fucVM.FileNotCached);
+            Assert.IsFalse(fucVM.IsDownloading);
+
+            // Trigger the download
+            fucVM.ClickedUs.Execute(null);
+
+            // This should be an immediate download in this test, so look for it.
+            Assert.IsFalse(fucVM.FileNotCached);
+            Assert.IsFalse(fucVM.IsDownloading);
+        }
+
+        [TestMethod]
+        public async Task IsDownloadingSetDuringDownload()
+        {
+            await new TestScheduler().With(async sched =>
+            {
+                // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
+                var f = new dummyFile();
+
+                f.GetStream = () =>
+                {
+                    var data = new byte[] { 0, 1, 2, 3 };
+                    var mr = new MemoryStream(data);
+                    return Observable.Return(new StreamReader(mr)).WriteLine("created stream reader").Delay(TimeSpan.FromMilliseconds(100), sched).WriteLine("done with delay for stream reader");
+                };
+
+                var dc = new dummyCache();
+                var fucVM = new FileUserControlViewModel(f, dc);
+
+                var t = fucVM.IsDownloading;
+                var fc = fucVM.FileNotCached;
+
+                // Nothign downloaded, nothing in cache.
+                Assert.IsTrue(fucVM.FileNotCached);
+                Assert.IsFalse(fucVM.IsDownloading);
+
+                // Trigger the download
+                fucVM.ClickedUs.Execute(null);
+
+                // Nothign downloaded, nothing in cache.
+                sched.AdvanceByMs(50);
+                Assert.IsTrue(fucVM.FileNotCached);
+                Assert.IsTrue(fucVM.IsDownloading);
+
+                // After it should have been downloaded, check again.
+                Debug.WriteLine("Moving forward to end of download");
+                sched.AdvanceByMs(100);
+                Debug.WriteLine("GOing to wait 200 ms to give a chance for everything to settle");
+                await Task.Delay(200);
+                Debug.WriteLine("Final testing");
+                Assert.IsFalse(fucVM.IsDownloading);
+                Assert.IsFalse(fucVM.FileNotCached);
+            });
+        }
+
     }
 }
