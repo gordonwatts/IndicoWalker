@@ -128,9 +128,10 @@ namespace IWalker.Util
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
-        public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file)
+        public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file, IBlobCache cache = null)
         {
-            return Blobs.LocalStorage.GetObjectCreatedAt<Tuple<string,byte[]>>(file.UniqueKey);
+            cache = cache ?? Blobs.LocalStorage;
+            return cache.GetObjectCreatedAt<Tuple<string,byte[]>>(file.UniqueKey);
         }
     }
 }
