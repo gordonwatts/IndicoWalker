@@ -128,7 +128,7 @@ namespace Test_MRUDatabase.ViewModels
         [TestMethod]
         public async Task IsDownloadingFlipsCorrectly()
         {
-            await new TestScheduler().With(async sched =>
+            await new TestScheduler().WithAsync(async sched =>
             {
                 // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
                 var f = new dummyFile();
