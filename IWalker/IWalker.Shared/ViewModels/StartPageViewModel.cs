@@ -159,7 +159,7 @@ namespace IWalker.ViewModels
                     _meetingCatalog[ml.Item1.UniqueString] = ml.Item2;
                     return _meetingCatalog;
                 })
-                .Select(mc => mc.SelectMany(mi => mi.Value).Where(mi => mi.StartTime.Within(TimeSpan.FromDays(Settings.DaysOfUpcomingMeetingsToShowOnMainPage))).OrderByDescending(minfo => minfo.StartTime))
+                .Select(mc => mc.SelectMany(mi => mi.Value).Where(mi => mi.StartTime.Within(TimeSpan.FromDays(Settings.DaysOfUpcomingMeetingsToShowOnMainPage))).OrderByDescending(minfo => minfo.StartTime).ToArray())
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(meetings => SetUpcomingMeetings(meetings));
 

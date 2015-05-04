@@ -83,8 +83,10 @@ namespace IWalker.ViewModels
             // Download or update the file.
             DownloadOrUpdate = ReactiveCommand.Create();
             var hasCachedValue = DownloadOrUpdate
-                .SelectMany(_ => Cache.GetObjectCreatedAt<Tuple<string,byte[]>>(File.UniqueKey))
-                .Select(dt => dt.HasValue);
+                .WriteLine("Download ReactiveCommand fired")
+                .SelectMany(_ => Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey))
+                .Select(dt => dt.HasValue)
+                .Publish().RefCount();
 
             var cacheUpdateRequired = hasCachedValue
                 .Where(isCached => isCached)
@@ -113,7 +115,7 @@ namespace IWalker.ViewModels
 
             // When we are downloading, set the IsDownloading to true.
             Observable
-                .Merge(downloadSuccessful.Select(_ => false), downloadRequired.Select(_ => true))
+                .Merge(downloadSuccessful.WriteLine("download successful").Select(_ => false), downloadRequired.WriteLine("Download required").Select(_ => true))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
             // Track the status of the download
