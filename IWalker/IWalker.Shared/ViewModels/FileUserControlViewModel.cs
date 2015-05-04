@@ -9,6 +9,7 @@ using Windows.Storage;
 using Windows.Storage.Streams;
 using Windows.System;
 using System.Diagnostics;
+using Akavache;
 
 namespace IWalker.ViewModels
 {
@@ -53,13 +54,15 @@ namespace IWalker.ViewModels
         /// Initialize all of our behaviors.
         /// </summary>
         /// <param name="file"></param>
-        public FileUserControlViewModel(IFile file)
+        public FileUserControlViewModel(IFile file, IBlobCache cache = null)
         {
+            cache = cache ?? Blobs.LocalStorage;
+
             // Save the document type for the UI
             DocumentTypeString = file.FileType.ToUpper();
 
             // Setup the actual file downloader
-            FileDownloader = new FileDownloadController(file);
+            FileDownloader = new FileDownloadController(file, cache);
 
             // Now, hook up our UI indicators to the download control.
 
@@ -83,11 +86,11 @@ namespace IWalker.ViewModels
             // Requires us to write a file to the local cache.
             ClickedUs
                 .Where(_ => FileDownloader.IsDownloaded)
-                .SelectMany(_ => file.GetFileFromCache(Blobs.LocalStorage))
+                .SelectMany(_ => file.GetFileFromCache(cache))
                 .SelectMany(async stream =>
                 {
                     var fname = string.Format("{0}.{1}", file.DisplayName.CleanFilename(), file.FileType).CleanFilename();
-                    var fdate = await file.GetCacheCreateTime();
+                    var fdate = await file.GetCacheCreateTime(cache);
                     var folder = fdate.HasValue ? fdate.Value.ToString().CleanFilename() : "Unknown Cache Time";
 
                     // Write the file. If it is already written, then we will just return it (e.g. assume it is the same).
