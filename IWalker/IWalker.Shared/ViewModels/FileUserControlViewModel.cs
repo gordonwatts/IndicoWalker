@@ -19,6 +19,12 @@ namespace IWalker.ViewModels
     public class FileUserControlViewModel : ReactiveObject
     {
         /// <summary>
+        /// Call after everything is hooked up to start off any
+        /// automated downloads.
+        /// </summary>
+        public ReactiveCommand<object> OnLoaded { get; private set; }
+
+        /// <summary>
         /// Returns true if the file is cached locally
         /// </summary>
         public bool FileNotCached { get { return _fileNotCached.Value; } }
@@ -145,10 +151,11 @@ namespace IWalker.ViewModels
             // Init the UI from the cache. We want to do one or the other
             // because the download will fetch from the cache first. So no need to
             // fire them both off.
-            if (Settings.AutoDownloadNewMeeting)
-            {
-                FileDownloader.DownloadOrUpdate.Execute(null);
-            }
+
+            OnLoaded = ReactiveCommand.Create();
+            OnLoaded
+                .Where(_ => Settings.AutoDownloadNewMeeting)
+                .InvokeCommand(FileDownloader.DownloadOrUpdate);
         }
 
         /// <summary>

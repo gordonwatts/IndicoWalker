@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -100,13 +101,17 @@ namespace IWalker.ViewModels
                 .Where(isCached => !isCached)
                 .Select(_ => default(Unit));
 
+            var downloadInProgress = new Subject<bool>();
+
             var downloadRequired =
-                Observable.Merge(cacheUpdateRequired, firstDownloadRequired);
+                Observable.Merge(cacheUpdateRequired, firstDownloadRequired)
+                .Do(_ => downloadInProgress.OnNext(true));
 
             var downloadSuccessful =
                 downloadRequired
                 .SelectMany(_ => Download())
                 .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                .Do(_ => downloadInProgress.OnNext(false))
                 .Select(_ => true)
                 .Publish();
             downloadSuccessful.Connect();
@@ -114,8 +119,7 @@ namespace IWalker.ViewModels
             FileDownloadedAndCached = downloadSuccessful.Select(_ => default(Unit));
 
             // When we are downloading, set the IsDownloading to true.
-            Observable
-                .Merge(downloadSuccessful.WriteLine("download successful").Select(_ => false), downloadRequired.WriteLine("Download required").Select(_ => true))
+            downloadInProgress
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false);
 
             // Track the status of the download
