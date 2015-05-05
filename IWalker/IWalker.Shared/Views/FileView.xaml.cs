@@ -2,6 +2,8 @@
 using ReactiveUI;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using System.Reactive.Linq;
+using ReactiveUI;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -18,6 +20,9 @@ namespace IWalker.Views
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text));
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .Where(vm => vm != null)
+                    .InvokeCommand(ViewModel.OnLoaded));
             });
         }
 
