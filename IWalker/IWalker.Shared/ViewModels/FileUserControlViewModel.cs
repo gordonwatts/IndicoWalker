@@ -27,8 +27,8 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Returns true if the file is cached locally
         /// </summary>
-        public bool FileNotCached { get { return _fileNotCached.Value; } }
-        private ObservableAsPropertyHelper<bool> _fileNotCached;
+        public bool FileNotCachedOrDownloading { get { return _fileNotCachedOrDownloading.Value; } }
+        private ObservableAsPropertyHelper<bool> _fileNotCachedOrDownloading;
 
         /// <summary>
         /// Get the state of a file download. If true, then the download is in progress.
@@ -76,9 +76,9 @@ namespace IWalker.ViewModels
                 .WriteLine(x => string.Format("IsDownloading: {0}", x))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false, RxApp.MainThreadScheduler);
 
-            FileDownloader.WhenAny(x => x.IsDownloaded, x => x.Value)
+            FileDownloader.WhenAny(x => x.IsDownloaded, x => x.IsDownloading, (x, y) => x.Value || y.Value)
                 .Select(x => !x)
-                .ToProperty(this, x => x.FileNotCached, out _fileNotCached, true, RxApp.MainThreadScheduler);
+                .ToProperty(this, x => x.FileNotCachedOrDownloading, out _fileNotCachedOrDownloading, true, RxApp.MainThreadScheduler);
 
             // Allow them to download a file.
             var canDoDownload = FileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)

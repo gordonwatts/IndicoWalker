@@ -36,12 +36,12 @@ namespace Test_MRUDatabase.ViewModels
 
             // Simulate the subscription setups
             var t = fucVM.IsDownloading;
-            var fc = fucVM.FileNotCached;
+            var fc = fucVM.FileNotCachedOrDownloading;
 
             fucVM.OnLoaded.Execute(null);
 
             // Nothing downloaded, nothing in cache.
-            Assert.IsTrue(fucVM.FileNotCached);
+            Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
             Assert.IsFalse(fucVM.IsDownloading);
 
             // Trigger the download
@@ -49,7 +49,7 @@ namespace Test_MRUDatabase.ViewModels
             fucVM.ClickedUs.Execute(null);
 
             // This should be an immediate download in this test, so look for it.
-            Assert.IsFalse(fucVM.FileNotCached);
+            Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
             Assert.IsFalse(fucVM.IsDownloading);
         }
 
@@ -73,12 +73,12 @@ namespace Test_MRUDatabase.ViewModels
 
                 // Simulate the subscriptions
                 var t = fucVM.IsDownloading;
-                var fc = fucVM.FileNotCached;
+                var fc = fucVM.FileNotCachedOrDownloading;
 
                 fucVM.OnLoaded.Execute(null);
 
                 // Nothign downloaded, nothing in cache.
-                Assert.IsTrue(fucVM.FileNotCached);
+                Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
                 Assert.IsFalse(fucVM.IsDownloading);
 
                 // Trigger the download
@@ -86,7 +86,7 @@ namespace Test_MRUDatabase.ViewModels
 
                 // Nothign downloaded, nothing in cache.
                 sched.AdvanceByMs(50);
-                Assert.IsTrue(fucVM.FileNotCached);
+                Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
                 Assert.IsTrue(fucVM.IsDownloading);
 
                 // After it should have been downloaded, check again.
@@ -101,7 +101,7 @@ namespace Test_MRUDatabase.ViewModels
 
                 // And do an final check.
                 Assert.IsFalse(fucVM.IsDownloading);
-                Assert.IsFalse(fucVM.FileNotCached);
+                Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
             });
         }
 
@@ -127,13 +127,13 @@ namespace Test_MRUDatabase.ViewModels
 
                 // Simulate the subscribing
                 var t = fucVM.IsDownloading;
-                var fc = fucVM.FileNotCached;
+                var fc = fucVM.FileNotCachedOrDownloading;
 
                 fucVM.OnLoaded.Execute(null);
 
                 // Nothign downloaded, nothing in cache.
                 sched.AdvanceByMs(50);
-                Assert.IsTrue(fucVM.FileNotCached);
+                Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
                 Assert.IsTrue(fucVM.IsDownloading);
 
                 // After it should have been downloaded, check again.
@@ -148,7 +148,7 @@ namespace Test_MRUDatabase.ViewModels
 
                 // And do an final check.
                 Assert.IsFalse(fucVM.IsDownloading);
-                Assert.IsFalse(fucVM.FileNotCached);
+                Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
             });
         }
 

@@ -17,7 +17,7 @@ namespace IWalker.Views
             this.WhenActivated(disposeOfMe =>
             {
                 disposeOfMe(this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.FileNotCached, y => y.DownloadIcon.Visibility));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.FileNotCachedOrDownloading, y => y.DownloadIcon.Visibility));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text));
                 disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
