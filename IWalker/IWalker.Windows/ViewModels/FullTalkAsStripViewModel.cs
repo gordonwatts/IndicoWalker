@@ -1,4 +1,5 @@
-﻿using ReactiveUI;
+﻿using IWalker.Util;
+using ReactiveUI;
 using System;
 using System.Diagnostics;
 using System.Linq;
@@ -34,7 +35,7 @@ namespace IWalker.ViewModels
         /// Hold onto how many pages there are in this document.
         /// </summary>
         private uint _numberPages;
-        private Subject<Unit> _loaded;
+        private ReplaySubject<Unit> _loaded;
 
         /// <summary>
         /// Request to go forward one page. The argument should be the current page that is
@@ -77,7 +78,7 @@ namespace IWalker.ViewModels
             // Page navigation. Make sure things are clean and we don't over-burden the UI before
             // we pass the info back to the UI!
             _moveToPage = new ReplaySubject<int>(1);
-            _loaded = new Subject<Unit>();
+            _loaded = new ReplaySubject<Unit>(1);
             MoveToPage = _moveToPage
                 .CombineLatest(_loaded, (p, _) => p)
                 .Select(scrubPageIndex)
