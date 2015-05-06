@@ -73,6 +73,7 @@ namespace IWalker.ViewModels
                     .Where(downhere => downhere == true)
                     .Take(1)
                     .SelectMany(_ => fileSource.File.GetFileFromCache(fileSource.Cache))
+                    .WriteLine("Rendering a PDF file using LoadFromStreamAsync")
                     .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
                     .Catch<PdfDocument, Exception>(ex =>
                     {
@@ -82,8 +83,13 @@ namespace IWalker.ViewModels
                     .PublishLast().ConnectAfterSubscription();
 
             // Finally, build the combination of these two guys.
-            _pdfAndCacheKey = cacheKey
-                .Select(key => Tuple.Create(key, pdfObservableFactory())).WriteLine("New cache key");
+            // Make sure that we don't keep re-creating this. We want to make sure
+            // that only one version of the file (from pdfObservableFactory) is
+            // generated. So do a Publish at the end here.
+            var ck = cacheKey
+                .Select(key => Tuple.Create(key, pdfObservableFactory())).WriteLine("New cache key").Replay(1);
+            _pdfAndCacheKey = ck;
+            ck.Connect();
 
             // The number of pages is complex in that we will need to fetch the file and render it if we've not already
             // cached it.
@@ -95,6 +101,9 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0);
         }
 
+        /// <summary>
+        /// Hold onto the file and cache key stream.
+        /// </summary>
         private IObservable<Tuple<string, IObservable<PdfDocument>>> _pdfAndCacheKey;
     }
 }

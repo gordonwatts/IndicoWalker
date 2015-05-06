@@ -15,7 +15,6 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_PDFFile
     {
-
         [TestMethod]
         public async Task DownloadFileNoP()
         {
@@ -62,7 +61,13 @@ namespace Test_MRUDatabase.ViewModels
             var dummy1 = pf.NumberOfPages;
 
             // Start it off
+            Debug.WriteLine("FIring the download or update");
             vm.DownloadOrUpdate.Execute(null);
+
+            await pf.WhenAny(x => x.NumberOfPages, x => x.Value)
+                .Where(x => x != 0)
+                .Timeout(TimeSpan.FromSeconds(1), Observable.Return<int>(0))
+                .FirstAsync();
 
             Assert.AreEqual(10, pf.NumberOfPages);
         }
@@ -278,7 +283,7 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
 
             Assert.IsNotNull(cacheInfo);
-            Assert.AreEqual(cacheStem, cacheInfo.Item1);
+            Assert.AreEqual(cacheStem + "-p5", cacheInfo.Item1);
 
             Assert.AreEqual(1, dc.NumberTimesGetCalled);
         }
@@ -309,7 +314,7 @@ namespace Test_MRUDatabase.ViewModels
                 .FirstAsync();
             Assert.AreEqual(10, pf.NumberOfPages);
 
-            var pupdate = await pf.GetPageStreamAndCacheInfo(5).FirstAsync();
+            var pupdate = await pf.GetPageStreamAndCacheInfo(5).Timeout(TimeSpan.FromSeconds(1)).FirstAsync();
 
             // First rendering
             var page = await pupdate.Item2.FirstAsync();
