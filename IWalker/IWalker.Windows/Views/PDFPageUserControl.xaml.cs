@@ -4,7 +4,6 @@ using System;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
-using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -53,24 +52,6 @@ namespace IWalker.Views
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(t => ViewModel.RenderImage.Execute(t)));
             });
-        }
-
-        /// <summary>
-        /// Depending on what mode we are operating in, determine the size, and let the layout system know what we want to be.
-        /// </summary>
-        /// <param name="availableSize"></param>
-        /// <returns></returns>
-        protected override Size MeasureOverride(Size availableSize)
-        {
-            if (ViewModel != null)
-            {
-                var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
-                return new Size(requestedSize.Item1, requestedSize.Item2);
-            }
-            else
-            {
-                return base.MeasureOverride(availableSize);
-            }
         }
 
         /// <summary>
