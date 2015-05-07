@@ -13,7 +13,7 @@ using Windows.UI.Xaml.Controls;
 namespace IWalker.Views
 {
     /// <summary>
-    /// An empty page that can be used on its own or navigated to within a Frame.
+    /// View for a PDF talk as a full list of slides (full screen) with keys and other things to navagate around.
     /// </summary>
     public sealed partial class FullTalkAsStripView : Page, IViewFor<FullTalkAsStripViewModel>
     {
