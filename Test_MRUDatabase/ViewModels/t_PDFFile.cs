@@ -45,7 +45,6 @@ namespace Test_MRUDatabase.ViewModels
         public async Task DownloadFileFromCacheNotThereYet()
         {
             var f = new dummyFile();
-            var data = await TestUtils.GetFileAsBytes("test.pdf");
             f.GetStream = () =>
             {
                 throw new InvalidOperationException();
@@ -53,6 +52,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Install original data in cache
             var dc = new dummyCache();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
             await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
 
             // Create VM's and hook them up.

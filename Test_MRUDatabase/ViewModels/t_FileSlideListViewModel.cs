@@ -1,12 +1,9 @@
 ﻿using Akavache;
-using IWalker.DataModel.Interfaces;
 using IWalker.Util;
 using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
-using System.IO;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 
@@ -47,7 +44,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(1, df.GetStreamCalled);
         }
 
-        private async Task SpinWait (Func<bool> test, int maxMiliseconds)
+        private async Task SpinWait(Func<bool> test, int maxMiliseconds)
         {
             int waited = 0;
             while (!test() && waited < maxMiliseconds)
@@ -69,9 +66,8 @@ namespace Test_MRUDatabase.ViewModels
             // First, we need to get the file into the cache. Use the infrastructure to do that.
 
             var df = new dummyFile("test.pdf", "test.pdf");
-            await df.GetAndUpdateFileOnce()
-                .ToList()
-                .FirstAsync();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
@@ -88,9 +84,8 @@ namespace Test_MRUDatabase.ViewModels
 
             Assert.AreEqual(10, list.Count);
 
-            // 1 - when we do the first GetAndUpdateFileOnce
             // 2 - when we do the update.
-            Assert.AreEqual(2, df.GetStreamCalled);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -101,9 +96,8 @@ namespace Test_MRUDatabase.ViewModels
             Settings.AutoDownloadNewMeeting = false;
 
             var df = new dummyFile("test.pdf", "test.pdf");
-            await df.GetAndUpdateFileOnce()
-                .ToList()
-                .FirstAsync();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
@@ -119,7 +113,7 @@ namespace Test_MRUDatabase.ViewModels
             await Task.Delay(10);
             Assert.AreEqual(10, list.Count);
 
-            Assert.AreEqual(2, df.GetStreamCalled);
+            Assert.AreEqual(1, df.GetStreamCalled);
         }
 
         [TestMethod]
@@ -151,9 +145,8 @@ namespace Test_MRUDatabase.ViewModels
             // First, we need to get the file into the cache. Use the infrastructure to do that.
 
             var df = new dummyFile("test.pdf", "test.pdf");
-            await df.GetAndUpdateFileOnce()
-                .ToList()
-                .FirstAsync();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
 
             // Now, we are going to update the cache, and see if it gets re-read.
             var dfctl = new FileDownloadController(df);
@@ -163,7 +156,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsNotNull(list);
             Assert.AreEqual(0, list.Count);
 
-            Assert.AreEqual(1, df.GetStreamCalled);
+            Assert.AreEqual(0, df.GetStreamCalled);
         }
 
         [TestMethod]
