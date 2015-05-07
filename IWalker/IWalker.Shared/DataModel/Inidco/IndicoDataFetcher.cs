@@ -2,6 +2,7 @@
 using IWalker.Util;
 using System;
 using System.IO;
+using System.Threading;
 using System.Threading.Tasks;
 using Windows.Web.Http;
 using Windows.Web.Http.Headers;
@@ -52,13 +53,22 @@ namespace IWalker.DataModel.Inidco
         /// <returns></returns>
         private async Task<Windows.Web.Http.HttpResponseMessage> FetchURIResponse(Uri uri, HttpMethod method = null)
         {
+            // Only insert a cert once, and make sure that no one gets
+            // by here without first doing the insertion. And try to keep it fast
+            // if there is no lock needed!
             if (!_loadedCERNCert)
             {
                 var c = await SecurityUtils.FindCert(SecurityUtils.CERNCertName);
                 if (c != null)
                 {
-                    _loadedCERNCert = true;
-                    CERNSSO.WebAccess.LoadCertificate(c);
+                    lock (this)
+                    {
+                        if (!_loadedCERNCert)
+                        {
+                            _loadedCERNCert = true;
+                            CERNSSO.WebAccess.LoadCertificate(c);
+                        }
+                    }
                 }
             }
 
