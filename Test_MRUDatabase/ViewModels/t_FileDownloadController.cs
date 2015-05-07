@@ -164,6 +164,37 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
+        public async Task IsDownloadingFlipsCorrectlyWhenError()
+        {
+            await new TestScheduler().WithAsync(async sched =>
+            {
+                // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
+                var f = new dummyFile();
+
+                f.GetStream = () =>
+                {
+                    return Observable.Throw<StreamReader>(new InvalidOperationException("ops"));
+                };
+
+                var dc = new dummyCache();
+                var vm = new FileDownloadController(f, dc);
+                var dummy = vm.IsDownloaded;
+                var dummy1 = vm.IsDownloading;
+
+                Assert.IsFalse(vm.IsDownloading);
+                vm.DownloadOrUpdate.Execute(null);
+
+                // And run past the end
+                sched.AdvanceByMs(200);
+
+                //TODO: Not clear why this is required (the delay), but it is!
+                await Task.Delay(200);
+                Assert.IsFalse(vm.IsDownloaded);
+                Assert.IsFalse(vm.IsDownloading);
+            });
+        }
+
+        [TestMethod]
         public void DownloadCalledOnceOnNewFile()
         {
             var f = new dummyFile();

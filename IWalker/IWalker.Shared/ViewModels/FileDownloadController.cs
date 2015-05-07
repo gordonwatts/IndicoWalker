@@ -112,6 +112,7 @@ namespace IWalker.ViewModels
                 .SelectMany(_ => Download())
                 .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
                 .Finally(() => downloadInProgress.OnNext(false))
+                .Do(_ => downloadInProgress.OnNext(false))
                 .Catch(Observable.Empty<Unit>())
                 .Select(_ => true)
                 .Publish();
