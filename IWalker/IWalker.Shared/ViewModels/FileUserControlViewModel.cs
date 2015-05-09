@@ -76,8 +76,7 @@ namespace IWalker.ViewModels
                 .WriteLine(x => string.Format("IsDownloading: {0}", x))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false, RxApp.MainThreadScheduler);
 
-            FileDownloader.WhenAny(x => x.IsDownloaded, x => x.IsDownloading, (x, y) => x.Value || y.Value)
-                .Select(x => !x)
+            FileDownloader.WhenAny(x => x.IsDownloaded, x => x.IsDownloading, (x, y) => !x.Value || y.Value)
                 .ToProperty(this, x => x.FileNotCachedOrDownloading, out _fileNotCachedOrDownloading, true, RxApp.MainThreadScheduler);
 
             // Allow them to download a file.
