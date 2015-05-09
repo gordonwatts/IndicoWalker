@@ -1,4 +1,5 @@
 ﻿using Akavache;
+using IWalker.Util;
 using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
@@ -6,7 +7,6 @@ using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Windows.Foundation;
 using Windows.UI.Core;
 
 namespace Test_MRUDatabase.ViewModels
@@ -35,10 +35,12 @@ namespace Test_MRUDatabase.ViewModels
             var dc = new dummyCache();
             await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
             var dt = await dc.GetObjectCreatedAt<Tuple<string, byte[]>>(f.UniqueKey);
-            var pageSize = new Size(1280, 720);
-            await dc.InsertObject(string.Format("{0}-{1}-DefaultPageSize", f.UniqueKey, dt.Value.ToString()), pageSize);
+            var pageSize = new IWalkerSize() { Width = 1280, Height = 720 };
+            await dc.InsertObject(string.Format("{0}-{1}-p1-DefaultPageSize", f.UniqueKey, dt.Value.ToString()), pageSize);
             var imageData = new byte[] { 0, 1, 2, 3, 4 };
-            await dc.InsertObject(string.Format("{0}-{1}-w100-h56", f.UniqueKey, dt.Value), imageData);
+            await dc.InsertObject(string.Format("{0}-{1}-p1-w100-h56", f.UniqueKey, dt.Value), imageData);
+
+            Debug.WriteLine("Setup is done, and data has been inserted into the cache. Testing starting");
 
             // Create the rest of the infrastructure.
             var vm = new FileDownloadController(f, dc);
