@@ -26,11 +26,9 @@ namespace Test_MRUDatabase
         public dummyMeeting()
         {
             Sessions = new ISession[] { new dummySession() };
+            Title = "Meeting1";
         }
-        public string Title
-        {
-            get { return "Meeting1"; }
-        }
+        public string Title { get; set; }
 
         public ISession[] Sessions { get; set; }
 
@@ -39,7 +37,7 @@ namespace Test_MRUDatabase
 
         public string AsReferenceString()
         {
-            return "meeting1";
+            return Title;
         }
     }
 
@@ -49,14 +47,13 @@ namespace Test_MRUDatabase
         {
             Talks = new ITalk[] { new dummyTalk() };
             Title = "session title";
+            StartTime = DateTime.Now;
+            Id = "1";
         }
         public ITalk[] Talks { get; set; }
 
 
-        public DateTime StartTime
-        {
-            get { return DateTime.Now; }
-        }
+        public DateTime StartTime { get; set; }
 
         public string Title
         {
@@ -64,12 +61,9 @@ namespace Test_MRUDatabase
             set;
         }
 
-        public string Id
-        {
-            get { return "1"; }
-        }
+        public string Id { get; set; }
 
-
+        [JsonIgnore]
         public bool IsPlaceHolderSession
         {
             get { return "<ad-hoc session>" == Title; }
@@ -78,16 +72,14 @@ namespace Test_MRUDatabase
 
     class dummyTalk : ITalk
     {
-
-        public string Title
+        public dummyTalk()
         {
-            get { return "talk 1"; }
+            Title = "talk 1";
+            TalkFile = new dummyFile();
         }
+        public string Title { get; set; }
 
-        public IFile TalkFile
-        {
-            get { return new dummyFile(); }
-        }
+        public IFile TalkFile { get; set; }
 
         public bool Equals(ITalk other)
         {
@@ -107,37 +99,44 @@ namespace Test_MRUDatabase
         }
 
 
+        [JsonIgnore]
         public IFile[] AllTalkFiles
         {
-            get { return new IFile[] { new dummyFile() }; }
+            get { return new IFile[] { TalkFile }; }
         }
     }
 
     // A dummy file.
     class dummyFile : IFile
     {
-        public int GetStreamCalled { get; private set; }
-        private string _name;
-        private string _url;
+        public string _name { get; set; }
+        public string _url { get; set; }
+
+        public dummyFile()
+        {
+            SetupDefaultGetStream();
+        }
+
         public dummyFile(string url = "bogus", string name = "talk.pdf")
         {
             _name = name;
             _url = url;
-            GetStreamCalled = 0;
-            GetDateCalled = 0;
             DateToReturn = "this is the first";
-            GetStream = () => Observable.FromAsync(() => Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url).AsTask())
-                .SelectMany(f => f.OpenStreamForReadAsync())
-                .Select(reader => new StreamReader(reader));
+
+            SetupDefaultGetStream();
 
         }
 
-        public bool IsValid { get { return true; } }
+        private void SetupDefaultGetStream()
+        {
+            GetStreamCalled = 0;
+            GetDateCalled = 0;
+            GetStream = () => Observable.FromAsync(() => Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(_url).AsTask())
+                .SelectMany(f => f.OpenStreamForReadAsync())
+                .Select(reader => new StreamReader(reader));
+        }
 
-        public string FileType { get { return "pdf"; } }
-
-        public string UniqueKey { get { return _name; } }
-
+        [JsonIgnore]
         public Func<IObservable<StreamReader>> GetStream { get; set; }
 
         public IObservable<StreamReader> GetFileStream()
@@ -153,6 +152,22 @@ namespace Test_MRUDatabase
             }
         }
 
+        [JsonIgnore]
+        public int GetStreamCalled { get; private set; }
+
+        [JsonIgnore]
+        public int GetDateCalled { get; private set; }
+
+        [JsonIgnore]
+        public bool IsValid { get { return true; } }
+
+        [JsonIgnore]
+        public string FileType { get { return "pdf"; } }
+
+        [JsonIgnore]
+        public string UniqueKey { get { return _name; } }
+
+        [JsonIgnore]
         public string DisplayName { get { return _name; } }
 
         /// <summary>
@@ -165,7 +180,6 @@ namespace Test_MRUDatabase
             return Observable.Return(DateToReturn);
         }
 
-        public int GetDateCalled { get; private set; }
     }
 
     /// <summary>
