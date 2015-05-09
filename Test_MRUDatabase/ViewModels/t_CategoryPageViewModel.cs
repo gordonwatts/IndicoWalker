@@ -5,8 +5,6 @@ using IWalker.ViewModels;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
 using Splat;
-using System;
-using System.Collections.Generic;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Test_MRUDatabase.Util;
@@ -44,15 +42,15 @@ namespace Test_MRUDatabase.ViewModels
             // When not in cache, make sure it is fetched and updated in the cache.
             var ds = new dummyScreen();
             var ms = new myMeetingListRef();
-            var t = new CategoryPageViewModel(ds, ms);
+            var dc = new dummyCache();
+            var t = new CategoryPageViewModel(ds, ms, dc);
 
-            await Task.Delay(5000);
             Assert.AreEqual(1, ms.Counter);
 
-            var item = await Blobs.LocalStorage.GetObject<IMeetingRefExtended[]>(ms.UniqueString);
+            var item = await dc.GetObject<IMeetingRefExtended[]>(ms.UniqueString);
             Assert.IsNotNull(item);
             Assert.AreEqual(2, item.Length);
-            Assert.AreEqual("meetign1", item[0].Title);
+            Assert.AreEqual("meeting1", item[0].Title);
             Assert.AreEqual("meeting2", item[1].Title);
         }
     }

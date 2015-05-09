@@ -4,7 +4,6 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Reactive.Linq;
-using System.Threading;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase
@@ -235,21 +234,23 @@ namespace Test_MRUDatabase
     /// <summary>
     /// Dummy extended meeting for testing.
     /// </summary>
+    /// <remarks>This will get serialized, so we have to make sure it is "readY".</remarks>
     class anExtendedMeetingRef : IMeetingRefExtended
     {
         public anExtendedMeetingRef(string mname)
         {
             Title = mname;
+            StartTime = DateTime.Now;
+            EndTime = DateTime.Now;
+            Meeting = null;
         }
-        public string Title { get; private set; }
 
-        public System.DateTime StartTime { get { return DateTime.Now; } }
+        public string Title { get; set; }
 
-        public System.DateTime EndTime { get { return DateTime.Now; } }
+        public System.DateTime StartTime { get; set; }
 
-        public IMeetingRef Meeting
-        {
-            get { throw new System.NotImplementedException(); }
-        }
+        public System.DateTime EndTime { get; set; }
+
+        public IMeetingRef Meeting { get; set; }
     }
 }

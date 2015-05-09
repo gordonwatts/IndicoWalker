@@ -2,11 +2,8 @@
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
-using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
 
 namespace Test_MRUDatabase
 {
@@ -78,7 +75,12 @@ namespace Test_MRUDatabase
 
         public IObservable<System.Reactive.Unit> Invalidate(string key)
         {
-            throw new NotImplementedException();
+            Debug.WriteLine("Invalidating {0}.", key);
+            if (_lines.ContainsKey(key))
+            {
+                _lines.Remove(key);
+            }
+            return Observable.Return(default(Unit));
         }
 
         public IObservable<System.Reactive.Unit> InvalidateAll()

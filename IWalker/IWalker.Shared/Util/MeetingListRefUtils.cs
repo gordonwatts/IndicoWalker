@@ -16,16 +16,17 @@ namespace IWalker.Util
         /// <param name="meetings">Meetings reference we should go after</param>
         /// <param name="updateAlways">If true, we will always update the meeting list. Otherwise we won't do it if we've recently done it</param>
         /// <returns></returns>
-        public static IObservable<IMeetingRefExtended[]> FetchAndUpdateRecentMeetings (this IMeetingListRef meetings, bool updateAlways = true)
+        public static IObservable<IMeetingRefExtended[]> FetchAndUpdateRecentMeetings (this IMeetingListRef meetings, bool updateAlways = true, IBlobCache cache = null)
         {
             Func<DateTimeOffset, bool> refetchFunc = null;
+            cache = cache ?? Blobs.LocalStorage;
 
             if (!updateAlways)
             {
                 refetchFunc = lasttime => (DateTime.Now - lasttime).TotalHours > Settings.MeetingCategoryStaleHours;
             }
 
-            return Blobs.LocalStorage
+            return cache
                 .GetAndFetchLatest(meetings.UniqueString, async () => (await meetings.GetMeetings(Settings.DaysBackToFetchMeetings)).ToArray(), refetchFunc);
         }
     }

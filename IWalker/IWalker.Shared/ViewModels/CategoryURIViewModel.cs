@@ -40,12 +40,14 @@ namespace IWalker.ViewModels
         /// Init ourselves with a new meeting ref
         /// </summary>
         /// <param name="meetings"></param>
-        public CategoryURIViewModel(IMeetingListRef meetings)
+        public CategoryURIViewModel(IMeetingListRef meetings, IBlobCache cache = null)
         {
+            cache = cache ?? Blobs.LocalStorage;
+
             // Get the list of items we are going to show. If there
             // is an error we should display it.
             MeetingList = new ReactiveList<IMeetingRefExtended>();
-            var meetingStream = meetings.FetchAndUpdateRecentMeetings()
+            var meetingStream = meetings.FetchAndUpdateRecentMeetings(cache: cache)
                 .Publish();
 
             meetingStream

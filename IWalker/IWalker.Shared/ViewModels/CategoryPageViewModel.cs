@@ -25,10 +25,10 @@ namespace IWalker.ViewModels
         /// Initialize a new category page view model
         /// </summary>
         /// <param name="parent"></param>
-        public CategoryPageViewModel(IScreen parent, IMeetingListRef meetings)
+        public CategoryPageViewModel(IScreen parent, IMeetingListRef meetings, IBlobCache cache = null)
         {
             HostScreen = parent;
-            CategoryListing = new CategoryURIViewModel(meetings);
+            CategoryListing = new CategoryURIViewModel(meetings, cache);
             CategoryConfig = new CategoryConfigViewModel(meetings);
         }
 
