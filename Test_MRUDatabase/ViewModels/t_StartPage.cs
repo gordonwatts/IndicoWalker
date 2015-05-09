@@ -31,6 +31,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.IsInstanceOfType(newPage, typeof(MeetingPageViewModel));
         }
 
+#if false
         [TestMethod]
         public void LoadBadURL()
         {
@@ -45,6 +46,7 @@ namespace Test_MRUDatabase.ViewModels
 
             Assert.IsNull(newPage);
         }
+#endif
 
         [TestMethod]
         public void LoadCategory()
