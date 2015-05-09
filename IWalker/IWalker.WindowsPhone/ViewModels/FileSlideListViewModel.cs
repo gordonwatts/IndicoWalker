@@ -7,7 +7,12 @@ namespace IWalker.ViewModels
     /// </summary>
     public class FileSlideListViewModel : ReactiveObject
     {
-        public FileSlideListViewModel(DataModel.Interfaces.IFile file, Util.TimePeriod timeSpan, System.IObservable<System.Reactive.Unit> observable)
+        /// <summary>
+        /// Dummy ctor - we don't do anythign with this in WP
+        /// </summary>
+        /// <param name="fileDownloadController"></param>
+        /// <param name="timeSpan"></param>
+        public FileSlideListViewModel(FileDownloadController fileDownloadController, Util.TimePeriod timeSpan)
         {
         }
     }
