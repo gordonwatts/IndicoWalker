@@ -59,7 +59,7 @@ namespace Test_MRUDatabase.ViewModels
             pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
             vm.DownloadOrUpdate.Execute(null);
 
-            await Task.Delay(2000);
+            await TestUtils.SpinWait(() => lastImage != null, 2000);
             Assert.AreEqual(0, loaderCalled);
             Assert.IsNotNull(lastImage);
             Assert.AreEqual(3, dc.NumberTimesInsertCalled); // Nothing new should have happened

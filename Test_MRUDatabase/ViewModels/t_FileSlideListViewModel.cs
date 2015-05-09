@@ -38,27 +38,11 @@ namespace Test_MRUDatabase.ViewModels
             // Trigger the initial download.
             dfctl.DownloadOrUpdate.Execute(null);
 
-            await SpinWait(() => list.Count != 0, 200);
+            await TestUtils.SpinWait(() => list.Count != 0, 200);
 
             Assert.AreEqual(10, list.Count);
             Assert.AreEqual(1, df.GetStreamCalled);
         }
-
-        private async Task SpinWait(Func<bool> test, int maxMiliseconds)
-        {
-            int waited = 0;
-            while (!test() && waited < maxMiliseconds)
-            {
-                await Task.Delay(10);
-                waited += 10;
-            }
-
-            if (!test())
-            {
-                Assert.Fail("Timeout occurred");
-            }
-        }
-
 
         [TestMethod]
         public async Task TestFileUpdated()
@@ -79,7 +63,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(0, list.Count);
 
             dfctl.DownloadOrUpdate.Execute(null);
-            await SpinWait(() => list.Count != 0, 200);
+            await TestUtils.SpinWait(() => list.Count != 0, 200);
             await Task.Delay(10);
 
             Assert.AreEqual(10, list.Count);
@@ -109,7 +93,7 @@ namespace Test_MRUDatabase.ViewModels
             Assert.AreEqual(0, list.Count);
             dfctl.DownloadOrUpdate.Execute(null);
 
-            await SpinWait(() => list.Count != 0, 200);
+            await TestUtils.SpinWait(() => list.Count != 0, 200);
             await Task.Delay(10);
             Assert.AreEqual(10, list.Count);
 

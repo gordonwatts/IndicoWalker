@@ -1,8 +1,6 @@
-﻿using System;
-using System.Collections.Generic;
+﻿using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
+using System;
 using System.IO;
-using System.Linq;
-using System.Text;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
 
@@ -31,7 +29,7 @@ namespace Test_MRUDatabase
         public static async Task<byte[]> GetFileAsBytes(string p)
         {
             var f = await Windows.ApplicationModel.Package.Current.InstalledLocation.GetFileAsync(p);
-            var len = (int) (await f.GetBasicPropertiesAsync()).Size;
+            var len = (int)(await f.GetBasicPropertiesAsync()).Size;
             var data = new byte[len];
             using (var reader = await f.OpenStreamForReadAsync())
             {
@@ -44,5 +42,28 @@ namespace Test_MRUDatabase
                 return data;
             }
         }
+
+        /// <summary>
+        /// Sit and spin until ready
+        /// </summary>
+        /// <param name="test"></param>
+        /// <param name="maxMiliseconds"></param>
+        /// <returns></returns>
+        public static async Task SpinWait(Func<bool> test, int maxMiliseconds)
+        {
+            int waited = 0;
+            while (!test() && waited < maxMiliseconds)
+            {
+                await Task.Delay(10);
+                waited += 10;
+            }
+
+            if (!test())
+            {
+                Assert.Fail("Timeout occurred");
+            }
+        }
+
+
     }
 }
