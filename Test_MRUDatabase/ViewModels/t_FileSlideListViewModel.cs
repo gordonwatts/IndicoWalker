@@ -38,7 +38,7 @@ namespace Test_MRUDatabase.ViewModels
             // Trigger the initial download.
             dfctl.DownloadOrUpdate.Execute(null);
 
-            await TestUtils.SpinWait(() => list.Count != 0, 200);
+            await TestUtils.SpinWait(() => list.Count == 10, 200);
 
             Assert.AreEqual(10, list.Count);
             Assert.AreEqual(1, df.GetStreamCalled);
