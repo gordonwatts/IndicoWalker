@@ -45,7 +45,7 @@ namespace Test_MRUDatabase.ViewModels
             var dc = new dummyCache();
             var t = new CategoryPageViewModel(ds, ms, dc);
 
-            Assert.AreEqual(1, ms.Counter);
+            await TestUtils.SpinWait(() => dc.NumberTimesInsertCalled >= 1, 1000);
 
             var item = await dc.GetObject<IMeetingRefExtended[]>(ms.UniqueString);
             Assert.IsNotNull(item);
