@@ -84,7 +84,6 @@ namespace IWalker.ViewModels
             // Download or update the file.
             DownloadOrUpdate = ReactiveCommand.Create();
             var hasCachedValue = DownloadOrUpdate
-                .WriteLine("Download ReactiveCommand fired")
                 .SelectMany(_ => Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey))
                 .Select(dt => dt.HasValue)
                 .Publish().RefCount();
@@ -109,8 +108,11 @@ namespace IWalker.ViewModels
 
             var downloadSuccessful =
                 downloadRequired
-                .SelectMany(_ => Download())
-                .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                .LimitGlobally(goSeq => goSeq
+                    .WriteLine("Starting download...")
+                    .SelectMany(_ => Download())
+                    .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                    .WriteLine("  Done download and cache insert"), 1)
                 .Finally(() => downloadInProgress.OnNext(false))
                 .Do(_ => downloadInProgress.OnNext(false))
                 .Catch(Observable.Empty<Unit>())
