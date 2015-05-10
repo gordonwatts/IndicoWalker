@@ -57,6 +57,7 @@ namespace Test_MRUDatabase
         public IObservable<DateTimeOffset?> GetCreatedAt(string key)
         {
             Debug.WriteLine("Trying to get object created at for key {0}", key);
+            Debug.Assert(key != null);
             if (!_lines.ContainsKey(key))
             {
                 Debug.WriteLine("  -> Nothing in cache.");

@@ -112,11 +112,6 @@ namespace Test_MRUDatabase
         public string _name { get; set; }
         public string _url { get; set; }
 
-        public dummyFile()
-        {
-            SetupDefaultGetStream();
-        }
-
         public dummyFile(string url = "bogus", string name = "talk.pdf")
         {
             _name = name;

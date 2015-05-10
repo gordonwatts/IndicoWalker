@@ -360,7 +360,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void UnderstandHowDummyCacheCausesProblems()
+        public async Task UnderstandHowDummyCacheCausesProblems()
         {
             var f = new dummyFile();
             var dc = new dummyCache();
@@ -372,6 +372,7 @@ namespace Test_MRUDatabase.ViewModels
             DownloadOrUpdate.Subscribe(_ => value = true);
             Assert.IsFalse(value);
             DownloadOrUpdate.Execute(null);
+            await TestUtils.SpinWait(() => value == true, 2000);
             Assert.IsTrue(value);
         }
 
