@@ -1,10 +1,12 @@
 ﻿using System;
 using System.Collections.Concurrent;
 using System.Collections.Generic;
+using System.Diagnostics;
 using System.Reactive;
 using System.Reactive.Concurrency;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
 
@@ -100,22 +102,134 @@ namespace IWalker.Util
         /// </summary>
         public class LimitGlobalCounter
         {
+            SemaphoreSlim _limiter = null;
+
             public LimitGlobalCounter(int maxCount)
             {
                 if (maxCount <= 0)
                     throw new ArgumentException("Count must be ge to zero");
+
+                _limiter = new SemaphoreSlim(maxCount);
+            }
+
+            public void Wait(CancellationToken token)
+            {
+                _limiter.Wait(token);
+            }
+
+            internal void Release()
+            {
+                _limiter.Release();
             }
         }
 
+        /// <summary>
+        /// Limit the number of simultaniously executing "limitedSequences" to maxCount.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="limitedSequence"></param>
+        /// <param name="maxCount"></param>
+        /// <param name="sched"></param>
+        /// <returns></returns>
         public static IObservable<U> LimitGlobally<T,U> (this IObservable<T> source, Func<IObservable<T>, IObservable<U>> limitedSequence, int maxCount, IScheduler sched = null)
         {
             var counter = new LimitGlobalCounter(maxCount);
             return source.LimitGlobally(limitedSequence, counter, sched);
         }
 
-        public static IObservable<U> LimitGlobally<T, U>(this IObservable<T> source, Func<IObservable<T>, IObservable<U>> limitedSequence, LimitGlobalCounter counter, IScheduler sched = null)
+        /// <summary>
+        /// Limit the number of simultaniously executing "limitedSequences" to counter. Counter can be shared
+        /// accross multiple calls.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <typeparam name="U"></typeparam>
+        /// <param name="source"></param>
+        /// <param name="limitedSequence">The transformation</param>
+        /// <param name="limitter">An instance of LimitGlobalCounter. Can be shared between various calls of this.</param>
+        /// <param name="sched">IScheduler to execute this on. If left null, defaults to Scheduler.Default</param>
+        /// <returns>The resulting sequence transformed by limitedSequence.</returns>
+        /// <remarks>
+        /// When the source sequence completes, the terminating sequence will complete after each sequence from limitedSequence compleats.
+        /// If source OnErrors, or limitedSequence on errors, then no further items will be processed. Once all ongoing sequences complete, the
+        /// first OnError will be passed on to the resulting sequence.
+        /// </remarks>
+        public static IObservable<U> LimitGlobally<T, U>(this IObservable<T> source, Func<IObservable<T>, IObservable<U>> limitedSequence, LimitGlobalCounter limitter, IScheduler sched = null)
         {
-            return limitedSequence(source);
+            // Use the default scheduler.
+            sched = sched ?? Scheduler.Default;
+
+            // Create an observable that will track the various things that go wrong
+            return Observable.Create<U>(o =>
+            {
+                var cancel = new CancellationDisposable(); // Monitor a cancel that comes along.
+                var queue = new ConcurrentQueue<Notification<T>>(); // Everything that comes in get queued up as a materialized item
+
+                Notification<U> final = null; // See failure symantics above
+                int pendingAccepts = 0;
+                var subscription = source.Materialize().Subscribe(
+                n =>
+                {
+                    if (cancel.Token.IsCancellationRequested)
+                        return;
+
+                    try { limitter.Wait(cancel.Token); }
+                    catch (OperationCanceledException)
+                    {
+                        return;
+                    }
+
+                    Interlocked.Increment(ref pendingAccepts);
+                    queue.Enqueue(n);
+                    sched.Schedule(() =>
+                    {
+                        try
+                        {
+                            Notification<T> notification;
+                            queue.TryDequeue(out notification);
+                            var sub = new Subject<T>();
+                            var seq = limitedSequence(sub).Materialize().Subscribe(
+                                result =>
+                                {
+                                    if (result.Kind != NotificationKind.OnNext && final != null)
+                                    {
+                                        final = result;
+                                    }
+                                    else
+                                    {
+                                        result.Accept(o);
+                                    }
+                                },
+                                error => final = final ?? Notification.CreateOnError<U>(error),
+                                () =>
+                                {
+                                    limitter.Release();
+                                    if (Interlocked.Decrement(ref pendingAccepts) == 0)     // try to go lock-free a long a possible
+                                    {
+                                        lock (queue)    // take the queue as gate (only one thread should accept final notification)
+                                        {
+                                            if (final != null               // make sure the final call has been received
+                                                && pendingAccepts == 0      // and we are behind the decrement of that thread
+                                            )
+                                            {
+                                                final.Accept(o);
+                                                final = null;
+                                            }
+                                        }
+                                    }
+                                }
+                            );
+                            notification.Accept(sub);
+                        }
+                        catch(Exception e)
+                        {
+                            Debug.WriteLine("Erorr on LimitGlobally: no error should ever make it here: {0}", e.Message);
+                        }
+                    });
+                });
+                return new CompositeDisposable(cancel, subscription);
+            });
         }
     }
 }
