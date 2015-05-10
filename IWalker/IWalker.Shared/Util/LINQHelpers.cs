@@ -10,7 +10,7 @@ using System.Threading;
 
 namespace IWalker.Util
 {
-    static class LINQHelpers
+    public static class LINQHelpers
     {
         /// <summary>
         /// Change any observable stream into a Unit stream.
@@ -102,7 +102,8 @@ namespace IWalker.Util
         {
             public LimitGlobalCounter(int maxCount)
             {
-
+                if (maxCount <= 0)
+                    throw new ArgumentException("Count must be ge to zero");
             }
         }
 
