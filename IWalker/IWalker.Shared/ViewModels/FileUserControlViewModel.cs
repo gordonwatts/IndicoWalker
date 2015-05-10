@@ -73,7 +73,6 @@ namespace IWalker.ViewModels
             // Now, hook up our UI indicators to the download control.
 
             FileDownloader.WhenAny(x => x.IsDownloading, x => x.Value)
-                .WriteLine(x => string.Format("IsDownloading: {0}", x))
                 .ToProperty(this, x => x.IsDownloading, out _isDownloading, false, RxApp.MainThreadScheduler);
 
             FileDownloader.WhenAny(x => x.IsDownloaded, x => x.IsDownloading, (x, y) => !x.Value || y.Value)

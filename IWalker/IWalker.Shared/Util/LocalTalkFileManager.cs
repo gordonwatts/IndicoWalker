@@ -54,7 +54,6 @@ namespace IWalker.Util
         public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file, IBlobCache cache)
         {
             return cache.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
-                    .Do(by => Debug.WriteLine("Got a file from cache of size {0} bytes", by.Item2.Length))
                     .Select(by => by.Item2.AsRORAByteStream())
                     .Catch<IRandomAccessStream, KeyNotFoundException>(e => Observable.Empty<IRandomAccessStream>());
         }

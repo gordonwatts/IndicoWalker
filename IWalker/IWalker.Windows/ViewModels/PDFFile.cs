@@ -73,7 +73,6 @@ namespace IWalker.ViewModels
                     .Where(downhere => downhere == true)
                     .Take(1)
                     .SelectMany(_ => fileSource.File.GetFileFromCache(fileSource.Cache))
-                    .WriteLine("Rendering a PDF file using LoadFromStreamAsync")
                     .SelectMany(stream => PdfDocument.LoadFromStreamAsync(stream))
                     .Catch<PdfDocument, Exception>(ex =>
                     {
@@ -87,7 +86,7 @@ namespace IWalker.ViewModels
             // that only one version of the file (from pdfObservableFactory) is
             // generated. So do a Publish at the end here.
             var ck = cacheKey
-                .Select(key => Tuple.Create(key, pdfObservableFactory())).WriteLine("New cache key").Replay(1);
+                .Select(key => Tuple.Create(key, pdfObservableFactory())).Replay(1);
             _pdfAndCacheKey = ck;
             ck.Connect();
 
