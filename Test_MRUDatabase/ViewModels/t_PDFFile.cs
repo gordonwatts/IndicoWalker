@@ -174,12 +174,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Start it off
             vm.DownloadOrUpdate.Execute(null);
-            await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
-                .Do(v => Debug.WriteLine("Got value {0} for pages {1}", v, pf.NumberOfPages))
-                .Where(y => y != 0)
-                .Take(1)
-                .Timeout(TimeSpan.FromSeconds(1), Observable.Return(0))
-                .FirstAsync();
+            await TestUtils.SpinWait(() => pf.NumberOfPages != 0, 1000);
             Assert.AreEqual(10, pf.NumberOfPages);
             Debug.WriteLine("Got the first file through");
 
@@ -188,11 +183,8 @@ namespace Test_MRUDatabase.ViewModels
             sender.OnNext(new StreamReader(new MemoryStream(data2)));
             Debug.WriteLine("New stream reader is sent");
             sender.OnCompleted();
-            await pf.WhenAny(x => x.NumberOfPages, y => y.Value)
-                .Where(y => y != 10)
-                .Take(1)
-                .Timeout(TimeSpan.FromSeconds(2), Observable.Return(0))
-                .FirstAsync();
+
+            await TestUtils.SpinWait(() => pf.NumberOfPages != 10, 1000);
             Assert.AreEqual(6, pf.NumberOfPages);
         }
 
