@@ -9,6 +9,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Text;
 using System.Threading;
+using System.Threading.Tasks;
 
 namespace IWalker.Util
 {
@@ -117,6 +118,12 @@ namespace IWalker.Util
                 _limiter.Wait(token);
             }
 
+            public async Task<bool> WaitAsync(CancellationToken token)
+            {
+                await _limiter.WaitAsync(token);
+                return true;
+            }
+
             internal void Release()
             {
                 _limiter.Release();
@@ -166,68 +173,92 @@ namespace IWalker.Util
                 var cancel = new CancellationDisposable(); // Monitor a cancel that comes along.
                 var queue = new ConcurrentQueue<Notification<T>>(); // Everything that comes in get queued up as a materialized item
 
-                Notification<U> final = null; // See failure symantics above
+                Notification<U> limitSequenceError = null; // See failure symantics above
+                Notification<T> sourceSequenceEndCondition = null;
                 int pendingAccepts = 0;
-                var subscription = source.Materialize().Subscribe(
-                n =>
-                {
-                    if (cancel.Token.IsCancellationRequested)
-                        return;
-
-                    try { limitter.Wait(cancel.Token); }
-                    catch (OperationCanceledException)
+                var subscription = source.Materialize()
+                    .Where(_ => !cancel.Token.IsCancellationRequested)
+                    .SelectMany(v => Observable.FromAsync(() => limitter.WaitAsync(cancel.Token)).Select(_ => v))
+                    .Subscribe(n =>
                     {
-                        return;
-                    }
-
-                    Interlocked.Increment(ref pendingAccepts);
-                    queue.Enqueue(n);
-                    sched.Schedule(() =>
-                    {
-                        try
+                        Interlocked.Increment(ref pendingAccepts);
+                        queue.Enqueue(n);
+                        sched.Schedule(() =>
                         {
-                            Notification<T> notification;
-                            queue.TryDequeue(out notification);
-                            var sub = new Subject<T>();
-                            var seq = limitedSequence(sub).Materialize().Subscribe(
-                                result =>
+                            try
+                            {
+                                Notification<T> notification;
+                                queue.TryDequeue(out notification);
+                                if (notification.Kind == NotificationKind.OnNext || notification.Kind == NotificationKind.OnError)
                                 {
-                                    if (result.Kind != NotificationKind.OnNext && final != null)
-                                    {
-                                        final = result;
-                                    }
-                                    else
-                                    {
-                                        result.Accept(o);
-                                    }
-                                },
-                                error => final = final ?? Notification.CreateOnError<U>(error),
-                                () =>
-                                {
-                                    limitter.Release();
-                                    if (Interlocked.Decrement(ref pendingAccepts) == 0)     // try to go lock-free a long a possible
-                                    {
-                                        lock (queue)    // take the queue as gate (only one thread should accept final notification)
+                                    var sub = new Subject<T>();
+                                    var seq = limitedSequence(sub).Materialize().Subscribe(
+                                        result =>
                                         {
-                                            if (final != null               // make sure the final call has been received
-                                                && pendingAccepts == 0      // and we are behind the decrement of that thread
-                                            )
+                                            // Did an error happen, or a completion happen before the source completed?
+                                            // Ignore the completion - that is "normal".
+                                            if (result.Kind == NotificationKind.OnError && limitSequenceError != null)
                                             {
-                                                final.Accept(o);
-                                                final = null;
+                                                limitSequenceError = result;
+                                            }
+                                            else if (result.Kind == NotificationKind.OnNext)
+                                            {
+                                                result.Accept(o);
+                                            }
+                                        },
+                                        () =>
+                                        {
+                                            // Our finally for this one. If this is the last one to get cleaned up, then we
+                                            // move on.
+                                            limitter.Release();
+                                            if (Interlocked.Decrement(ref pendingAccepts) == 0)     // try to go lock-free a long a possible
+                                            {
+                                                lock (queue)    // take the queue as gate (only one thread should accept final notification)
+                                                {
+                                                    if (pendingAccepts == 0)
+                                                    {
+                                                        if (limitSequenceError != null)
+                                                        {
+                                                            // Somethign went wrong, terminate early!
+                                                            limitSequenceError.Accept(o);
+                                                            limitSequenceError = null;
+                                                        }
+                                                        else if (sourceSequenceEndCondition != null)
+                                                        {
+                                                            // We are done, so terminate.
+                                                            o.OnCompleted();
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    );
+                                    notification.Accept(sub);
+                                    sub.OnCompleted();
+                                }
+                                else
+                                {
+                                    // The sequence has terminated "normally".
+                                    Debug.Assert(sourceSequenceEndCondition == null);
+                                    sourceSequenceEndCondition = notification;
+                                    if (Interlocked.Decrement(ref pendingAccepts) == 0)
+                                    {
+                                        lock (queue)
+                                        {
+                                            if (pendingAccepts == 0)
+                                            {
+                                                o.OnCompleted();
                                             }
                                         }
                                     }
                                 }
-                            );
-                            notification.Accept(sub);
-                        }
-                        catch(Exception e)
-                        {
-                            Debug.WriteLine("Erorr on LimitGlobally: no error should ever make it here: {0}", e.Message);
-                        }
+                            }
+                            catch (Exception e)
+                            {
+                                Debug.WriteLine("Erorr on LimitGlobally: no error should ever make it here: {0}", e.Message);
+                            }
+                        });
                     });
-                });
                 return new CompositeDisposable(cancel, subscription);
             });
         }
