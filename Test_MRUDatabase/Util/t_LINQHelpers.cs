@@ -92,13 +92,13 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
-        public void Limit2SequenceToOne()
+        public async Task Limit2SequenceToOne()
         {
-            new TestScheduler().With(shed =>
+            await new TestScheduler().WithAsync(async shed =>
             {
                 var source = Observable.Concat(Observable.Return(5), Observable.Return(10));
 
-                var sequence = source.LimitGlobally(s => s.Delay(TimeSpan.FromMilliseconds(100), shed), 1);
+                var sequence = source.LimitGlobally(s => s.WriteLine("Starting delay").Delay(TimeSpan.FromMilliseconds(100), shed).WriteLine("Done with delay"), 1);
                 var results = new List<int>();
 
                 sequence.Subscribe(v =>
@@ -111,12 +111,27 @@ namespace Test_MRUDatabase.Util
 
                 Assert.AreEqual(0, results.Count);
 
+                // All these await's Task.Delay are to make sure that there is enough time for the multi-threaded
+                // stuff to run. The semaphore that is being used just doesn't work on the test scheduler.
+
+                Debug.WriteLine("Doign a delay of 1");
+                shed.AdvanceByMs(1);
+                await Task.Delay(10);
+                Debug.WriteLine("Starting first 50");
                 shed.AdvanceByMs(50);
+                await Task.Delay(10);
                 Assert.AreEqual(0, results.Count);
+                Debug.WriteLine("Starting second 51");
                 shed.AdvanceByMs(51);
+                await Task.Delay(10);
+                Debug.WriteLine("Doing the spin wait");
+                await TestUtils.SpinWait(() => results.Count != 0, 1000);
+                await Task.Delay(10);
                 Assert.AreEqual(1, results.Count);
                 Assert.IsTrue(results.Contains(5));
                 shed.AdvanceByMs(100);
+                await Task.Delay(10);
+                await TestUtils.SpinWait(() => results.Count != 1, 1000);
                 Assert.AreEqual(2, results.Count);
                 Assert.IsTrue(results.Contains(10));
 
@@ -124,9 +139,9 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
-        public void Limit2SequenceToTwo()
+        public async Task Limit2SequenceToTwo()
         {
-            new TestScheduler().With(shed =>
+            await new TestScheduler().WithAsync(async shed =>
             {
                 var source = Observable.Concat(Observable.Return(5), Observable.Return(10));
 
@@ -143,13 +158,16 @@ namespace Test_MRUDatabase.Util
 
                 Assert.AreEqual(0, results.Count);
 
+                shed.AdvanceByMs(1);
+                await Task.Delay(10);
                 shed.AdvanceByMs(50);
+                await Task.Delay(10);
                 Assert.AreEqual(0, results.Count);
                 shed.AdvanceByMs(51);
+                await Task.Delay(10);
                 Assert.AreEqual(2, results.Count);
                 Assert.IsTrue(results.Contains(5));
                 Assert.IsTrue(results.Contains(10));
-
             });
         }
     }
