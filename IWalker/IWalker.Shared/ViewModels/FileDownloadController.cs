@@ -73,6 +73,11 @@ namespace IWalker.ViewModels
         public IBlobCache Cache { get; private set; }
 
         /// <summary>
+        /// Track the global download count accross the app.
+        /// </summary>
+        private static LINQHelpers.LimitGlobalCounter _gLimit = new LINQHelpers.LimitGlobalCounter(1);
+
+        /// <summary>
         /// Create the download controller for this file
         /// </summary>
         /// <param name="file"></param>
@@ -112,7 +117,7 @@ namespace IWalker.ViewModels
                     .WriteLine("Starting download...")
                     .SelectMany(_ => Download())
                     .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
-                    .WriteLine("  Done download and cache insert"), 1)
+                    .WriteLine("  Done download and cache insert"), _gLimit)
                 .Finally(() => downloadInProgress.OnNext(false))
                 .Do(_ => downloadInProgress.OnNext(false))
                 .Catch(Observable.Empty<Unit>())
