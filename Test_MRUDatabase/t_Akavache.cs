@@ -1,15 +1,16 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
+using IWalker.Util;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
+using ReactiveUI.Testing;
 using Splat;
 using System;
+using System.Diagnostics;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using ReactiveUI.Testing;
-using IWalker.Util;
 
 namespace Test_MRUDatabase
 {
@@ -115,6 +116,22 @@ namespace Test_MRUDatabase
                 Assert.AreEqual(1, mtg.Count);
                 Assert.IsNotNull(mtg.First());
             });
+        }
+
+        [TestMethod]
+        public void UnderstandByteJSONCost()
+        {
+            const int s_size = 1024 * 1024 * 70;
+            byte[] stuff = new byte[s_size];
+            for (int i = 0; i < s_size; i++)
+            {
+                stuff[i] = (byte)(i % 256);
+            }
+
+            var json = Newtonsoft.Json.JsonConvert.SerializeObject(stuff);
+
+            Debug.WriteLine("Data array size is: {0}", s_size);
+            Debug.WriteLine("  -> json string size is: {0}", json.Length);
         }
 
     }
