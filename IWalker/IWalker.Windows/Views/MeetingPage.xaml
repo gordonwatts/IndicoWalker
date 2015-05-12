@@ -51,7 +51,11 @@
             <TextBlock Text="No Talks or Sessions Found" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" />
         </Border>
          <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
-            <ItemsControl x:Name="SessionList"/>
+            <ItemsControl x:Name="SessionList">
+                <ItemsPanelTemplate>
+                    <VirtualizingStackPanel/>
+                </ItemsPanelTemplate>
+            </ItemsControl>
         </ScrollViewer>
     </Grid>
 </Page>
