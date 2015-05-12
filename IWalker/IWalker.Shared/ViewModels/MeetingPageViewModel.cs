@@ -176,7 +176,7 @@ namespace IWalker.ViewModels
             // If they want to see it in the browser
             OpenMeetingInBrowser = ReactiveCommand.Create();
             OpenMeetingInBrowser
-                .Subscribe(_ => Launcher.LaunchUriAsync(new Uri(meeting.WebURL)));
+                .Subscribe(async _ => await Launcher.LaunchUriAsync(new Uri(meeting.WebURL)));
         }
 
         /// <summary>

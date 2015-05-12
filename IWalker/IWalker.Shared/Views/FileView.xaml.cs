@@ -1,9 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using System.Reactive.Linq;
-using ReactiveUI;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
