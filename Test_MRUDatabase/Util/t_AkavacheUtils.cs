@@ -336,5 +336,42 @@ namespace Test_MRUDatabase.Util
             // It should be in the cache.
             Assert.AreEqual("this is one", await Blobs.LocalStorage.GetObject<string>("key"));
         }
+
+        [TestMethod]
+        public async Task GetBytesNotThere()
+        {
+            var dc = new dummyCache();
+            var r = await dc.GetOrFetch("hi", () => Observable.Return(new byte[0]))
+                .Materialize()
+                .ToArray();
+
+            Assert.AreEqual(2, r.Length);
+            Assert.IsTrue(r[0].Kind == NotificationKind.OnNext);
+            Assert.IsTrue(r[1].Kind == NotificationKind.OnCompleted);
+        }
+
+        [TestMethod]
+        public async Task GetBytesNotThereFail()
+        {
+            var dc = new dummyCache();
+            var r = await dc.GetOrFetch("hi", () => Observable.Throw<byte[]>(new NotImplementedException()))
+                .Materialize()
+                .ToArray();
+
+            Assert.AreEqual(1, r.Length);
+            Assert.IsTrue(r[0].Kind == NotificationKind.OnError);
+        }
+
+        [TestMethod]
+        public async Task GetBytesAlreadyCached()
+        {
+            var dc = new dummyCache();
+            await dc.Insert("hi", new byte[] { 0, 1, 2 }).ToArray();
+
+            var r = await dc.GetOrFetch("hi", () => Observable.Return(new byte[0]));
+
+            Assert.AreEqual(3, r.Length);
+            Assert.AreEqual((byte)1, r[1]);
+        }
     }
 }

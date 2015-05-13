@@ -82,7 +82,7 @@ namespace IWalker.ViewModels
                     () => info.Item2.Take(1).Select(pdf => pdf.Size.ToIWalkerSize()),
                     DateTime.Now + Settings.PageCacheTime)
                     .Select(sz => Tuple.Create(info.Item1, info.Item2, CalcRenderingSize(info.Item3, info.Item4, info.Item5, sz))))
-                .SelectMany(info => _cache.GetOrFetchObject<byte[]>(MakePageCacheKey(info.Item1, info.Item3),
+                .SelectMany(info => _cache.GetOrFetch(MakePageCacheKey(info.Item1, info.Item3),
                     () => info.Item2.SelectMany(pdfPg =>
                     {
                         var ms = new MemoryStream();

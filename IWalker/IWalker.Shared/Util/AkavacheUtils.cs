@@ -9,6 +9,34 @@ namespace IWalker.Util
 {
     public static class AkavacheUtils
     {
+        //
+        // Summary:
+        //     Attempt to return data from the cache. If the item doesn't exist or
+        //     returns an error, call a Func to return the latest version of an object and
+        //     insert the result in the cache.  For most Internet applications, this method
+        //     is the best method to call to fetch static data (i.e. images) from the network.
+        //
+        // Parameters:
+        //   key:
+        //     The key to associate with the object.
+        //
+        //   fetchFunc:
+        //     A Func which will asynchronously return the latest value for the bytes should
+        //     the cache not contain the key. Observable.Start is the most straightforward
+        //     way (though not the most efficient!) to implement this Func.
+        //
+        //   absoluteExpiration:
+        //     An optional expiration date.
+        //
+        // Returns:
+        //     A Future result representing the bytes from the cache.
+        public static IObservable<byte[]> GetOrFetch(this IBlobCache This, string key, Func<IObservable<byte[]>> fetchFunc, DateTimeOffset? absoluteExpiration = null)
+        {
+            return This.Get(key)
+                .Catch<byte[], Exception>(_ => Observable.Defer(() => fetchFunc())
+                            .SelectMany(value => This.InsertObject(key, value, absoluteExpiration).Select(dummy => value)));
+        }
+
         /// <summary>
         /// This method attempts to returned a cached value, and fetch one from
         /// the web. Optionally, it can continue to query to see if an update is required.

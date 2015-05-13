@@ -38,7 +38,7 @@ namespace Test_MRUDatabase.ViewModels
             var pageSize = new IWalkerSize() { Width = 1280, Height = 720 };
             await dc.InsertObject(string.Format("{0}-{1}-p1-DefaultPageSize", f.UniqueKey, dt.Value.ToString()), pageSize);
             var imageData = new byte[] { 0, 1, 2, 3, 4 };
-            await dc.InsertObject(string.Format("{0}-{1}-p1-w100-h56", f.UniqueKey, dt.Value), imageData);
+            await dc.Insert(string.Format("{0}-{1}-p1-w100-h56", f.UniqueKey, dt.Value), imageData);
 
             Debug.WriteLine("Setup is done, and data has been inserted into the cache. Testing starting");
 
