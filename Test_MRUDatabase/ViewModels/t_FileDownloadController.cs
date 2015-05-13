@@ -37,7 +37,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void TriggerSuccessfulFileDownloadNoCache()
+        public async Task TriggerSuccessfulFileDownloadNoCache()
         {
             var f = new dummyFile();
 
@@ -52,6 +52,7 @@ namespace Test_MRUDatabase.ViewModels
             vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
 
             vm.DownloadOrUpdate.Execute(null);
+            await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
             Assert.IsTrue(vm.IsDownloaded);
             Assert.AreEqual(1, downloadUpdateCount);
         }
@@ -82,7 +83,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void TriggerSuccessfulFileDownloadCached()
+        public async Task TriggerSuccessfulFileDownloadCached()
         {
             var f = new dummyFile();
 
@@ -99,6 +100,8 @@ namespace Test_MRUDatabase.ViewModels
             vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
 
             vm.DownloadOrUpdate.Execute(null);
+            await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
+
             Assert.IsTrue(vm.IsDownloaded);
             Assert.AreEqual(1, downloadUpdateCount);
         }
@@ -157,7 +160,7 @@ namespace Test_MRUDatabase.ViewModels
                 sched.AdvanceByMs(200);
 
                 //TODO: Not clear why this is required (the delay), but it is!
-                await Task.Delay(200);
+                await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
                 Assert.IsTrue(vm.IsDownloaded);
                 Assert.IsFalse(vm.IsDownloading);
             });
@@ -188,14 +191,14 @@ namespace Test_MRUDatabase.ViewModels
                 sched.AdvanceByMs(200);
 
                 //TODO: Not clear why this is required (the delay), but it is!
-                await Task.Delay(200);
+                await TestUtils.SpinWait(() => vm.IsDownloading == false, 1000);
                 Assert.IsFalse(vm.IsDownloaded);
                 Assert.IsFalse(vm.IsDownloading);
             });
         }
 
         [TestMethod]
-        public void DownloadCalledOnceOnNewFile()
+        public async Task DownloadCalledOnceOnNewFile()
         {
             var f = new dummyFile();
 
@@ -215,6 +218,8 @@ namespace Test_MRUDatabase.ViewModels
             var dummy1 = vm.IsDownloading;
 
             vm.DownloadOrUpdate.Execute(null);
+
+            await TestUtils.SpinWait(() => f.GetStreamCalled != 0, 1000);
 
             Assert.AreEqual(1, f.GetStreamCalled);
         }

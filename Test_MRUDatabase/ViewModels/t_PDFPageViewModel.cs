@@ -152,11 +152,10 @@ namespace Test_MRUDatabase.ViewModels
             Debug.WriteLine("Going to fire off a render request");
             pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
 
-            Debug.WriteLine("GOing to pause for 2 seconds to make sure nothing funny is going on");
-            await Task.Delay(2000);
-            Debug.WriteLine("Going to pause for 2 seconds to make sure nothing funny is going on");
-            await Task.Delay(2000);
-            Debug.WriteLine("Done.");
+            await TestUtils.SpinWait(() => timesLoaded != 0, 1000);
+            await TestUtils.SpinWait(() => dc.NumberTimesGetCalled == 3, 1000);
+            await TestUtils.SpinWait(() => lastImage != null, 1000);
+
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(3, dc.NumberTimesGetCalled); // Once for data, once for size cache, and once again for data file.
             Assert.IsNotNull(lastImage);
@@ -258,6 +257,8 @@ namespace Test_MRUDatabase.ViewModels
             // Now, build the VM
 
             var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            await TestUtils.SpinWait(() => timesLoaded != 0, 1000);
 
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(0, dc.NumberTimesGetCalled);

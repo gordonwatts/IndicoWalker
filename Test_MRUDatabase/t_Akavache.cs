@@ -133,6 +133,5 @@ namespace Test_MRUDatabase
             Debug.WriteLine("Data array size is: {0}", s_size);
             Debug.WriteLine("  -> json string size is: {0}", json.Length);
         }
-
     }
 }

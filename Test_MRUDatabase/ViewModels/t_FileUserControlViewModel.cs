@@ -90,7 +90,7 @@ namespace Test_MRUDatabase.ViewModels
                 Assert.IsTrue(fucVM.IsDownloading);
 
                 // After it should have been downloaded, check again.
-                sched.AdvanceByMs(51);
+                sched.AdvanceByMs(501);
 
                 // We have to wait 200 ms or the item isn't inserted into the cache.
                 // It is amazing that we have to wait this long.
@@ -98,6 +98,7 @@ namespace Test_MRUDatabase.ViewModels
 
                 // Give a chance for anything queued up to run by advancing the scheduler.
                 sched.AdvanceByMs(1);
+                await TestUtils.SpinWait(() => fucVM.IsDownloading == false, 1000);
 
                 // And do an final check.
                 Assert.IsFalse(fucVM.IsDownloading);

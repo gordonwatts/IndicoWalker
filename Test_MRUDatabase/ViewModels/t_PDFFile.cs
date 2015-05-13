@@ -32,10 +32,7 @@ namespace Test_MRUDatabase.ViewModels
 
             vm.DownloadOrUpdate.Execute(null);
 
-            await pf.WhenAny(x => x.NumberOfPages, x => x.Value)
-                .Where(x => x != 0)
-                .Timeout(TimeSpan.FromSeconds(1), Observable.Return<int>(0))
-                .FirstAsync();
+            await TestUtils.SpinWait(() => pf.NumberOfPages != 0, 1000);
 
             Assert.AreEqual(10, pf.NumberOfPages);
         }
