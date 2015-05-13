@@ -40,8 +40,10 @@ namespace Test_MRUDatabase.Util
         public async Task GetNewValueFetchFalse()
         {
             // Value is not in cache first. Event though we say no, it should still do the fetch.
-            var rtn = await Blobs.LocalStorage.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => Observable.Return(false))
+            var dc = new dummyCache();
+            var rtn = await dc.GetAndFetchLatest("key", () => Observable.Return("hi there"), dt => Observable.Return(false))
                 .ToList()
+                .Timeout(TimeSpan.FromMilliseconds(1000))
                 .FirstAsync();
 
             // We should have gotten it back
@@ -50,7 +52,7 @@ namespace Test_MRUDatabase.Util
             Assert.AreEqual("hi there", rtn[0]);
 
             // It should be in the cache.
-            Assert.AreEqual("hi there", await Blobs.LocalStorage.GetObject<string>("key"));
+            Assert.AreEqual("hi there", await dc.GetObject<string>("key"));
         }
 
         [TestMethod]
