@@ -293,6 +293,7 @@ namespace Test_MRUDatabase.ViewModels
             // Do a render, but nothing should happen since we've not subscribed to the image list.
             pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, 100, 100));
 
+            await TestUtils.SpinWait(() => timesLoaded != 0, 1000);
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(0, dc.NumberTimesGetCalled);
         }
