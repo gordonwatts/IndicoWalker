@@ -34,7 +34,7 @@ namespace IWalker.Util
         {
             return This.Get(key)
                 .Catch<byte[], Exception>(_ => Observable.Defer(() => fetchFunc())
-                            .SelectMany(value => This.InsertObject(key, value, absoluteExpiration).Select(dummy => value)));
+                            .SelectMany(value => This.Insert(key, value, absoluteExpiration).Select(dummy => value)));
         }
 
         /// <summary>

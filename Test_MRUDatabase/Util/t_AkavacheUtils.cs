@@ -373,5 +373,21 @@ namespace Test_MRUDatabase.Util
             Assert.AreEqual(3, r.Length);
             Assert.AreEqual((byte)1, r[1]);
         }
+
+        [TestMethod]
+        public async Task GetBytesWhatGoesInComesOut()
+        {
+            var dc = new dummyCache();
+            var r = await dc.GetOrFetch("hi", () => Observable.Return(new byte[] { 0, 1, 2, 3, 4 }));
+
+            var r1 = await dc.GetOrFetch("hi", () => Observable.Return(new byte[] { 0 }));
+
+            Assert.AreEqual(5, r1.Length);
+            Assert.AreEqual(0, r1[0]);
+            Assert.AreEqual(1, r1[1]);
+            Assert.AreEqual(2, r1[2]);
+            Assert.AreEqual(3, r1[3]);
+            Assert.AreEqual(4, r1[4]);
+        }
     }
 }
