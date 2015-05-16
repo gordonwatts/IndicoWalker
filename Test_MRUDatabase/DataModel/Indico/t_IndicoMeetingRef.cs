@@ -25,7 +25,7 @@ namespace Test_MRUDatabase.DataModel.Indico
             };
             var f = new IndicoMeetingRef.IndicoFile(fileInfo, "thisIsAFile") as IFile;
 
-            Assert.AreEqual("1/28/2015 4:53:19 PM +01:00", await f.GetFileDate());
+            Assert.IsTrue((await f.GetFileDate()).Contains("53:19"));
         }
 
         [TestMethod]
