@@ -73,9 +73,21 @@ namespace IWalker.ViewModels
         public IBlobCache Cache { get; private set; }
 
         /// <summary>
-        /// Track the global download count accross the app.
+        /// Track the global download count across the app.
         /// </summary>
         private static LINQHelpers.LimitGlobalCounter _gLimit = new LINQHelpers.LimitGlobalCounter(1);
+
+        /// <summary>
+        /// Reset for testing.
+        /// </summary>
+        /// <remarks>
+        /// TODO: you could argue that we need this only because some tests seem to leave the limit counter non-zero.
+        /// This really should not be possible, no matter what error occurs. This should be tested/fixed in the code!
+        /// </remarks>
+        public static void Reset()
+        {
+            _gLimit = new LINQHelpers.LimitGlobalCounter(1);
+        }
 
         /// <summary>
         /// Create the download controller for this file

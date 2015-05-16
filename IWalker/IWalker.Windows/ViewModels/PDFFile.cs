@@ -88,7 +88,6 @@ namespace IWalker.ViewModels
             var ck = cacheKey
                 .Select(key => Tuple.Create(key, pdfObservableFactory())).Replay(1);
             _pdfAndCacheKey = ck;
-            ck.Connect();
 
             // The number of pages is complex in that we will need to fetch the file and render it if we've not already
             // cached it.
@@ -98,6 +97,10 @@ namespace IWalker.ViewModels
                                     () => fetchNumberOfPages(info.Item2),
                                     DateTime.Now + Settings.CacheFilesTime))
                 .ToProperty(this, x => x.NumberOfPages, out _nPages, 0);
+
+            // TODO: this should probably be a RefCount - otherwise this right here causes fetches
+            // from all sorts of places (like the cache). Won't trigger a download, so it isn't too bad.
+            ck.Connect();
         }
 
         /// <summary>

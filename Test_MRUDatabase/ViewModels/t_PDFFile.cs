@@ -14,6 +14,12 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_PDFFile
     {
+        [TestInitialize]
+        public void Setup()
+        {
+            FileDownloadController.Reset();
+        }
+
         [TestMethod]
         public async Task DownloadFileNoP()
         {
