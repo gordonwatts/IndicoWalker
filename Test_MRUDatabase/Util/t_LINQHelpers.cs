@@ -144,9 +144,10 @@ namespace Test_MRUDatabase.Util
         {
             await new TestScheduler().WithAsync(async shed =>
             {
-                var source = Observable.Concat(Observable.Return(5), Observable.Return(10));
+                var source = Observable.Concat(Observable.Return(5), Observable.Return(10), Observable.Return(60));
 
-                var sequence = source.LimitGlobally(s => s.Delay(TimeSpan.FromMilliseconds(100), shed), 2);
+                int counter = 0;
+                var sequence = source.LimitGlobally(s => s.Do(_ => counter++).Delay(TimeSpan.FromMilliseconds(100), shed).WriteLine("Done with delay"), 2);
                 var results = new List<int>();
 
                 sequence.Subscribe(v =>
@@ -159,16 +160,9 @@ namespace Test_MRUDatabase.Util
 
                 Assert.AreEqual(0, results.Count);
 
-                shed.AdvanceByMs(1);
-                await Task.Delay(10);
-                shed.AdvanceByMs(50);
-                await Task.Delay(10);
-                Assert.AreEqual(0, results.Count);
-                shed.AdvanceByMs(51);
-                await Task.Delay(10);
-                Assert.AreEqual(2, results.Count);
-                Assert.IsTrue(results.Contains(5));
-                Assert.IsTrue(results.Contains(10));
+                await TestUtils.SpinWait(() => counter == 2, 100);
+                await Task.Delay(20);
+                Assert.AreEqual(2, counter);
             });
         }
 
@@ -198,6 +192,73 @@ namespace Test_MRUDatabase.Util
             try
             {
                 var seq = Observable.Return(Observable.Return(10))
+                    .LimitGlobally(s => s.SelectMany(v => Observable.Throw<int>(new InvalidOperationException())), sl)
+                    .LastAsync();
+
+                var r = await seq;
+            }
+            catch (InvalidOperationException e)
+            {
+            }
+
+            await Task.Delay(10);
+            Debug.WriteLine("Doing count check now");
+            Assert.AreEqual(1, sl.CurrentCount);
+        }
+
+        [TestMethod]
+        public async Task LimitWithExceptionOnSourceWithGoodAndErrorInternally()
+        {
+            // Make sure an exception inside is propagated outside.
+            var sl = new LINQHelpers.LimitGlobalCounter(1);
+            try
+            {
+                var seq = Observable.Concat(Observable.Return(10), Observable.Throw<int>(new InvalidOperationException()))
+                    .LimitGlobally(s => s.SelectMany(v => Observable.Throw<int>(new InvalidOperationException())), sl)
+                    .FirstAsync();
+
+                var r = await seq;
+            }
+            catch (InvalidOperationException e)
+            {
+            }
+
+            await Task.Delay(10);
+            Debug.WriteLine("Checking the semaphore");
+            Assert.AreEqual(1, sl.CurrentCount);
+            Debug.WriteLine("Done Checking the semaphore");
+        }
+
+        [TestMethod]
+        public async Task LimitWithExceptionOnSourceWithGood()
+        {
+            // Make sure an exception inside is propagated outside.
+            var sl = new LINQHelpers.LimitGlobalCounter(1);
+            try
+            {
+                var seq = Observable.Concat(Observable.Return(10), Observable.Throw<int>(new InvalidOperationException()))
+                    .LimitGlobally(s => s, sl)
+                    .FirstAsync();
+
+                var r = await seq;
+            }
+            catch (InvalidOperationException e)
+            {
+            }
+
+            // Delay is required b.c. Finally sometimes executes after sequence is done.
+            await Task.Delay(10);
+            Assert.AreEqual(1, sl.CurrentCount);
+        }
+
+        [TestMethod]
+        public async Task LimitWithExceptionOnSourceWithBadFirst()
+        {
+            // Make sure an exception inside is propagated outside.
+            var sl = new LINQHelpers.LimitGlobalCounter(1);
+            try
+            {
+                var seq = Observable.Concat(Observable.Throw<int>(new InvalidOperationException()), Observable.Return(10))
                     .LimitGlobally(s => s.SelectMany(v => Observable.Throw<int>(new InvalidOperationException())), sl)
                     .FirstAsync();
 

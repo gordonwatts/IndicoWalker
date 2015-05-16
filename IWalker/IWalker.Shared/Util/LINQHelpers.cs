@@ -124,6 +124,12 @@ namespace IWalker.Util
                 return true;
             }
 
+            public async Task<bool> WaitAsync()
+            {
+                await _limiter.WaitAsync();
+                return true;
+            }
+
             internal void Release()
             {
                 _limiter.Release();
@@ -172,6 +178,14 @@ namespace IWalker.Util
             // Use the default scheduler.
             sched = sched ?? Scheduler.Default;
 
+            return from item in source.ObserveOn(sched)
+                   from resultItem in
+                       (from limited in Observable.FromAsync(() => { Debug.WriteLine("Getting"); return limitter.WaitAsync();}).WriteLine("Got")
+                        from convertedItem in limitedSequence(Observable.Return(item))
+                        select convertedItem).Finally(() => { Debug.WriteLine("Releasing"); limitter.Release(); })
+                   select resultItem;
+                   
+#if false
             // Create an observable that will track the various things that go wrong
             return Observable.Create<U>(o =>
             {
@@ -183,10 +197,19 @@ namespace IWalker.Util
                 int pendingAccepts = 0;
                 var subscription = source.Materialize()
                     .Where(_ => !cancel.Token.IsCancellationRequested)
-                    .SelectMany(v => Observable.FromAsync(() => limitter.WaitAsync(cancel.Token)).Select(_ => v))
+                    .SelectMany(v => Observable.FromAsync(() => limitter.WaitAsync(cancel.Token)).WriteLine("Just past limiter with {0}", v.ToString()).Select(_ => v))
                     .Subscribe(n =>
                     {
                         Interlocked.Increment(ref pendingAccepts);
+
+                        // If we are in error condition, don't pump anything more through.
+                        if (limitSequenceError != null || sourceSequenceEndCondition != null)
+                        {
+                            Interlocked.Decrement(ref pendingAccepts);
+                            limitter.Release();
+                            return;
+                        }
+
                         queue.Enqueue(n);
                         sched.Schedule(() =>
                         {
@@ -194,12 +217,14 @@ namespace IWalker.Util
                             {
                                 Notification<T> notification;
                                 queue.TryDequeue(out notification);
+                                Debug.WriteLine("About to process notification {0}", notification.ToString());
                                 if (notification.Kind == NotificationKind.OnNext || notification.Kind == NotificationKind.OnError)
                                 {
                                     var sub = new Subject<T>();
                                     var seq = limitedSequence(sub).Materialize().Subscribe(
                                         result =>
                                         {
+                                            Debug.WriteLine("Getting item from function sequence {0}", result.ToString());
                                             // Did an error happen, or a completion happen before the source completed?
                                             // Ignore the completion - that is "normal".
                                             if (result.Kind == NotificationKind.OnError && limitSequenceError == null)
@@ -215,6 +240,7 @@ namespace IWalker.Util
                                         {
                                             // Our finally for this one. If this is the last one to get cleaned up, then we
                                             // move on.
+                                            Debug.WriteLine("Function sequence has terminated! Releasing semaphore");
                                             limitter.Release();
                                             if (Interlocked.Decrement(ref pendingAccepts) == 0)     // try to go lock-free a long a possible
                                             {
@@ -224,13 +250,15 @@ namespace IWalker.Util
                                                     {
                                                         if (limitSequenceError != null)
                                                         {
-                                                            // Somethign went wrong, terminate early!
+                                                            // Something went wrong, terminate early!
+                                                            Debug.WriteLine("Going to pass error onto external sequence");
                                                             limitSequenceError.Accept(o);
                                                             limitSequenceError = null;
                                                         }
                                                         else if (sourceSequenceEndCondition != null)
                                                         {
                                                             // We are done, so terminate.
+                                                            Debug.WriteLine("Going to pass on completed to external sequence");
                                                             o.OnCompleted();
                                                         }
                                                     }
@@ -238,12 +266,14 @@ namespace IWalker.Util
                                             }
                                         }
                                     );
+                                    Debug.WriteLine("Going to pass notification to sequence {0}", notification.ToString());
                                     notification.Accept(sub);
                                     sub.OnCompleted();
                                 }
                                 else
                                 {
                                     // The sequence has terminated "normally".
+                                    Debug.WriteLine("Input sequence has terminated normally.");
                                     Debug.Assert(sourceSequenceEndCondition == null);
                                     sourceSequenceEndCondition = notification;
                                     limitter.Release();
@@ -253,6 +283,7 @@ namespace IWalker.Util
                                         {
                                             if (pendingAccepts == 0)
                                             {
+                                                Debug.WriteLine("Going to pass completed onto external sequence");
                                                 o.OnCompleted();
                                             }
                                         }
@@ -264,9 +295,13 @@ namespace IWalker.Util
                                 Debug.WriteLine("Erorr on LimitGlobally: no error should ever make it here: {0}", e.Message);
                             }
                         });
+                    },
+                    () => {
+                        Debug.WriteLine("Completed Source Sequence pending is {0}", pendingAccepts);
                     });
                 return new CompositeDisposable(cancel, subscription);
             });
+#endif
         }
     }
 }
