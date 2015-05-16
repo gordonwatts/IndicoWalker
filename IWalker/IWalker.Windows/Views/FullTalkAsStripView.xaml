@@ -88,11 +88,29 @@
                 <StaticResource ResourceKey="BrillianBackButton"/>
             </Button.Style>
         </Button>
+        <ListView x:Name="SlideStrip" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+            <ListView.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <ItemsStackPanel Orientation="Horizontal"/>
+                </ItemsPanelTemplate>
+            </ListView.ItemsPanel>
+            <ListView.ItemTemplate>
+                <DataTemplate>
+                    <local:PDFPageUserControl
+                            Width="300" Height="300"
+                            x:Name="yo"
+                            Margin="0 0 5 0"
+                            ViewModel="{Binding}"
+                            RespectRenderingDimension="Vertical" />
+                </DataTemplate>
+            </ListView.ItemTemplate>
+        </ListView>
+        <!--
         <ScrollViewer x:Name="theScrollViewer" VerticalScrollMode="Disabled" HorizontalScrollMode="Auto" VerticalScrollBarVisibility="Disabled" HorizontalScrollBarVisibility="Auto" ZoomMode="Disabled">
             <ItemsControl x:Name="SlideStrip">
                 <ItemsControl.ItemsPanel>
                     <ItemsPanelTemplate>
-                        <StackPanel Orientation="Horizontal"/>
+                        <ItemsStackPanel Orientation="Horizontal" CacheLength="2"/>
                     </ItemsPanelTemplate>
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
@@ -101,10 +119,11 @@
                             x:Name="yo"
                             Margin="0 0 5 0"
                             ViewModel="{Binding}"
-                            RespectRenderingDimension="Vertical" ShowPDF="False" />
+                            RespectRenderingDimension="Vertical" ShowPDF="True" />
                     </DataTemplate>
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+        -->
     </Grid>
 </Page>

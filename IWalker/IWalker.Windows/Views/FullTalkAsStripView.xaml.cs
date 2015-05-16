@@ -3,8 +3,6 @@ using IWalker.ViewModels;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -34,7 +32,7 @@ namespace IWalker.Views
                     .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
 
                 backButton.WireAsBackButton();
-
+#if false
                 // Forward and backwards arrows.
                 // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
                 // get a scroll to the item we want. So we need to aggregate those while running.
@@ -129,15 +127,17 @@ namespace IWalker.Views
                 this.Events().Unloaded
                     .Subscribe(t => _holder.Unload());
 
+                // The orientation of this pannel will affect how we calc the arrow key stuff.
+                _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
+#endif
                 // We want to capture key strokes, etc. By default we don't have
                 // the focus, so grab it.
                 Focus(Windows.UI.Xaml.FocusState.Programmatic);
 
-                // The orientation of this pannel will affect how we calc the arrow key stuff.
-                _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
             });
         }
 
+#if false
         /// <summary>
         /// Turn the keystrokes into a page movement
         /// </summary>
@@ -223,6 +223,15 @@ namespace IWalker.Views
         }
 
         /// <summary>
+        /// What orientation is this pannel?
+        /// </summary>
+        public enum FullPanelOrientation
+        {
+            Horizontal, Vertical
+        }
+#endif
+
+        /// <summary>
         /// Hold onto the view model, which we will need for doing all sorts of things.
         /// </summary>
         public FullTalkAsStripViewModel ViewModel
@@ -237,14 +246,6 @@ namespace IWalker.Views
         {
             get { return ViewModel; }
             set { ViewModel = (FullTalkAsStripViewModel)value; }
-        }
-
-        /// <summary>
-        /// What orientation is this pannel?
-        /// </summary>
-        public enum FullPanelOrientation
-        {
-            Horizontal, Vertical
         }
     }
 }
