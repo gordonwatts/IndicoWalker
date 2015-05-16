@@ -101,8 +101,7 @@ namespace IWalker.ViewModels
             var publishedSize = imageSize
                 .Do(info => _pageSize = info.Size)
                 .Select(info => info.PGInfo)
-                .Publish();
-            publishedSize.Connect();
+                .Publish().RefCount();
 
             _pageSizeLoaded = publishedSize.AsUnit();
 
@@ -130,20 +129,6 @@ namespace IWalker.ViewModels
                                                 .Select(_ => ms.ToArray());
                                         }))
                           select new MemoryStream(imageData);
-        }
-
-        /// <summary>
-        /// Generate the cache key from the data. This should be unique enough such that
-        /// when the file changes or similar the cache hit will fail.
-        /// </summary>
-        /// <param name="pageNumber"></param>
-        /// <param name="width"></param>
-        /// <param name="height"></param>
-        /// <param name="cacheTag"></param>
-        /// <returns></returns>
-        private string MakeCacheKey(uint pageNumber, int width, int height, string cacheTag)
-        {
-            return string.Format("{0}-{1}-{2}x{3}", cacheTag, pageNumber, width, height);
         }
 
         /// <summary>
