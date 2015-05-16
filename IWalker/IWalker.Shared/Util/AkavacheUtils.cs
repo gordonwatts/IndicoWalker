@@ -175,7 +175,7 @@ namespace IWalker.Util
         }
 
         /// <summary>
-        /// Helper function to cache or retreive from the cache the image bytes
+        /// Helper function to cache or retrieve from the cache the image bytes
         /// </summary>
         /// <param name="cache"></param>
         /// <param name="pageKey"></param>
