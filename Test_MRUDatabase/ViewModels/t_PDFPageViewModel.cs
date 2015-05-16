@@ -15,7 +15,7 @@ namespace Test_MRUDatabase.ViewModels
     public class t_PDFPageViewModel
     {
         [TestMethod]
-        public async Task MakeSureNothingRenderedWhenNoImage()
+        public async Task MakeSureNothingRenderedWhenImageCached()
         {
             // The exact image we need is in the cache. So we should never make a
             // request to load the PDF file or PdfDocument.
@@ -330,50 +330,6 @@ namespace Test_MRUDatabase.ViewModels
             await TestUtils.SpinWait(() => timesLoaded != 0, 1000);
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(0, dc.NumberTimesGetCalled);
-        }
-
-#if false
-        [TestMethod]
-        public async Task TestUIMethod()
-        {
-            await RunOnUI(async () =>
-            {
-                await Task.Factory.StartNew(() =>
-                {
-                    var b = new BitmapImage();
-                });
-            });
-        }
-#endif
-
-        /// <summary>
-        /// Run on the UI thread.
-        /// </summary>
-        /// <param name="a"></param>
-        /// <returns></returns>
-        public async Task RunOnUI(Func<Task> a)
-        {
-            Exception failure = null;
-            bool finished = false;
-
-            await Windows.ApplicationModel.Core.CoreApplication
-                .MainView.CoreWindow.Dispatcher.RunAsync(CoreDispatcherPriority.Normal, () =>
-                {
-                    try
-                    {
-                        a().Wait();
-                        finished = true;
-                    }
-                    catch (Exception e)
-                    {
-                        failure = e;
-                    }
-                });
-
-            if (failure != null)
-                throw failure;
-
-            Assert.IsTrue(finished);
         }
     }
 }
