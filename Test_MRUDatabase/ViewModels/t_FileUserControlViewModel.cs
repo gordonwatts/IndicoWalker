@@ -99,6 +99,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Give a chance for anything queued up to run by advancing the scheduler.
             await TestUtils.SpinWait(() => fucVM.IsDownloading == false, 1000);
+            await TestUtils.SpinWait(() => fucVM.FileNotCachedOrDownloading == false, 1000);
 
             // And do an final check.
             Assert.IsFalse(fucVM.IsDownloading);
