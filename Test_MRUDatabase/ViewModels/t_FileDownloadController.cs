@@ -15,6 +15,12 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_FileDownloadController
     {
+        [TestInitialize]
+        public void Setup()
+        {
+            FileDownloadController.Reset();
+        }
+
         [TestMethod]
         public void NoFileDownloadedIsNotCached()
         {
@@ -169,8 +175,6 @@ namespace Test_MRUDatabase.ViewModels
         [TestMethod]
         public async Task IsDownloadingFlipsCorrectlyWhenError()
         {
-            await new TestScheduler().WithAsync(async sched =>
-            {
                 // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
                 var f = new dummyFile();
 
@@ -187,14 +191,34 @@ namespace Test_MRUDatabase.ViewModels
                 Assert.IsFalse(vm.IsDownloading);
                 vm.DownloadOrUpdate.Execute(null);
 
-                // And run past the end
-                sched.AdvanceByMs(200);
-
                 //TODO: Not clear why this is required (the delay), but it is!
                 await TestUtils.SpinWait(() => vm.IsDownloading == false, 1000);
                 Assert.IsFalse(vm.IsDownloaded);
                 Assert.IsFalse(vm.IsDownloading);
-            });
+        }
+
+        [TestMethod]
+        public async Task RxFinally()
+        {
+            bool hit = false;
+            var r = await Observable.Return(10)
+                .Finally(() => hit = true)
+                .FirstAsync();
+            Assert.IsTrue(hit);
+        }
+
+        [TestMethod]
+        public async Task RxFinallyWithError()
+        {
+            bool hit = false;
+            try
+            {
+                var r = await Observable.Throw<int>(new NotImplementedException())
+                    .Finally(() => hit = true)
+                    .FirstAsync();
+            }
+            catch { }
+            Assert.IsTrue(hit);
         }
 
         [TestMethod]
@@ -284,7 +308,7 @@ namespace Test_MRUDatabase.ViewModels
         /// request).
         /// </summary>
         [TestMethod]
-        public void CheckDateCalledOnceCacheEmpty()
+        public async Task CheckDateCalledOnceCacheEmpty()
         {
             var f = new dummyFile();
 
@@ -304,6 +328,8 @@ namespace Test_MRUDatabase.ViewModels
             var dummy1 = vm.IsDownloading;
 
             vm.DownloadOrUpdate.Execute(null);
+
+            await TestUtils.SpinWait(() => f.GetDateCalled == 1, 100);
 
             Assert.AreEqual(1, f.GetDateCalled);
         }
