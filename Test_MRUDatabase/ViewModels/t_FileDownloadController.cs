@@ -6,6 +6,7 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using ReactiveUI;
 using ReactiveUI.Testing;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
@@ -249,7 +250,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void DownloadCalledOnceOnCacheUpdate()
+        public async Task DownloadCalledOnceOnCacheUpdate()
         {
             var f = new dummyFile();
 
@@ -257,11 +258,12 @@ namespace Test_MRUDatabase.ViewModels
             {
                 var data = new byte[] { 0, 1, 2, 3 };
                 var mr = new MemoryStream(data);
+                Debug.WriteLine("Just called GetStream");
                 return Observable.Return(new StreamReader(mr));
             };
 
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
+            await dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
             var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
@@ -270,6 +272,8 @@ namespace Test_MRUDatabase.ViewModels
             var dummy1 = vm.IsDownloading;
 
             vm.DownloadOrUpdate.Execute(null);
+
+            await TestUtils.SpinWait(() => f.GetStreamCalled == 1, 1000);
 
             Assert.AreEqual(1, f.GetStreamCalled);
         }
