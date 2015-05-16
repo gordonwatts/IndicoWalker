@@ -4,6 +4,7 @@ using ReactiveUI;
 using System;
 using System.Diagnostics;
 using System.IO;
+using System.Reactive;
 using System.Reactive.Linq;
 using Windows.Data.Pdf;
 
@@ -52,6 +53,27 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> RenderImage { get; private set; }
 
         /// <summary>
+        /// Fires when a page size is loaded.
+        /// </summary>
+        private IObservable<Unit> _pageSizeLoaded = null;
+
+        /// <summary>
+        /// Returns a sequence that when complete indicates the image
+        /// size has been properly loaded and all the sizing methods can be called
+        /// and will return a valid value.
+        /// </summary>
+        /// <returns>Sequence that will fire just once before terminating after this object has a valid page size</returns>
+        public IObservable<Unit> LoadSize()
+        {
+            return _pageSizeLoaded.Take(1);
+        }
+
+        /// <summary>
+        /// Track the size of this page. Loaded from cache or from the PdfPage we go and fetch.
+        /// </summary>
+        private IWalkerSize _pageSize = null;
+
+        /// <summary>
         /// Initialize with the page that we should track.
         /// </summary>
         /// <param name="pageInfo">A stream of cache tags and the PDF pages associated with it.</param>
@@ -68,6 +90,25 @@ namespace IWalker.ViewModels
             // Always pull from the cache first, but if that doesn't work, then render and place
             // in the cache.
 
+            // Get the size of the thing when it is requested.
+            var imageSize = from pgInfo in pageInfo
+                            from sz in _cache.GetOrFetchPageSize(pgInfo.Item1, () => pgInfo.Item2.Take(1).Select(pdf => pdf.Size.ToIWalkerSize()))
+                            select new
+                            {
+                                PGInfo = pgInfo,
+                                Size = sz
+                            };
+            var publishedSize = imageSize
+                .Do(info => _pageSize = info.Size)
+                .Select(info => info.PGInfo)
+                .Publish();
+            publishedSize.Connect();
+
+            _pageSizeLoaded = publishedSize.AsUnit();
+
+            // The render request must be "good" - that is well formed. Otherwise
+            // we will just ignore it. This is because sometimes when things are being "sized" the
+            // render request is malformed.
             RenderImage = ReactiveCommand.Create();
             var renderRequest = RenderImage
                 .Cast<Tuple<RenderingDimension, double, double>>()
@@ -76,45 +117,19 @@ namespace IWalker.ViewModels
                     || (info.Item1 == RenderingDimension.MustFit && info.Item2 > 0 && info.Item3 > 0)
                 );
 
-            ImageStream =
-                Observable.CombineLatest(pageInfo, renderRequest, (pinfo, rr) => Tuple.Create(pinfo.Item1, pinfo.Item2, rr.Item1, rr.Item2, rr.Item3))
-                .SelectMany(info => _cache.GetOrFetchObject<IWalkerSize>(MakeSizeCacheKey(info.Item1),
-                    () => info.Item2.Take(1).Select(pdf => pdf.Size.ToIWalkerSize()),
-                    DateTime.Now + Settings.PageCacheTime)
-                    .Select(sz => Tuple.Create(info.Item1, info.Item2, CalcRenderingSize(info.Item3, info.Item4, info.Item5, sz))))
-                .SelectMany(info => _cache.GetOrFetch(MakePageCacheKey(info.Item1, info.Item3),
-                    () => info.Item2.SelectMany(pdfPg =>
-                    {
-                        var ms = new MemoryStream();
-                        var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
-                        var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)info.Item3.Item1, DestinationHeight = (uint)info.Item3.Item2 };
-                        return Observable.FromAsync(() => pdfPg.RenderToStreamAsync(ra).AsTask())
-                            .Select(_ => ms.ToArray());
-                    }),
-                    DateTime.Now + Settings.PageCacheTime
-                    ))
-                .Select(bytes => new MemoryStream(bytes));
-        }
-
-        /// <summary>
-        /// Create an image cache key
-        /// </summary>
-        /// <param name="pageCacheKey"></param>
-        /// <param name="renderSize"></param>
-        /// <returns></returns>
-        private string MakePageCacheKey(string pageCacheKey, Tuple<int, int> renderSize)
-        {
-            return string.Format("{0}-w{1}-h{2}", pageCacheKey, renderSize.Item1, renderSize.Item2);
-        }
-
-        /// <summary>
-        /// We need to cache the size of the page so we don't need the actual PDF page.
-        /// </summary>
-        /// <param name="normalCacheKey"></param>
-        /// <returns></returns>
-        private string MakeSizeCacheKey(string normalCacheKey)
-        {
-            return normalCacheKey + "-DefaultPageSize";
+            // Generate an image when we have a render request and a everything else is setup.
+            ImageStream = from requestInfo in Observable.CombineLatest(publishedSize, renderRequest, (pSize, rr) => new { pgInfo = pSize, RenderRequest = rr })
+                          let imageDimensions = CalcRenderingSize(requestInfo.RenderRequest.Item1, requestInfo.RenderRequest.Item2, requestInfo.RenderRequest.Item3)
+                          from imageData in _cache.GetOrFetchPageImageData(requestInfo.pgInfo.Item1, imageDimensions.Item1, imageDimensions.Item2,
+                          () => requestInfo.pgInfo.Item2.SelectMany(pdfPg =>
+                                        {
+                                            var ms = new MemoryStream();
+                                            var ra = WindowsRuntimeStreamExtensions.AsRandomAccessStream(ms);
+                                            var opt = new PdfPageRenderOptions() { DestinationWidth = (uint)imageDimensions.Item1, DestinationHeight = (uint)imageDimensions.Item2 };
+                                            return Observable.FromAsync(() => pdfPg.RenderToStreamAsync(ra).AsTask())
+                                                .Select(_ => ms.ToArray());
+                                        }))
+                          select new MemoryStream(imageData);
         }
 
         /// <summary>
@@ -138,18 +153,20 @@ namespace IWalker.ViewModels
         /// <param name="width">Width of the area, or 0 or infinity</param>
         /// <param name="height">Height of the area, or 0 or infinity</param>
         /// <returns></returns>
-        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height, IWalkerSize pageSize)
+        public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height)
         {
+            Debug.Assert(_pageSize != null);
+
             switch (orientation)
             {
                 case RenderingDimension.Horizontal:
                     if (width > 0)
-                        return Tuple.Create((int)width, (int)(pageSize.Height / pageSize.Width * width));
+                        return Tuple.Create((int)width, (int)(_pageSize.Height / _pageSize.Width * width));
                     return null;
 
                 case RenderingDimension.Vertical:
                     if (height > 0)
-                        return Tuple.Create((int)(pageSize.Width / pageSize.Height * height), (int)height);
+                        return Tuple.Create((int)(_pageSize.Width / _pageSize.Height * height), (int)height);
                     return null;
 
                 case RenderingDimension.MustFit:

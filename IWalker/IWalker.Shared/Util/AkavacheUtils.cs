@@ -160,5 +160,33 @@ namespace IWalker.Util
             return items.Concat(getAfter);
 
         }
+
+        /// <summary>
+        /// Convenience routine to help with caching and extracting the page size from the cache.
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="pageKey"></param>
+        /// <param name="sizeCalcFunc"></param>
+        /// <returns></returns>
+        public static IObservable<IWalkerSize> GetOrFetchPageSize(this IBlobCache cache, string pageKey, Func<IObservable<IWalkerSize>> sizeCalcFunc)
+        {
+            var sizeKey = pageKey + "-DefaultPageSize";
+            return cache.GetOrFetchObject<IWalkerSize>(sizeKey, sizeCalcFunc, DateTime.Now + Settings.PageCacheTime);
+        }
+
+        /// <summary>
+        /// Helper function to cache or retreive from the cache the image bytes
+        /// </summary>
+        /// <param name="cache"></param>
+        /// <param name="pageKey"></param>
+        /// <param name="width"></param>
+        /// <param name="height"></param>
+        /// <param name="pageDataGenerator"></param>
+        /// <returns></returns>
+        public static IObservable<byte[]> GetOrFetchPageImageData(this IBlobCache cache, string pageKey, double width, double height, Func<IObservable<byte[]>> pageDataGenerator)
+        {
+            string pageDataKey = string.Format("{0}-w{1}-h{2}", pageKey, width, height);
+            return cache.GetOrFetch(pageDataKey, pageDataGenerator, DateTime.Now + Settings.PageCacheTime);
+        }
     }
 }

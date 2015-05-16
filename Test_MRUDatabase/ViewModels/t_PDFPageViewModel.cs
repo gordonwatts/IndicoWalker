@@ -14,7 +14,6 @@ namespace Test_MRUDatabase.ViewModels
     [TestClass]
     public class t_PDFPageViewModel
     {
-
         [TestMethod]
         public async Task MakeSureNothingRenderedWhenNoImage()
         {
@@ -101,7 +100,9 @@ namespace Test_MRUDatabase.ViewModels
             pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
             vm.DownloadOrUpdate.Execute(null);
 
-            await Task.Delay(2000);
+            await TestUtils.SpinWait(() => timesLoaded != 0, 2000);
+            await TestUtils.SpinWait(() => dc.NumberTimesGetCalled == 3, 2000);
+            await TestUtils.SpinWait(() => lastImage != null, 2000);
             Assert.AreEqual(1, timesLoaded);
             Assert.AreEqual(3, dc.NumberTimesGetCalled); // Once for data, once for size cache, and once again for data file.
             Assert.IsNotNull(lastImage);
@@ -162,6 +163,38 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
+        public async Task SizePerpareCausesNoErrors()
+        {
+            // Get the size stuff ready, and then call it to make sure
+            // there are no issues with doing the size calculation.
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            var pf = new PDFFile(vm);
+            vm.DownloadOrUpdate.Execute(null);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            // Next, fire off the size thing.
+
+            await pdfVM.LoadSize().ToArray();
+            var r = pdfVM.CalcRenderingSize(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100);
+            Assert.AreEqual(100, r.Item1);
+            Assert.AreEqual(56, r.Item2);
+        }
+
+        [TestMethod]
         public async Task RenderAlreadyCachedFile()
         {
             // If the file has already been downloaded and installed locally (on a previous
@@ -197,7 +230,7 @@ namespace Test_MRUDatabase.ViewModels
             pdfVM.RenderImage.Execute(Tuple.Create(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100));
             vm.DownloadOrUpdate.Execute(null);
 
-            await Task.Delay(2000);
+            await TestUtils.SpinWait(() => lastImage != null, 2000);
             Assert.AreEqual(0, loaderCalled);
             Assert.IsNotNull(lastImage);
         }
