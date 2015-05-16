@@ -7,6 +7,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.ViewModels
@@ -20,6 +21,7 @@ namespace Test_MRUDatabase.ViewModels
             // Turn off auto-download to make sure that we control when a download occurs
             // for various tests.
             Settings.AutoDownloadNewMeeting = false;
+            FileDownloadController.Reset();
         }
 
         [TestMethod]
@@ -56,54 +58,51 @@ namespace Test_MRUDatabase.ViewModels
         [TestMethod]
         public async Task IsDownloadingSetDuringDownload()
         {
-            await new TestScheduler().WithAsync(async sched =>
+            // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
+            var f = new dummyFile();
+
+            var getStreamSubject = new Subject<StreamReader>();
+
+            f.GetStream = () =>
             {
-                // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
-                var f = new dummyFile();
+                return getStreamSubject;
+            };
 
-                f.GetStream = () =>
-                {
-                    var data = new byte[] { 0, 1, 2, 3 };
-                    var mr = new MemoryStream(data);
-                    return Observable.Return(new StreamReader(mr)).WriteLine("created stream reader").Delay(TimeSpan.FromMilliseconds(100), sched).WriteLine("done with delay for stream reader");
-                };
+            var dc = new dummyCache();
+            var fucVM = new FileUserControlViewModel(f, dc);
 
-                var dc = new dummyCache();
-                var fucVM = new FileUserControlViewModel(f, dc);
+            // Simulate the subscriptions
+            var t = fucVM.IsDownloading;
+            var fc = fucVM.FileNotCachedOrDownloading;
 
-                // Simulate the subscriptions
-                var t = fucVM.IsDownloading;
-                var fc = fucVM.FileNotCachedOrDownloading;
+            fucVM.OnLoaded.Execute(null);
 
-                fucVM.OnLoaded.Execute(null);
+            // Nothing downloaded, nothing in cache.
+            Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
+            Assert.IsFalse(fucVM.IsDownloading);
 
-                // Nothign downloaded, nothing in cache.
-                Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
-                Assert.IsFalse(fucVM.IsDownloading);
+            // Trigger the download
+            Debug.WriteLine("Triggering the download");
+            fucVM.ClickedUs.Execute(null);
 
-                // Trigger the download
-                fucVM.ClickedUs.Execute(null);
+            // Nothing downloaded, nothing in cache.
+            Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
+            Assert.IsTrue(fucVM.IsDownloading);
 
-                // Nothign downloaded, nothing in cache.
-                sched.AdvanceByMs(50);
-                Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
-                Assert.IsTrue(fucVM.IsDownloading);
+            // After it should have been downloaded, check again.
+            await Task.Delay(20);
+            Debug.WriteLine("Sending the data");
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            getStreamSubject.OnNext(new StreamReader(mr));
+            getStreamSubject.OnCompleted();
 
-                // After it should have been downloaded, check again.
-                sched.AdvanceByMs(501);
+            // Give a chance for anything queued up to run by advancing the scheduler.
+            await TestUtils.SpinWait(() => fucVM.IsDownloading == false, 1000);
 
-                // We have to wait 200 ms or the item isn't inserted into the cache.
-                // It is amazing that we have to wait this long.
-                await Task.Delay(200);
-
-                // Give a chance for anything queued up to run by advancing the scheduler.
-                sched.AdvanceByMs(1);
-                await TestUtils.SpinWait(() => fucVM.IsDownloading == false, 1000);
-
-                // And do an final check.
-                Assert.IsFalse(fucVM.IsDownloading);
-                Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
-            });
+            // And do an final check.
+            Assert.IsFalse(fucVM.IsDownloading);
+            Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
         }
 
         [TestMethod]
@@ -132,7 +131,7 @@ namespace Test_MRUDatabase.ViewModels
 
                 fucVM.OnLoaded.Execute(null);
 
-                // Nothign downloaded, nothing in cache.
+                // Nothing downloaded, nothing in cache.
                 sched.AdvanceByMs(50);
                 Assert.IsTrue(fucVM.FileNotCachedOrDownloading);
                 Assert.IsTrue(fucVM.IsDownloading);
