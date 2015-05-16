@@ -27,20 +27,20 @@ namespace IWalker.Util
         }
 
         /// <summary>
-        /// Limit the # of items that move through the second sequence. This limits only in a subscrpition, not globally!
+        /// Limit the # of items that move through the second sequence. This limits only in a subscription, not globally!
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <param name="source"></param>
         /// <param name="maxCount"></param>
         /// <returns></returns>
         /// <remarks>
-        /// Coppied from here:
+        /// Copied from here:
         ///     https://social.msdn.microsoft.com/Forums/en-US/379a027d-4a06-4abd-9255-d54c3807b50c/parallel-processing-of-incoming-events-observablesemaphoreobserveparallel-?forum=rx
         ///     There are significant modifications because this was a very old method!
         /// </remarks>
         public static IObservable<T> Semaphore<T>(IObservable<T> source, int maxCount, IScheduler sched = null)
         {
-            // By default use the thread pool (so this will be defered, and can do multiple guys, which is what we want).
+            // By default use the thread pool (so this will be deferred, and can do multiple guys, which is what we want).
             sched = sched ?? Scheduler.Default;
 
             return Observable.Create<T>(o =>
@@ -108,7 +108,7 @@ namespace IWalker.Util
             public LimitGlobalCounter(int maxCount)
             {
                 if (maxCount <= 0)
-                    throw new ArgumentException("Count must be ge to zero");
+                    throw new ArgumentException("Count must be greater or equal to zero");
 
                 _limiter = new SemaphoreSlim(maxCount);
             }
@@ -128,10 +128,15 @@ namespace IWalker.Util
             {
                 _limiter.Release();
             }
+
+            public int CurrentCount
+            {
+                get { return _limiter.CurrentCount; }
+            }
         }
 
         /// <summary>
-        /// Limit the number of simultaniously executing "limitedSequences" to maxCount.
+        /// Limit the number of simultaneously executing "limitedSequences" to maxCount.
         /// </summary>
         /// <typeparam name="T"></typeparam>
         /// <typeparam name="U"></typeparam>
@@ -197,7 +202,7 @@ namespace IWalker.Util
                                         {
                                             // Did an error happen, or a completion happen before the source completed?
                                             // Ignore the completion - that is "normal".
-                                            if (result.Kind == NotificationKind.OnError && limitSequenceError != null)
+                                            if (result.Kind == NotificationKind.OnError && limitSequenceError == null)
                                             {
                                                 limitSequenceError = result;
                                             }
@@ -241,6 +246,7 @@ namespace IWalker.Util
                                     // The sequence has terminated "normally".
                                     Debug.Assert(sourceSequenceEndCondition == null);
                                     sourceSequenceEndCondition = notification;
+                                    limitter.Release();
                                     if (Interlocked.Decrement(ref pendingAccepts) == 0)
                                     {
                                         lock (queue)

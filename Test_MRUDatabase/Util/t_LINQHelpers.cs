@@ -6,12 +6,13 @@ using System;
 using System.Collections.Generic;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Reactive;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.Util
 {
     /// <summary>
-    /// Tests for some of the linq helpers we have
+    /// Tests for some of the LINQ helpers we have
     /// </summary>
     [TestClass]
     public class t_LINQHelpers
@@ -114,7 +115,7 @@ namespace Test_MRUDatabase.Util
                 // All these await's Task.Delay are to make sure that there is enough time for the multi-threaded
                 // stuff to run. The semaphore that is being used just doesn't work on the test scheduler.
 
-                Debug.WriteLine("Doign a delay of 1");
+                Debug.WriteLine("Doing a delay of 1");
                 shed.AdvanceByMs(1);
                 await Task.Delay(10);
                 Debug.WriteLine("Starting first 50");
@@ -169,6 +170,45 @@ namespace Test_MRUDatabase.Util
                 Assert.IsTrue(results.Contains(5));
                 Assert.IsTrue(results.Contains(10));
             });
+        }
+
+        [TestMethod]
+        public async Task LimitWithException()
+        {
+            // Make sure an exception inside is propagated outside.
+            try
+            {
+                var seq = Observable.Return(Observable.Return(10))
+                    .LimitGlobally(s => s.SelectMany(v => Observable.Throw<int>(new InvalidOperationException())), 1)
+                    .FirstAsync();
+
+                var r = await seq;
+            }
+            catch (InvalidOperationException e)
+            {
+                return;
+            }
+        }
+
+        [TestMethod]
+        public async Task LimitWithExceptionResetsCount()
+        {
+            // Make sure an exception inside is propagated outside.
+            var sl = new LINQHelpers.LimitGlobalCounter(1);
+            try
+            {
+                var seq = Observable.Return(Observable.Return(10))
+                    .LimitGlobally(s => s.SelectMany(v => Observable.Throw<int>(new InvalidOperationException())), sl)
+                    .FirstAsync();
+
+                var r = await seq;
+            }
+            catch (InvalidOperationException e)
+            {
+            }
+
+            Assert.AreEqual(1, sl.CurrentCount);
+
         }
     }
 }
