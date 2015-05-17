@@ -6,6 +6,7 @@ using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
+using System.Threading.Tasks;
 
 namespace IWalker.ViewModels
 {
@@ -108,21 +109,24 @@ namespace IWalker.ViewModels
         /// <param name="n"></param>
         /// <param name="file"></param>
         /// <returns></returns>
-        private void SetNPages(int n, PDFFile file)
+        private async Task SetNPages(int n, PDFFile file)
         {
-            if (Pages.Count == 0)
+            // First, generate enough pages for adding.
+            if (Pages.Count < n)
             {
-                Pages.AddRange(Enumerable.Range(0, n).Select(i => new PDFPageViewModel(file.GetPageStreamAndCacheInfo(i))));
+                var newPages = Enumerable.Range(Pages.Count, n - Pages.Count).Select(i => new PDFPageViewModel(file.GetPageStreamAndCacheInfo(i))).ToArray();
+                var sequenceOfPages = newPages.Select(p => p.LoadSize());
+                foreach (var seq in sequenceOfPages)
+                {
+                    var r = await seq.ToArray();
+                }
+                Pages.AddRange(newPages);
             }
             else
             {
                 while (Pages.Count > n)
                 {
                     Pages.RemoveAt(Pages.Count - 1);
-                }
-                while (Pages.Count < n)
-                {
-                    Pages.Add(new PDFPageViewModel(file.GetPageStreamAndCacheInfo(Pages.Count)));
                 }
             }
             _numberPages = (uint)n;

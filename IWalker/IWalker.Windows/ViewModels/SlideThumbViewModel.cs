@@ -1,5 +1,6 @@
 ﻿using ReactiveUI;
 using System;
+using System.Reactive;
 using Windows.Data.Pdf;
 
 namespace IWalker.ViewModels
@@ -39,6 +40,16 @@ namespace IWalker.ViewModels
             OpenFullView = ReactiveCommand.Create();
             OpenFullView
                 .Subscribe(_ => fullVM.Value.LoadPage(pageNumber));
+        }
+
+        /// <summary>
+        /// Cause the PDF Page size to get loaded - should be done before we
+        /// show ourselves!
+        /// </summary>
+        /// <returns></returns>
+        internal IObservable<Unit> LoadSize()
+        {
+            return PDFPageVM.LoadSize();
         }
     }
 }

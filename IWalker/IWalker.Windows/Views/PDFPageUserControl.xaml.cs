@@ -4,6 +4,7 @@ using System;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
+using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using Windows.UI.Xaml.Media.Imaging;
@@ -84,6 +85,29 @@ namespace IWalker.Views
         // Using a DependencyProperty as the backing store for RespectRenderingDimension.  This enables animation, styling, binding, etc...
         public static readonly DependencyProperty RespectRenderingDimensionProperty =
             DependencyProperty.Register("RespectRenderingDimension", typeof(PDFPageViewModel.RenderingDimension), typeof(PDFPageUserControl), new PropertyMetadata(PDFPageViewModel.RenderingDimension.Horizontal));
+
+        /// <summary>
+        /// Return the size so the layout system can calculate the proper
+        /// size for this.
+        /// </summary>
+        /// <param name="availableSize"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// The VM's LoadSize must have been called before this guy gets called, or this call will
+        /// cause a crash!!
+        /// </remarks>
+        protected override Size MeasureOverride(Size availableSize)
+        {
+            if (ViewModel != null)
+            {
+                var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
+                return new Size(requestedSize.Item1, requestedSize.Item2);
+            }
+            else
+            {
+                return base.MeasureOverride(availableSize);
+            }
+        }
 
         /// <summary>
         /// Hold onto the view model, which we will need for doing all sorts of things.

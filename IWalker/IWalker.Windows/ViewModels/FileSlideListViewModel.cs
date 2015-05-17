@@ -7,6 +7,7 @@ using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 namespace IWalker.ViewModels
 {
     /// <summary>
@@ -82,12 +83,17 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="n"></param>
         /// <param name="pdfFile"></param>
-        private void SetNumberOfThumbNails(int n, PDFFile pdfFile, Lazy<FullTalkAsStripViewModel> fullVM)
+        private async Task SetNumberOfThumbNails(int n, PDFFile pdfFile, Lazy<FullTalkAsStripViewModel> fullVM)
         {
-            // Optimize if we are chaning from no slides to many slides.
-            if (SlideThumbnails.Count == 0)
+            // If we are adding slides, make sure they are "setup" before showing them.
+            if (SlideThumbnails.Count < n)
             {
-                SlideThumbnails.AddRange(Enumerable.Range(0, n).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), fullVM, i)));
+                var newSlides = Enumerable.Range(SlideThumbnails.Count, n - SlideThumbnails.Count).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), fullVM, i));
+                foreach (var sld in newSlides)
+                {
+                    await sld.LoadSize();
+                }
+                SlideThumbnails.AddRange(newSlides);
             }
             else
             {
@@ -95,10 +101,7 @@ namespace IWalker.ViewModels
                 {
                     SlideThumbnails.RemoveAt(SlideThumbnails.Count - 1);
                 }
-                while (SlideThumbnails.Count < n)
-                {
-                    SlideThumbnails.Add(new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(SlideThumbnails.Count), null, SlideThumbnails.Count));
-                }
+
             }
         }
     }
