@@ -11,7 +11,7 @@ using Windows.UI.Xaml.Controls;
 namespace IWalker.Views
 {
     /// <summary>
-    /// View for a PDF talk as a full list of slides (full screen) with keys and other things to navagate around.
+    /// View for a PDF talk as a full list of slides (full screen) with keys and other things to navigate around.
     /// </summary>
     public sealed partial class FullTalkAsStripView : Page, IViewFor<FullTalkAsStripViewModel>
     {
