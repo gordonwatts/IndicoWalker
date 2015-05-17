@@ -9,6 +9,7 @@ using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.ViewModels
@@ -138,39 +139,48 @@ namespace Test_MRUDatabase.ViewModels
         [TestMethod]
         public async Task IsDownloadingFlipsCorrectly()
         {
-            await new TestScheduler().WithAsync(async sched =>
+            // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
+            var f = new dummyFile();
+
+            var newSR = new Subject<StreamReader>();
+
+            f.GetStream = () =>
             {
-                // http://stackoverflow.com/questions/21588945/structuring-tests-or-property-for-this-reactive-ui-scenario
-                var f = new dummyFile();
+                return newSR;
+            };
 
-                f.GetStream = () =>
-                {
-                    var data = new byte[] { 0, 1, 2, 3 };
-                    var mr = new MemoryStream(data);
-                    return Observable.Return(new StreamReader(mr)).WriteLine("created stream reader").Delay(TimeSpan.FromMilliseconds(100), sched).WriteLine("done with delay for stream reader");
-                };
+            var dc = new dummyCache();
+            var vm = new FileDownloadController(f, dc);
+            var dummy = vm.IsDownloaded;
+            var dummy1 = vm.IsDownloading;
 
-                var dc = new dummyCache();
-                var vm = new FileDownloadController(f, dc);
-                var dummy = vm.IsDownloaded;
-                var dummy1 = vm.IsDownloading;
+            Assert.IsFalse(vm.IsDownloading);
+            Assert.IsFalse(vm.IsDownloaded);
 
-                Assert.IsFalse(vm.IsDownloading);
-                vm.DownloadOrUpdate.Execute(null);
+            // Fire off the download
+            Debug.WriteLine("Starting download/update");
+            vm.DownloadOrUpdate.Execute(null);
 
-                // Since the download is synchronous, it should get here just fine.
-                sched.AdvanceByMs(10);
-                Assert.IsTrue(vm.IsDownloading);
-                Assert.IsFalse(vm.IsDownloaded);
+            // Since the download is synchronous, it should get here just fine.
+            await TestUtils.SpinWait(() => vm.IsDownloading == true, 1000);
+            await TestUtils.SpinWait(() => vm.IsDownloaded == false, 1000);
+            Assert.IsTrue(vm.IsDownloading);
+            Assert.IsFalse(vm.IsDownloaded);
 
-                // And run past the end
-                sched.AdvanceByMs(200);
+            Debug.WriteLine("Going to wait a bit here");
+            await Task.Delay(1000);
+            // And now stuff the data in.
+            Debug.WriteLine("Going to send the data one");
+            var data = new byte[] { 0, 1, 2, 3 };
+            var mr = new MemoryStream(data);
+            newSR.OnNext(new StreamReader(mr));
+            newSR.OnCompleted();
+            Debug.WriteLine("Done sending the data along");
 
-                //TODO: Not clear why this is required (the delay), but it is!
-                await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
-                Assert.IsTrue(vm.IsDownloaded);
-                Assert.IsFalse(vm.IsDownloading);
-            });
+            // And make sure it finishes.
+            await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
+            Assert.IsTrue(vm.IsDownloaded);
+            Assert.IsFalse(vm.IsDownloading);
         }
 
         [TestMethod]
