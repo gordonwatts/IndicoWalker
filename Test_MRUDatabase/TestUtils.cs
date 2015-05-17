@@ -47,9 +47,10 @@ namespace Test_MRUDatabase
         /// Sit and spin until ready
         /// </summary>
         /// <param name="test"></param>
-        /// <param name="maxMiliseconds"></param>
+        /// <param name="maxMiliseconds">Up to how long should we wait? Throw assertion failure if we don't satisfy the test</param>
+        /// <param name="extraTimeToWait">How much time to wait after we see the change in case there is another change coming</param>
         /// <returns></returns>
-        public static async Task SpinWait(Func<bool> test, int maxMiliseconds)
+        public static async Task SpinWait(Func<bool> test, int maxMiliseconds, int extraTimeToWait = 0)
         {
             int waited = 0;
             while (!test() && waited < maxMiliseconds)

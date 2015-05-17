@@ -8,6 +8,7 @@ using System.Diagnostics;
 using System.Reactive.Linq;
 using System.Reactive;
 using System.Threading.Tasks;
+using System.Reactive.Subjects;
 
 namespace Test_MRUDatabase.Util
 {
@@ -95,48 +96,50 @@ namespace Test_MRUDatabase.Util
         [TestMethod]
         public async Task Limit2SequenceToOne()
         {
-            await new TestScheduler().WithAsync(async shed =>
-            {
-                var source = Observable.Concat(Observable.Return(5), Observable.Return(10));
+            var source = Observable.Range(1, 10);
 
-                var sequence = source.LimitGlobally(s => s.WriteLine("Starting delay").Delay(TimeSpan.FromMilliseconds(100), shed).WriteLine("Done with delay"), 1);
-                var results = new List<int>();
+            var processed = 0;
+            var maxInFlight = 0;
+            var inFlight = 0;
 
-                sequence.Subscribe(v =>
+            var sequence = source.LimitGlobally(s => 
+                s
+                .Do(_ =>
                 {
-                    lock (results)
+                    lock (source)
                     {
-                        results.Add(v);
+                        processed++;
+                        inFlight++;
+                        maxInFlight = Math.Max(inFlight, maxInFlight);
                     }
-                });
+                })
+                .WriteLine("Starting an item")
+                .Do(_ => 
+                {
+                    lock(source)
+                    {
+                        inFlight--;
+                    }
+                })
+                , 1
+                );
 
-                Assert.AreEqual(0, results.Count);
-
-                // All these await's Task.Delay are to make sure that there is enough time for the multi-threaded
-                // stuff to run. The semaphore that is being used just doesn't work on the test scheduler.
-
-                Debug.WriteLine("Doing a delay of 1");
-                shed.AdvanceByMs(1);
-                await Task.Delay(10);
-                Debug.WriteLine("Starting first 50");
-                shed.AdvanceByMs(50);
-                await Task.Delay(10);
-                Assert.AreEqual(0, results.Count);
-                Debug.WriteLine("Starting second 51");
-                shed.AdvanceByMs(51);
-                await Task.Delay(10);
-                Debug.WriteLine("Doing the spin wait");
-                await TestUtils.SpinWait(() => results.Count != 0, 1000);
-                await Task.Delay(10);
-                Assert.AreEqual(1, results.Count);
-                Assert.IsTrue(results.Contains(5));
-                shed.AdvanceByMs(100);
-                await Task.Delay(10);
-                await TestUtils.SpinWait(() => results.Count != 1, 1000);
-                Assert.AreEqual(2, results.Count);
-                Assert.IsTrue(results.Contains(10));
-
+            // Stash the results.
+            var results = new List<int>();
+            sequence.Subscribe(v =>
+            {
+                lock (results)
+                {
+                    results.Add(v);
+                }
             });
+
+            // Wait until all the results have gone through.
+            await TestUtils.SpinWait(() => results.Count == 10, 1000);
+
+            Assert.AreEqual(10, processed);
+            Assert.AreEqual(0, inFlight);
+            Assert.AreEqual(1, maxInFlight);
         }
 
         [TestMethod]
