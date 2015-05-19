@@ -1,12 +1,14 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
+using System.Diagnostics;
 using System.IO;
 using System.Reactive;
 using System.Reactive.Linq;
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
+using IWalker.Util;
 using Windows.UI.Xaml.Media.Imaging;
 
 namespace IWalker.Views
@@ -86,6 +88,8 @@ namespace IWalker.Views
         public static readonly DependencyProperty RespectRenderingDimensionProperty =
             DependencyProperty.Register("RespectRenderingDimension", typeof(PDFPageViewModel.RenderingDimension), typeof(PDFPageUserControl), new PropertyMetadata(PDFPageViewModel.RenderingDimension.Horizontal));
 
+        private static Tuple<int,int> _sizeCache;
+
         /// <summary>
         /// Return the size so the layout system can calculate the proper
         /// size for this.
@@ -100,13 +104,14 @@ namespace IWalker.Views
         {
             if (ViewModel != null)
             {
-                var requestedSize = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
-                return new Size(requestedSize.Item1, requestedSize.Item2);
+                _sizeCache = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
             }
             else
             {
-                return base.MeasureOverride(availableSize);
+                if (_sizeCache == null)
+                    return base.MeasureOverride(availableSize);
             }
+            return new Size(_sizeCache.Item1, _sizeCache.Item2);
         }
 
         /// <summary>
