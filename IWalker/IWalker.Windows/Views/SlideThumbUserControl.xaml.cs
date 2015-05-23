@@ -22,7 +22,7 @@ namespace IWalker.Views
             {
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel));
 
-                // If they mousedown or tap and release in this image, then we want to open
+                // If they mouse down or tap and release in this image, then we want to open
                 // the full screen display starting from this image.
                 var pressed = PDFPageUC.Events().PointerPressed;
                 var released = PDFPageUC.Events().PointerReleased;
