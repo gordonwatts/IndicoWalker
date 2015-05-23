@@ -20,6 +20,8 @@ namespace IWalker.Views
     /// <remarks>
     public sealed partial class PDFPageUserControl : UserControl, IViewFor<PDFPageViewModel>
     {
+        private PDFPageViewModel _pageVMCache;
+
         public PDFPageUserControl()
         {
             this.InitializeComponent();
@@ -33,9 +35,12 @@ namespace IWalker.Views
             gd.Add(this.WhenAny(x => x.ViewModel.ImageStream, x => x.Value)
                 .Subscribe(imageStreams => imageStreams
                     .ObserveOn(RxApp.MainThreadScheduler)
-                    .SelectMany(ConvertToBMI)
+                    .Where(_ => ViewModel != null)
+                    .Do(_ => _pageVMCache = ViewModel)
+                    .SelectMany(stream => ConvertToBMI(stream, _pageVMCache))
                     .ObserveOn(RxApp.MainThreadScheduler)
-                    .Subscribe(image => ThumbImage.Source = image)));
+                    .Where(t => t.Item2 == _pageVMCache)
+                    .Subscribe(image => ThumbImage.Source = image.Item1)));
 
             // The following things should cause a re-rendering:
             // 1) The size of the control changes
@@ -71,13 +76,13 @@ namespace IWalker.Views
         /// </summary>
         /// <param name="imageStream"></param>
         /// <returns></returns>
-        private async Task<BitmapImage> ConvertToBMI (MemoryStream imageStream)
+        private async Task<Tuple<BitmapImage, PDFPageViewModel>> ConvertToBMI (MemoryStream imageStream, PDFPageViewModel vm)
         {
             imageStream.Seek(0, SeekOrigin.Begin);
             var bm = new BitmapImage();
             await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
             imageStream.Dispose();
-            return bm;
+            return Tuple.Create(bm, vm);
         }
 
         /// <summary>
