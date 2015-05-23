@@ -10,6 +10,7 @@ using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 using IWalker.Util;
 using Windows.UI.Xaml.Media.Imaging;
+using System.Threading.Tasks;
 
 namespace IWalker.Views
 {
@@ -25,18 +26,14 @@ namespace IWalker.Views
 
             var gd = new System.Reactive.Disposables.CompositeDisposable();
 
-            // The image source
+            // Tie together the image source.
+            // There are two ObserveOn's below, both are required:
+            //   - BItmapImage must be dealt with on the main thread
+            //   - Despite that, when it comes back from loading the image, it may not be on the default thread!
             gd.Add(this.WhenAny(x => x.ViewModel.ImageStream, x => x.Value)
                 .Subscribe(imageStreams => imageStreams
                     .ObserveOn(RxApp.MainThreadScheduler)
-                    .SelectMany(async imageStream =>
-                    {
-                        imageStream.Seek(0, SeekOrigin.Begin);
-                        var bm = new BitmapImage();
-                        await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
-                        imageStream.Dispose();
-                        return bm;
-                    })
+                    .SelectMany(ConvertToBMI)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(image => ThumbImage.Source = image)));
 
@@ -65,6 +62,22 @@ namespace IWalker.Views
                 }
                 gd = null;
             });
+        }
+
+        /// <summary>
+        /// Convert a stream to an image, and dispose of the stream.
+        /// This must be called on the UI thread!
+        /// When the async is done, it may not do the callback on the UI thread!
+        /// </summary>
+        /// <param name="imageStream"></param>
+        /// <returns></returns>
+        private async Task<BitmapImage> ConvertToBMI (MemoryStream imageStream)
+        {
+            imageStream.Seek(0, SeekOrigin.Begin);
+            var bm = new BitmapImage();
+            await bm.SetSourceAsync(WindowsRuntimeStreamExtensions.AsRandomAccessStream(imageStream));
+            imageStream.Dispose();
+            return bm;
         }
 
         /// <summary>
