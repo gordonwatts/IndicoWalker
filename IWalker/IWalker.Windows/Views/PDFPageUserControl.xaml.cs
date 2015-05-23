@@ -41,8 +41,13 @@ namespace IWalker.Views
                         .ObserveOn(RxApp.MainThreadScheduler)
                         .Subscribe(image => ThumbImage.Source = image)));
 
-                // Now, when something about our size and rendering stuff changes, we need
-                // to shoot off a rendering request. Don't do it if we have already requested it, however!
+                // The following things should cause a re-rendering:
+                // 1) The size of the control changes
+                // 2) ShowPDF changes
+                // 3) The VM we are connected to changes
+                //    This can happen when the rendering system recycles this View from a cache in an attempt to keep memory
+                //    usage low.
+
                 disposeOfMe(this.Events().SizeChanged.Select(a => default(Unit))
                     .Merge(this.WhenAny(x => x.ShowPDF, x => default(Unit)))
                     .Buffer(TimeSpan.FromMilliseconds(250)).Where(l => l != null && l.Count > 0).Select(l => default(Unit))
@@ -52,6 +57,7 @@ namespace IWalker.Views
                     .Select(_ => RespectRenderingDimension)
                     .Select(t => Tuple.Create(t, ActualWidth, ActualHeight))
                     .DistinctUntilChanged()
+                    .CombineLatest(this.WhenAny(x => x.ViewModel, x => x.Value).Where(x => x != null), (t, vm) => t)
                     .ObserveOn(RxApp.MainThreadScheduler)
                     .Subscribe(t => ViewModel.RenderImage.Execute(t)));
             });
