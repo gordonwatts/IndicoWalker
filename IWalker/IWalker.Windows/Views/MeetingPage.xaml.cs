@@ -36,7 +36,7 @@ namespace IWalker.Views
             gc.Add(this.OneWayBind(ViewModel, x => x.MeetingIsEmpty, y => y.NothingFound.Visibility));
 
             // Start the data population. Do it here to make sure that everything else has already been setup.
-            gc.Add(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).Subscribe(vm => vm.UpdateData.Execute(null)));
+            gc.Add(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).DistinctUntilChanged().Subscribe(vm => vm.UpdateData.Execute(null)));
 
             // And get rid of it when it is time.
             this.WhenActivated(disposeOfMe =>
