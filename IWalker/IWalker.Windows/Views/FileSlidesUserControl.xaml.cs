@@ -1,5 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -15,9 +16,17 @@ namespace IWalker.Views
         public FileSlidesUserControl()
         {
             this.InitializeComponent();
+
+            var gc = new CompositeDisposable();
+            gc.Add(this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
         }
 
