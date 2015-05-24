@@ -2,6 +2,7 @@
 using ReactiveUI;
 using System;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -18,18 +19,27 @@ namespace IWalker.Views
         public SlideThumbUserControl()
         {
             this.InitializeComponent();
+
+            var gc = new CompositeDisposable();
+
+            gc.Add(this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel));
+
+            // If they mouse down or tap and release in this image, then we want to open
+            // the full screen display starting from this image.
+            var pressed = PDFPageUC.Events().PointerPressed;
+            var released = PDFPageUC.Events().PointerReleased;
+            var when = from pd in pressed
+                       from pu in released
+                       select Unit.Default;
+            gc.Add(when.Subscribe(e => ViewModel.OpenFullView.Execute(null)));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.PDFPageVM, y => y.PDFPageUC.ViewModel));
-
-                // If they mouse down or tap and release in this image, then we want to open
-                // the full screen display starting from this image.
-                var pressed = PDFPageUC.Events().PointerPressed;
-                var released = PDFPageUC.Events().PointerReleased;
-                var when = from pd in pressed
-                           from pu in released
-                           select Unit.Default;
-                disposeOfMe(when.Subscribe(e => ViewModel.OpenFullView.Execute(null)));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
 
         }

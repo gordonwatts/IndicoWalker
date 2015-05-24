@@ -1,5 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
+using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
@@ -13,15 +16,25 @@ namespace IWalker.Views
         public FileView()
         {
             this.InitializeComponent();
+
+            var gc = new CompositeDisposable();
+
+            gc.Add(this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick));
+            gc.Add(this.OneWayBind(ViewModel, x => x.FileNotCachedOrDownloading, y => y.DownloadIcon.Visibility));
+            gc.Add(this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive));
+            gc.Add(this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text));
+
+            gc.Add(this.WhenAny(x => x.ViewModel, x => x.Value)
+                .Where(vm => vm != null)
+                .Subscribe(vm => vm.OnLoaded.Execute(null)));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.BindCommand(ViewModel, x => x.ClickedUs, y => y.FileClick));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.FileNotCachedOrDownloading, y => y.DownloadIcon.Visibility));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.IsDownloading, y => y.DownloadProgress.IsActive));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.DocumentTypeString, y => y.DocumentType.Text));
-                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
-                    .Where(vm => vm != null)
-                    .InvokeCommand(ViewModel.OnLoaded));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
         }
 
