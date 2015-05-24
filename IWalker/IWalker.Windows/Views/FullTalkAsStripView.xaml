@@ -88,7 +88,12 @@
                 <StaticResource ResourceKey="BrillianBackButton"/>
             </Button.Style>
         </Button>
-        <ListView x:Name="SlideStrip" ScrollViewer.HorizontalScrollMode="Auto" ScrollViewer.HorizontalScrollBarVisibility="Auto" ScrollViewer.VerticalScrollBarVisibility="Disabled">
+        <ListView x:Name="SlideStrip"
+                  SelectionMode="None"
+                  ScrollViewer.HorizontalScrollMode="Auto"
+                  ScrollViewer.HorizontalScrollBarVisibility="Auto"
+                  ScrollViewer.VerticalScrollBarVisibility="Disabled"
+				  ItemContainerStyle="{StaticResource PlainOldList}">
             <ListView.ItemsPanel>
                 <ItemsPanelTemplate>
                     <ItemsStackPanel Orientation="Horizontal"/>
