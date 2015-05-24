@@ -22,7 +22,7 @@ namespace IWalker.Views
             {
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
 
-                // If the ESC key or backbutton is hit, we want to navigate back.
+                // If the ESC key or back-button is hit, we want to navigate back.
                 var keyrelease = SlideStrip.Events().KeyDown
                     .Where(keys => ViewModel != null);
 
