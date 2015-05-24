@@ -3,6 +3,7 @@ using IWalker.ViewModels;
 using ReactiveUI;
 using Splat;
 using System;
+using System.Diagnostics;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -32,6 +33,47 @@ namespace IWalker.Views
                     .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
 
                 backButton.WireAsBackButton();
+
+#if false
+                // When the VM asks us to move...
+                // And when we get asked to bring a page into view...
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .CombineLatest(SlideStrip.Events().Loaded, (vm, loaded) => vm)
+                    .Where(x => x != null)
+                    .SelectMany(vm => vm.MoveToPage)
+                    .Delay(TimeSpan.FromMilliseconds(500))
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Where(p => SlideStrip.Items.Count >= p)
+                    .Subscribe(p => SlideStrip.ScrollIntoView(SlideStrip.Items[p])));
+
+                // Forward and backwards arrows.
+                // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
+                // get a scroll to the item we want. So we need to aggregate those while running.
+                _currentPage = 0;
+
+                // When the VM asks us to move...
+                // And when we get asked to bring a page into view...
+                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
+                    .CombineLatest(SlideStrip.Events().Loaded, (vm, loaded) => vm)
+                    .Where(x => x != null)
+                    .SelectMany(vm => vm.MoveToPage)
+                    .Do(p => _currentPage = p)
+                    .ObserveOn(RxApp.MainThreadScheduler)
+                    .Where(p => SlideStrip.Items.Count >= p)
+                    .Subscribe(p => Debug.WriteLine("Looking at page {0}", p)));
+                    //.Subscribe(p => SlideStrip.ScrollIntoView(SlideStrip.Items[p])));
+
+                var keysByScrolling = keyrelease
+                        .Select(k => Tuple.Create(k, calcKeyMoveRequest(k)))
+                        .Where(k => k.Item2 != 0)
+                        .Do(k => k.Item1.Handled = true)
+                        .Select(k => k.Item2);
+
+                disposeOfMe(keysByScrolling
+                    .Select(delta => _currentPage + delta)
+                    .InvokeCommand(ViewModel, x => x.PageMove));
+
+#endif
 #if false
                 // Forward and backwards arrows.
                 // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
@@ -127,17 +169,16 @@ namespace IWalker.Views
                 this.Events().Unloaded
                     .Subscribe(t => _holder.Unload());
 
-                // The orientation of this pannel will affect how we calc the arrow key stuff.
+                // The orientation of this panel will affect how we calc the arrow key stuff.
                 _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
 #endif
                 // We want to capture key strokes, etc. By default we don't have
                 // the focus, so grab it.
-                Focus(Windows.UI.Xaml.FocusState.Programmatic);
+                SlideStrip.Focus(Windows.UI.Xaml.FocusState.Programmatic);
 
             });
         }
 
-#if false
         /// <summary>
         /// Turn the keystrokes into a page movement
         /// </summary>
@@ -151,6 +192,7 @@ namespace IWalker.Views
                 return -1;
             return 0;
         }
+#if false
 
         /// <summary>
         /// Keep track of how we are going to do the scrolling.
@@ -223,7 +265,7 @@ namespace IWalker.Views
         }
 
         /// <summary>
-        /// What orientation is this pannel?
+        /// What orientation is this panel?
         /// </summary>
         public enum FullPanelOrientation
         {
@@ -241,6 +283,7 @@ namespace IWalker.Views
         }
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register("ViewModel", typeof(FullTalkAsStripViewModel), typeof(FullTalkAsStripView), new PropertyMetadata(null));
+        private int _currentPage;
 
         object IViewFor.ViewModel
         {
