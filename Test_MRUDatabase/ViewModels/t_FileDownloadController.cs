@@ -111,6 +111,7 @@ namespace Test_MRUDatabase.ViewModels
             await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
 
             Assert.IsTrue(vm.IsDownloaded);
+            await TestUtils.SpinWait(() => downloadUpdateCount == 1, 1000);
             Assert.AreEqual(1, downloadUpdateCount);
         }
 
