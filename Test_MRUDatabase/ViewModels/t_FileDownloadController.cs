@@ -100,7 +100,7 @@ namespace Test_MRUDatabase.ViewModels
             f.GetStream = () => Observable.Return(new StreamReader(mr));
 
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now, new byte[] { 0, 1, 2 }));
+            await dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now, new byte[] { 0, 1, 2 }));
             var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 

@@ -283,7 +283,6 @@ namespace IWalker.Views
         }
         public static readonly DependencyProperty ViewModelProperty =
             DependencyProperty.Register("ViewModel", typeof(FullTalkAsStripViewModel), typeof(FullTalkAsStripView), new PropertyMetadata(null));
-        private int _currentPage;
 
         object IViewFor.ViewModel
         {

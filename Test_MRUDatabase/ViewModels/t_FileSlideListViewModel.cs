@@ -101,7 +101,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public async Task TestFileNoAutoNoCache()
+        public void TestFileNoAutoNoCache()
         {
             // First, we need to get the file into the cache. Use the infrastructure to do that.
 
@@ -170,7 +170,7 @@ namespace Test_MRUDatabase.ViewModels
             }
 
             // And now wait for everything.
-            Task.WaitAll(allImages);
+            await Task.WhenAll(allImages);
             Assert.IsTrue(allImages.Select(item => item.Result).All(itm => itm != null));
         }
 

@@ -181,7 +181,7 @@ namespace Test_MRUDatabase.Util
 
                 var r = await seq;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
                 return;
             }
@@ -200,7 +200,7 @@ namespace Test_MRUDatabase.Util
 
                 var r = await seq;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
             }
 
@@ -222,7 +222,7 @@ namespace Test_MRUDatabase.Util
 
                 var r = await seq;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
             }
 
@@ -245,7 +245,7 @@ namespace Test_MRUDatabase.Util
 
                 var r = await seq;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
             }
 
@@ -267,7 +267,7 @@ namespace Test_MRUDatabase.Util
 
                 var r = await seq;
             }
-            catch (InvalidOperationException e)
+            catch (InvalidOperationException)
             {
             }
 

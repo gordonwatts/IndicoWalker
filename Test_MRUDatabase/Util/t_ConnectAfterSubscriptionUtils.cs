@@ -3,6 +3,7 @@ using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.Diagnostics;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 
 namespace Test_MRUDatabase.Util
 {
@@ -48,15 +49,15 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
-        public void MakeSureSubscribeOnce()
+        public async Task MakeSureSubscribeOnce()
         {
             int count = 0;
             var obs = Observable.Return(10)
                 .WriteLine("In the replay part")
                 .Do(_ => count++)
                 .Replay(1).ConnectAfterSubscription();
-            var v1 = obs.First();
-            var v2 = obs.First();
+            var v1 = await obs.FirstAsync();
+            var v2 = await obs.FirstAsync();
 
             Assert.AreEqual(10, v1);
             Assert.AreEqual(10, v2);
@@ -64,7 +65,7 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
-        public void MakeSureSubscribeOnceGC()
+        public async Task MakeSureSubscribeOnceGC()
         {
             int count = 0;
             var obs = Observable.Return(10)
@@ -72,9 +73,9 @@ namespace Test_MRUDatabase.Util
                 .Do(_ => count++)
                 .Replay(1).ConnectAfterSubscription()
                 .WriteLine("After the replay");
-            var v1 = obs.First();
+            var v1 = await obs.FirstAsync();
             GC.Collect();
-            var v2 = obs.First();
+            var v2 = await obs.FirstAsync();
 
             Assert.AreEqual(10, v1);
             Assert.AreEqual(10, v2);
@@ -82,7 +83,7 @@ namespace Test_MRUDatabase.Util
         }
 
         [TestMethod]
-        public void MakeSureSubscribeOncePublishGC()
+        public async Task MakeSureSubscribeOncePublishGC()
         {
             int count = 0;
             var obs = Observable.Return(10)
@@ -90,9 +91,9 @@ namespace Test_MRUDatabase.Util
                 .Do(_ => count++)
                 .PublishLast().ConnectAfterSubscription()
                 .WriteLine("After the replay");
-            var v1 = obs.First();
+            var v1 = await obs.FirstAsync();
             GC.Collect();
-            var v2 = obs.First();
+            var v2 = await obs.FirstAsync();
 
             Assert.AreEqual(10, v1);
             Assert.AreEqual(10, v2);
