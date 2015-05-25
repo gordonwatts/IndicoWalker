@@ -38,9 +38,9 @@ namespace IWalker.Util
         /// If something goes wrong (e.g. we are offline), the also return false.
         /// If the cache is missing the item, then we need to update.
         /// </remarks>
-        private static IObservable<bool> CheckForUpdate(this IFile file)
+        public static IObservable<bool> CheckForUpdate(this IFile file, IBlobCache cache)
         {
-            return Blobs.LocalStorage.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
+            return cache.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
                 .Zip(file.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
                 .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
@@ -59,7 +59,20 @@ namespace IWalker.Util
         }
 
         /// <summary>
-        /// Returns the time that this particular objectw as put into the cache.
+        /// Save all the data we pull off the internet in the cache for later user.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <param name="serverModifiedType"></param>
+        /// <param name="filedata"></param>
+        /// <param name="cache"></param>
+        /// <returns></returns>
+        public static IObservable<Unit> SaveFileInCache(this IFile file, string serverModifiedType, byte[] filedata, IBlobCache cache)
+        {
+            return cache.InsertObject(file.UniqueKey, Tuple.Create(serverModifiedType, filedata), DateTime.Now + Settings.CacheFilesTime);
+        }
+
+        /// <summary>
+        /// Returns the time that this particular object was put into the cache.
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>

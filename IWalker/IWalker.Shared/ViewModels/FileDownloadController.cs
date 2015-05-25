@@ -101,13 +101,13 @@ namespace IWalker.ViewModels
             // Download or update the file.
             DownloadOrUpdate = ReactiveCommand.Create();
             var hasCachedValue = DownloadOrUpdate
-                .SelectMany(_ => Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey))
+                .SelectMany(_ => File.GetCacheCreateTime(Cache))
                 .Select(dt => dt.HasValue)
                 .Publish().RefCount();
 
             var cacheUpdateRequired = hasCachedValue
                 .Where(isCached => isCached)
-                .SelectMany(_ => CheckForUpdate())
+                .SelectMany(_ => File.CheckForUpdate(Cache))
                 .Where(isNewOneEB => isNewOneEB)
                 .Select(_ => default(Unit))
                 .Publish();
@@ -128,7 +128,7 @@ namespace IWalker.ViewModels
                 .LimitGlobally(goSeq => goSeq
                     .WriteLine("Starting download...")
                     .SelectMany(_ => Download())
-                    .SelectMany(data => Cache.InsertObject(File.UniqueKey, data, DateTime.Now + Settings.CacheFilesTime))
+                    .SelectMany(data => File.SaveFileInCache(data.Item1, data.Item2, Cache))
                     .WriteLine("  Done download and cache insert"), _gLimit)
                 .Finally(() => downloadInProgress.OnNext(false))
                 .Do(_ => downloadInProgress.OnNext(false))
@@ -147,24 +147,11 @@ namespace IWalker.ViewModels
             // Note the concatenate when we combine - we very much want this to run
             // in order, no matter what latencies get caught up in the system.
             // This must be run when we are subscribed to, hence the defer.
-            var initiallyCached = Observable.Defer(() => Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(File.UniqueKey)
+            var initiallyCached = Observable.Defer(() => File.GetCacheCreateTime(Cache)
                 .Select(dt => dt.HasValue));
 
             Observable.Concat(initiallyCached, downloadSuccessful)
                 .ToProperty(this, x => x.IsDownloaded, out _isDownloaded, false);
-        }
-
-        /// <summary>
-        /// Get the date the web server returns for a file and compare that
-        /// with the current headers.
-        /// </summary>
-        /// <returns></returns>
-        private IObservable<bool> CheckForUpdate()
-        {
-            return Cache.GetObject<Tuple<string, byte[]>>(File.UniqueKey)
-                .Zip(File.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
-                .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
-                .Catch(Observable.Return(false));
         }
 
         /// <summary>

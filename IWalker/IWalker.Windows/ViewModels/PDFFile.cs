@@ -54,7 +54,7 @@ namespace IWalker.ViewModels
             // Note the publish below - otherwise we will miss it going by if it happens too
             // fast.
             var cacheKey = Observable.Merge(isDownloaded, newFile)
-                .SelectMany(_ => fileSource.Cache.GetObjectCreatedAt<Tuple<string, byte[]>>(fileSource.File.UniqueKey))
+                .SelectMany(_ => fileSource.File.GetCacheCreateTime(fileSource.Cache))
                 .Select(date => string.Format("{0}-{1}", fileSource.File.UniqueKey, date.ToString()))
                 .DistinctUntilChanged();
 
