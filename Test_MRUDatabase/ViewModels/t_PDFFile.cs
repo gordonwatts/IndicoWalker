@@ -8,6 +8,7 @@ using System.IO;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
 using Windows.Data.Pdf;
+using IWalker.Util;
 
 namespace Test_MRUDatabase.ViewModels
 {
@@ -264,7 +265,7 @@ namespace Test_MRUDatabase.ViewModels
             // For this to work, we need the # of pages in the cache already.
             var dc = new dummyCache();
             await dc.InsertObject(f.UniqueKey, Tuple.Create("old date", data)).FirstAsync();
-            var dtc = await dc.GetObjectCreatedAt<Tuple<string, byte[]>>(f.UniqueKey).FirstAsync();
+            var dtc = await f.GetCacheCreateTime(dc);
 
             var cacheStem = string.Format("talk.pdf-{0}", dtc.Value.ToString());
             await dc.InsertObject(cacheStem + "-NumberOfPages", 10).FirstAsync();

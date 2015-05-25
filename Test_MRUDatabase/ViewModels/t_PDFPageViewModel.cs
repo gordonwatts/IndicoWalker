@@ -33,7 +33,7 @@ namespace Test_MRUDatabase.ViewModels
             // Create the cache, and add everything into it that the system should need.
             var dc = new dummyCache();
             await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
-            var dt = await dc.GetObjectCreatedAt<Tuple<string, byte[]>>(f.UniqueKey);
+            var dt = await f.GetCacheCreateTime(dc);
             var pageSize = new IWalkerSize() { Width = 1280, Height = 720 };
             await dc.InsertObject(string.Format("{0}-{1}-p1-DefaultPageSize", f.UniqueKey, dt.Value.ToString()), pageSize);
             var imageData = new byte[] { 0, 1, 2, 3, 4 };
