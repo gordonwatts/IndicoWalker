@@ -134,7 +134,7 @@ namespace Test_MRUDatabase
         [JsonIgnore]
         public Func<IObservable<StreamReader>> GetStream { get; set; }
 
-        public IObservable<StreamReader> GetFileStream()
+        public IObservable<Tuple<string, StreamReader>> GetFileStream()
         {
             GetStreamCalled++;
             if (GetStream == null)
@@ -143,7 +143,7 @@ namespace Test_MRUDatabase
             }
             else
             {
-                return GetStream();
+                return GetStream().Select(s => Tuple.Create(DateToReturn, s));
             }
         }
 

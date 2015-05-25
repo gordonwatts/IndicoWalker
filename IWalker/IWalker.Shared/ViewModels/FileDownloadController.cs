@@ -167,13 +167,14 @@ namespace IWalker.ViewModels
         {
             // Get the file stream, and write it out.
             var ms = new MemoryStream();
-            using (var dataStream = await File.GetFileStream())
+            var r = await File.GetFileStream();
+            using (var dataStream = r.Item2)
             {
                 await dataStream.BaseStream.CopyToAsync(ms);
             }
 
             // Get the date from the header that we will need to stash
-            var timeStamp = await File.GetFileDate();
+            var timeStamp = r.Item1;
 
             // This is what needs to be cached.
             var ar = ms.ToArray();

@@ -321,7 +321,8 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         /// <summary>
-        /// Make sure the get data is not called too much (since it will generate a web
+        /// Make sure the get data is not called when the cache is empty - in that case,
+        /// the date comes back from the original web request.
         /// request).
         /// </summary>
         [TestMethod]
@@ -346,9 +347,10 @@ namespace Test_MRUDatabase.ViewModels
 
             vm.DownloadOrUpdate.Execute(null);
 
-            await TestUtils.SpinWait(() => f.GetDateCalled == 1, 100);
+            await TestUtils.SpinWait(() => f.GetDateCalled == 0, 100);
+            await Task.Delay(100); // Just in case. :-)
 
-            Assert.AreEqual(1, f.GetDateCalled);
+            Assert.AreEqual(0, f.GetDateCalled);
         }
 
         /// <summary>

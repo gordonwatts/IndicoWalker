@@ -20,7 +20,7 @@ namespace IWalker.DataModel.Inidco
         static Lazy<IndicoDataFetcher> _fetcher = new Lazy<IndicoDataFetcher>(() => new IndicoDataFetcher());
 
         /// <summary>
-        /// Get the singlton instance of the fetcher
+        /// Get the singleton instance of the fetcher
         /// </summary>
         public static IndicoDataFetcher Fetcher { get { return _fetcher.Value; } }
 
@@ -28,22 +28,6 @@ namespace IWalker.DataModel.Inidco
         /// True if we've loaded the CERN cert.
         /// </summary>
         bool _loadedCERNCert = false;
-
-        /// <summary>
-        /// Fetch the reader to read everything back from the website
-        /// for a given URL.
-        /// </summary>
-        /// <param name="uri"></param>
-        /// <returns></returns>
-        /// <remarks>
-        /// TODO: Fix this up so it is fairly efficient.
-        /// </remarks>
-        public async Task<StreamReader> GetDataFromURL(Uri uri)
-        {
-            var r = await FetchURIResponse(uri);
-            var s = await r.Content.ReadAsInputStreamAsync();
-            return new StreamReader(s.AsStreamForRead());
-        }
 
         /// <summary>
         /// Fetch the response message for a URI.
@@ -76,6 +60,34 @@ namespace IWalker.DataModel.Inidco
 
             var r = await CERNSSO.WebAccess.GetWebResponse(uri, method);
             return r;
+        }
+
+        /// <summary>
+        /// Fetch the reader to read everything back from the website
+        /// for a given URL.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        /// <remarks>
+        /// TODO: Fix this up so it is fairly efficient.
+        /// </remarks>
+        public async Task<StreamReader> GetDataFromURL(Uri uri)
+        {
+            var r = await FetchURIResponse(uri);
+            var s = await r.Content.ReadAsInputStreamAsync();
+            return new StreamReader(s.AsStreamForRead());
+        }
+
+        /// <summary>
+        /// Get the data and the headers at the same time.
+        /// </summary>
+        /// <param name="uri"></param>
+        /// <returns></returns>
+        public async Task<Tuple<HttpContentHeaderCollection, StreamReader>> GetDataAndHeadersFromURL(Uri uri)
+        {
+            var r = await FetchURIResponse(uri);
+            var s = await r.Content.ReadAsInputStreamAsync();
+            return Tuple.Create(r.Content.Headers, new StreamReader(s.AsStreamForRead()));
         }
 
         /// <summary>

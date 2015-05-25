@@ -3,12 +3,11 @@ using IndicoInterface.NET.SimpleAgendaDataModel;
 using IWalker.DataModel.Interfaces;
 using Newtonsoft.Json;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Linq;
 using System.Reactive.Linq;
 using System.Threading.Tasks;
-using Windows.Storage;
+using Windows.Web.Http.Headers;
 
 namespace IWalker.DataModel.Inidco
 {
@@ -37,7 +36,7 @@ namespace IWalker.DataModel.Inidco
         }
 
         /// <summary>
-        /// The Initializer to be used with serialization
+        /// The constructor to be used with serialization
         /// </summary>
         public IndicoMeetingRef()
         { }
@@ -288,12 +287,34 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
-            /// Return a stream that can be used to read over the net.
+            /// Return a stream that can be used to read over the net along with the date from the
+            /// server. The GetFileDate method should return the same date.
             /// </summary>
             /// <returns></returns>
-            public IObservable<StreamReader> GetFileStream()
+            public IObservable<Tuple<string, StreamReader>> GetFileStream()
             {
-                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetDataFromURL(new Uri(_aFile.URL)));
+                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetDataAndHeadersFromURL(new Uri(_aFile.URL)))
+                    .Select(info => Tuple.Create(ExtractLastModifiedHeader(info.Item1), info.Item2));
+            }
+
+            /// <summary>
+            /// Given headers, extract the date we will use to mark when this file was last modified on the server.
+            /// </summary>
+            /// <param name="dt"></param>
+            /// <returns></returns>
+            private string ExtractLastModifiedHeader(HttpContentHeaderCollection dt)
+            {
+                return dt.LastModified.HasValue ? dt.LastModified.Value.ToString() : "";
+            }
+
+            /// <summary>
+            /// Given the URL, get the header info.
+            /// </summary>
+            /// <returns></returns>
+            public IObservable<string> GetFileDate()
+            {
+                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(new Uri(_aFile.URL)))
+                    .Select(ExtractLastModifiedHeader);
             }
 
             /// <summary>
@@ -321,16 +342,6 @@ namespace IWalker.DataModel.Inidco
             public string DisplayName
             {
                 get { return _aFile.DisplayFilename; }
-            }
-
-            /// <summary>
-            /// Given the URL, get the header info.
-            /// </summary>
-            /// <returns></returns>
-            public IObservable<string> GetFileDate()
-            {
-                return Observable.FromAsync(() => IndicoDataFetcher.Fetcher.GetContentHeadersFromUrl(new Uri(_aFile.URL)))
-                    .Select(dt => dt.LastModified.HasValue ? dt.LastModified.Value.ToString() : "");
             }
         }
 

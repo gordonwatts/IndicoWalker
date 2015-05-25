@@ -32,10 +32,12 @@ namespace IWalker.DataModel.Interfaces
         string UniqueKey { get; }
 
         /// <summary>
-        /// Return the stream that we can use to read the file
+        /// Return the stream that we can use to read the file and the date that describes when the
+        /// file was last updated on the server. It should be the same date that is returned by GetFileDate below,
+        /// but it is here in order to minimize the # of web requests (if that is how it is done).
         /// </summary>
         /// <returns></returns>
-        IObservable<StreamReader> GetFileStream();
+        IObservable<Tuple<string, StreamReader>> GetFileStream();
 
         /// <summary>
         /// Return the display name of a file (generally the name without the type).
