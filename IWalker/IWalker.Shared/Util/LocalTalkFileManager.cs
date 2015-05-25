@@ -66,7 +66,7 @@ namespace IWalker.Util
         public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file, IBlobCache cache = null)
         {
             cache = cache ?? Blobs.LocalStorage;
-            return cache.GetObjectCreatedAt<Tuple<string,byte[]>>(file.UniqueKey);
+            return cache.GetObjectCreatedAt<Tuple<string, byte[]>>(file.UniqueKey);
         }
     }
 }
