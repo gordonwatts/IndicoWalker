@@ -5,6 +5,7 @@ using System.Linq;
 using System.Reactive.Linq;
 using System.Text;
 using IWalker.Util;
+using System.Diagnostics;
 
 namespace IWalker.ViewModels
 {
@@ -44,13 +45,14 @@ namespace IWalker.ViewModels
         public DateTime StartTime { get; private set; }
 
         /// <summary>
-        /// Setup the VM to display the session. We are given an inital set of talks, as well as a session of updates
+        /// Setup the VM to display the session. We are given an initial set of talks, as well as a session of updates
         /// for future talks.
         /// </summary>
         /// <param name="dItem"></param>
         /// <param name="ldrSessions"></param>
         public SessionUserControlViewModel(DataModel.Interfaces.ISession dItem, IObservable<DataModel.Interfaces.ISession[]> ldrSessions, bool isSingleSessionMeeting)
         {
+            Debug.WriteLine("Creating a new session");
             // Cache the ID. This will help with updates later on.
             Id = dItem.Id;
             StartTime = dItem.StartTime;
