@@ -51,7 +51,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var df = new dummyFile("test.pdf", "test.pdf");
             var data = await TestUtils.GetFileAsBytes("test.pdf");
-            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
+            await df.SaveFileInCache(df.DateToReturn, data, Blobs.LocalStorage);
 
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
@@ -81,7 +81,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var df = new dummyFile("test.pdf", "test.pdf");
             var data = await TestUtils.GetFileAsBytes("test.pdf");
-            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
+            await df.SaveFileInCache(df.DateToReturn, data, Blobs.LocalStorage);
 
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
@@ -130,7 +130,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var df = new dummyFile("test.pdf", "test.pdf");
             var data = await TestUtils.GetFileAsBytes("test.pdf");
-            await Blobs.LocalStorage.InsertObject(df.UniqueKey, Tuple.Create(df.DateToReturn, data)).FirstAsync();
+            await df.SaveFileInCache(df.DateToReturn, data, Blobs.LocalStorage);
 
             // Now, we are going to update the cache, and see if it gets re-read.
             var dfctl = new FileDownloadController(df);

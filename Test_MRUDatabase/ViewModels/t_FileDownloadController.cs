@@ -33,11 +33,11 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void FileDownlaodedIsCached()
+        public async Task FileDownlaodedIsCached()
         {
             var f = new dummyFile();
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
+            await f.SaveFileInCache(DateTime.Now.ToString(), new byte[] { 0, 1 }, dc);
             var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
@@ -100,7 +100,7 @@ namespace Test_MRUDatabase.ViewModels
             f.GetStream = () => Observable.Return(new StreamReader(mr));
 
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now, new byte[] { 0, 1, 2 }));
+            await f.SaveFileInCache(DateTime.Now.ToString(), new byte[] { 0, 1, 2 }, dc);
             var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
@@ -115,7 +115,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void TriggerNoFileDownloadCached()
+        public async Task TriggerNoFileDownloadCached()
         {
             var f = new dummyFile();
 
@@ -124,7 +124,7 @@ namespace Test_MRUDatabase.ViewModels
             f.GetStream = () => Observable.Return(new StreamReader(mr));
 
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2 }));
+            await f.SaveFileInCache(f.DateToReturn, new byte[] { 0, 1, 2 }, dc);
             var vm = new FileDownloadController(f, dc);
             var dummy = vm.IsDownloaded;
 
@@ -273,7 +273,7 @@ namespace Test_MRUDatabase.ViewModels
             };
 
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(DateTime.Now.ToString(), new byte[] { 0, 1 }));
+            await f.SaveFileInCache(DateTime.Now.ToString(), new byte[] { 0, 1 }, dc);
             var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
@@ -289,7 +289,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void DownloadNotCalledOnceOnCacheUpdate()
+        public async Task DownloadNotCalledOnceOnCacheUpdate()
         {
             var f = new dummyFile();
 
@@ -302,7 +302,7 @@ namespace Test_MRUDatabase.ViewModels
 
             var dc = new dummyCache();
             var theDateString = "this is now";
-            dc.InsertObject(f.UniqueKey, Tuple.Create(theDateString, new byte[] { 0, 1 }));
+            await f.SaveFileInCache(theDateString, new byte[] { 0, 1 }, dc);
             f.DateToReturn = theDateString;
             var vm = new FileDownloadController(f, dc);
 
@@ -353,7 +353,7 @@ namespace Test_MRUDatabase.ViewModels
         /// request).
         /// </summary>
         [TestMethod]
-        public void CheckDateCalledOnceCacheFilled()
+        public async Task CheckDateCalledOnceCacheFilled()
         {
             var f = new dummyFile();
 
@@ -365,7 +365,7 @@ namespace Test_MRUDatabase.ViewModels
             };
 
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2 }));
+            await f.SaveFileInCache(f.DateToReturn, new byte[] { 0, 1, 2 }, dc);
             var vm = new FileDownloadController(f, dc);
             int isDownloadingCounter = 0;
             vm.WhenAny(x => x.IsDownloading, x => x.Value)
@@ -433,11 +433,11 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void CtorHasNothingAccessedCache()
+        public async Task CtorHasNothingAccessedCache()
         {
             var f = new dummyFile();
             var dc = new dummyCache();
-            dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, new byte[] { 0, 1, 2, 3 }));
+            await f.SaveFileInCache(f.DateToReturn, new byte[] { 0, 1, 2, 3 }, dc);
             var vm = new FileDownloadController(f, dc);
 
             Assert.AreEqual(0, f.GetDateCalled);

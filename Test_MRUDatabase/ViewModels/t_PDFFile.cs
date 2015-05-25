@@ -56,7 +56,7 @@ namespace Test_MRUDatabase.ViewModels
             // Install original data in cache
             var dc = new dummyCache();
             var data = await TestUtils.GetFileAsBytes("test.pdf");
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
+            await f.SaveFileInCache(f.DateToReturn, data, dc);
 
             // Create VM's and hook them up.
             var vm = new FileDownloadController(f, dc);
@@ -90,7 +90,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Install original data in cache
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
+            await f.SaveFileInCache(f.DateToReturn, data, dc);
 
             // Create VM's and hook them up.
             var vm = new FileDownloadController(f, dc);
@@ -120,7 +120,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Install original data in cache
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create(f.DateToReturn, data)).FirstAsync();
+            await f.SaveFileInCache(f.DateToReturn, data, dc);
 
             // Create VM's and hook them up.
             var vm = new FileDownloadController(f, dc);
@@ -172,7 +172,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Install original data in cache
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create("old date", data)).FirstAsync();
+            await f.SaveFileInCache("old date", data, dc);
 
             // Create VM's and hook them up.
             var vm = new FileDownloadController(f, dc);
@@ -264,7 +264,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // For this to work, we need the # of pages in the cache already.
             var dc = new dummyCache();
-            await dc.InsertObject(f.UniqueKey, Tuple.Create("old date", data)).FirstAsync();
+            await f.SaveFileInCache("old date", data, dc);
             var dtc = await f.GetCacheCreateTime(dc);
 
             var cacheStem = string.Format("talk.pdf-{0}", dtc.Value.ToString());
