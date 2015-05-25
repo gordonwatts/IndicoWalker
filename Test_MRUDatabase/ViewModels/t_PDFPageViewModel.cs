@@ -61,7 +61,7 @@ namespace Test_MRUDatabase.ViewModels
             await TestUtils.SpinWait(() => lastImage != null, 2000);
             Assert.AreEqual(0, loaderCalled);
             Assert.IsNotNull(lastImage);
-            Assert.AreEqual(3, dc.NumberTimesInsertCalled); // Nothing new should have happened
+            Assert.AreEqual(4, dc.NumberTimesInsertCalled); // Nothing new should have happened
         }
 
         [TestMethod]

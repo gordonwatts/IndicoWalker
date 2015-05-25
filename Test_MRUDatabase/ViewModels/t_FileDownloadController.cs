@@ -85,8 +85,10 @@ namespace Test_MRUDatabase.ViewModels
             // Make sure that it reflects the fact that it is downloaded, even though
             // the trigger for this happens earlier.
             var bogus = vm.IsDownloaded;
-            await Task.Delay(10);
+
+            await TestUtils.SpinWait(() => vm.IsDownloaded, 1000);
             Assert.IsTrue(vm.IsDownloaded);
+            await TestUtils.SpinWait(() => downloadUpdateCount == 1, 1000);
             Assert.AreEqual(1, downloadUpdateCount);
         }
 

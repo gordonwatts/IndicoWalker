@@ -17,13 +17,23 @@ namespace IWalker.Util
     public static class LocalTalkFileManager
     {
         /// <summary>
-        /// Return the key we will use to lookup to see if the file has been downloaded recently.
+        /// The cache key for the date that comes from the server.
         /// </summary>
         /// <param name="file"></param>
         /// <returns></returns>
         private static string FileDateKey(this IFile file)
         {
             return string.Format("{0}-file-date", file.UniqueKey);
+        }
+
+        /// <summary>
+        /// Cache key for the full file data.
+        /// </summary>
+        /// <param name="file"></param>
+        /// <returns></returns>
+        private static string FileDataKey (this IFile file)
+        {
+            return string.Format("{0}-file-data", file.UniqueKey);
         }
 
         /// <summary>
@@ -40,8 +50,8 @@ namespace IWalker.Util
         /// </remarks>
         public static IObservable<bool> CheckForUpdate(this IFile file, IBlobCache cache)
         {
-            return cache.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
-                .Zip(file.GetFileDate(), (cacheDate, remoteDate) => cacheDate.Item1 != remoteDate)
+            return cache.GetObject<string>(file.FileDateKey())
+                .Zip(file.GetFileDate(), (cacheDate, remoteDate) => cacheDate != remoteDate)
                 .Catch<bool, KeyNotFoundException>(_ => Observable.Return(true))
                 .Catch(Observable.Return(false));
         }
@@ -53,8 +63,8 @@ namespace IWalker.Util
         /// <param name="file">The file we should fetch - from local storage or elsewhere. Null if it isn't local and can't be fetched.</param>
         public static IObservable<IRandomAccessStream> GetFileFromCache(this IFile file, IBlobCache cache)
         {
-            return cache.GetObject<Tuple<string, byte[]>>(file.UniqueKey)
-                    .Select(by => by.Item2.AsRORAByteStream())
+            return cache.Get(file.FileDataKey())
+                    .Select(bytes => bytes.AsRORAByteStream())
                     .Catch<IRandomAccessStream, KeyNotFoundException>(e => Observable.Empty<IRandomAccessStream>());
         }
 
@@ -68,7 +78,11 @@ namespace IWalker.Util
         /// <returns></returns>
         public static IObservable<Unit> SaveFileInCache(this IFile file, string serverModifiedType, byte[] filedata, IBlobCache cache)
         {
-            return cache.InsertObject(file.UniqueKey, Tuple.Create(serverModifiedType, filedata), DateTime.Now + Settings.CacheFilesTime);
+            var timeToDelete = DateTime.Now + Settings.CacheFilesTime;
+
+            var insertDate = cache.InsertObject(file.FileDateKey(), serverModifiedType, timeToDelete);
+            var insertData = cache.Insert(file.FileDataKey(), filedata, timeToDelete);
+            return Observable.Concat(insertDate, insertData).Skip(1);
         }
 
         /// <summary>
@@ -79,7 +93,7 @@ namespace IWalker.Util
         public static IObservable<DateTimeOffset?> GetCacheCreateTime(this IFile file, IBlobCache cache = null)
         {
             cache = cache ?? Blobs.LocalStorage;
-            return cache.GetObjectCreatedAt<Tuple<string, byte[]>>(file.UniqueKey);
+            return cache.GetObjectCreatedAt<string>(file.FileDateKey());
         }
     }
 }
