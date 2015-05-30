@@ -65,6 +65,25 @@ namespace Test_MRUDatabase
             }
         }
 
+        /// <summary>
+        /// Wait for two values to be equal.
+        /// </summary>
+        /// <typeparam name="T"></typeparam>
+        /// <param name="expected"></param>
+        /// <param name="eval"></param>
+        /// <param name="maxMiliseconds"></param>
+        /// <returns></returns>
+        internal static async Task SpinWaitAreEqual<T>(T expected, Func<T> eval, int maxMiliseconds = 1000)
+            where T : class
+        {
+            int waited = 0;
+            while ((eval() != expected) && waited < maxMiliseconds)
+            {
+                await Task.Delay(10);
+                waited += 10;
+            }
 
+            Assert.AreEqual(expected, eval());
+        }
     }
 }
