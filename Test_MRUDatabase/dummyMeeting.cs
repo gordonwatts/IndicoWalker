@@ -27,6 +27,8 @@ namespace Test_MRUDatabase
         {
             Sessions = new ISession[] { new dummySession() };
             Title = "Meeting1";
+            StartTime = DateTime.Now;
+            EndTime = DateTime.Now + TimeSpan.FromMinutes(30);
         }
         public string Title { get; set; }
 
