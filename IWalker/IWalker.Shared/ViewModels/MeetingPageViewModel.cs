@@ -92,6 +92,8 @@ namespace IWalker.ViewModels
                 });
 
             var meetingSequence = Observable.Merge(firstMeeting, bufferTimes);
+
+            // TODO: why do we need this firstMeeting a published observable?
             firstMeeting.Connect();
             return meetingSequence;
         }
