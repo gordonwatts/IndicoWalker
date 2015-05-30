@@ -104,8 +104,8 @@ namespace IWalker.ViewModels
         {
             // Fetch the guy from the local cache. MeetingLoader will actually return a continuous stream
             // of updates (when there is a difference) if we are close to the meeting time.
-            UpdateData = ReactiveCommand.Create();
-            var ldrCmdReady = UpdateData
+            StartMeetingUpdates = ReactiveCommand.Create();
+            var ldrCmdReady = StartMeetingUpdates
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
                 .Catch(MeetingLoadFailed(meeting))
                 .Publish();
@@ -217,10 +217,10 @@ namespace IWalker.ViewModels
         }
 
         /// <summary>
-        /// Update. Do this so all subscriptions (like to ToProperties) have been done
-        /// before triggering.
+        /// Start the automatic meeting update process, including the one when this VM is initially loaded.
         /// </summary>
-        public ReactiveCommand<object> UpdateData { get; private set; }
+        /// <remarks>This is only done on a time-table. Re-firing this after it is fired once will not cause the update to re-trigger unless the time interval has been reached.</remarks>
+        public ReactiveCommand<object> StartMeetingUpdates { get; private set; }
         
         /// <summary>
         /// Track the home screen.
