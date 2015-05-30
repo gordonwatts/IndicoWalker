@@ -107,7 +107,7 @@ namespace IWalker.ViewModels
             StartMeetingUpdates = ReactiveCommand.Create();
             var ldrCmdReady = StartMeetingUpdates
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
-                .Catch(MeetingLoadFailed(meeting))
+                .Catch((Exception e) => MeetingLoadFailed(meeting))
                 .Publish();
 
             ldrCmdReady
