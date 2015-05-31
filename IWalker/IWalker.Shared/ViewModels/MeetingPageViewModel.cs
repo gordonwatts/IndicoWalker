@@ -104,6 +104,7 @@ namespace IWalker.ViewModels
             // Fetch the guy from the local cache.
             StartMeetingUpdates = ReactiveCommand.Create();
             var ldrCmdReady = StartMeetingUpdates
+                .Take(1)
                 //.SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => meeting.GetMeeting(), null, DateTime.Now + Settings.CacheAgendaTime))
                 .Catch((Exception e) => MeetingLoadFailed(meeting))
