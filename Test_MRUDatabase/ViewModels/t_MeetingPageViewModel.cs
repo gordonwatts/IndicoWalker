@@ -1,6 +1,7 @@
 ﻿using Akavache;
 using IWalker.DataModel.Interfaces;
 using IWalker.Util;
+using IWalker.ViewModels;
 using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using Newtonsoft.Json;
@@ -34,25 +35,52 @@ namespace Test_MRUDatabase.ViewModels
             Locator.CurrentMutable.RegisterConstant(new dummyMRUDB(), typeof(IMRUDatabase));
         }
 
-#if flase
         [TestMethod]
         public async Task TitleOnce()
         {
             var meeting = MeetingHelpers.CreateMeeting();
             var mvm = new MeetingPageViewModel(null, meeting);
 
-            // The first value is empty as everything gets itself setup for data binding.
-            var s = await mvm.WhenAny(x => x.MeetingTitle, x => x.Value)
-                .Take(1)
-                .ToList()
-                .FirstAsync();
+            var bogus = mvm.MeetingTitle;
+            mvm.StartMeetingUpdates.Execute(null);
 
-            // For some reason the meeting title only comes back as "" - which is the initial set.
-            // TODO: Fix this.
-
-            Assert.AreEqual(s, "Meeting1");
+            await TestUtils.SpinWaitAreEqual("Meeting1", () => mvm.MeetingTitle);
         }
-#endif
+
+        [TestMethod]
+        public void BadLoad()
+        {
+            // THrow an error when trying to load a meeting
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void ReloadTimingWithUncachedMeeting()
+        {
+            // 1. Meeting is occuring now
+            // 2. The meeting is not cached
+            // 3. Make sure that multiple attempts are made to fetch it.
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void ReloadTimingWithCachedMeeting()
+        {
+            // 1. Meeting is occurning now
+            // 2. Meeting is cached.
+            // 3. Make sure updates occur.
+            Assert.Inconclusive();
+        }
+
+        [TestMethod]
+        public void ReloadTimingWithFailedFetches()
+        {
+            // 1. Meeting is occuring now
+            // 2. Meeting is cached.
+            // 3. Meeting fetch failes
+            // 4. Make sure next fetch occurs.
+            Assert.Inconclusive();
+        }
 
         [TestMethod]
         public async Task LocalMeetingFetch()

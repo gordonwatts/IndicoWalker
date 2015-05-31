@@ -29,11 +29,13 @@ namespace IWalker.ViewModels
             LoadMeeting(mRef);
         }
 
+#if false
         /// <summary>
-        /// Return a stream of meetings, as needed.
+        /// Return meetings loaded from the internet. We will continue sending them if the meeting
+        /// is currently running (e.g. doing constant updates).
         /// </summary>
         /// <param name="meeting"></param>
-        /// <returns></returns>
+        /// <returns>Stream of meetings</returns>
         /// <remarks>
         /// The algorithm for this:
         /// 1. Always fetch the meeting at least one time.
@@ -45,14 +47,9 @@ namespace IWalker.ViewModels
         /// </remarks>
         private IObservable<IMeeting> MeetingLoader(IMeetingRef meeting)
         {
-            // Get the first copy of the meeting.
-            // We are careful on exceptions. If we can't find it from the cache or online, then
-            // we are in some trouble: we can't load the meeting. So we need to surface an error
-            // to be reported to the user.
+            // Grab a copy of the meeting online.
             var firstMeeting = Observable.FromAsync(() => meeting.GetMeeting())
-                .Catch(
-                    Blobs.LocalStorage.GetObject<IMeeting>(meeting.AsReferenceString())
-                    )
+                .Catch(Observable.Empty<IMeeting>())
                 .Publish();
 
             // Determine the two buffer times for this meeting, and create a "pulse" that will
@@ -98,17 +95,20 @@ namespace IWalker.ViewModels
             return meetingSequence;
         }
 
+#endif
         /// <summary>
         /// Given a meeting, load the info. Since this is an asynchronous command, we have to schedule stuff off it.
         /// </summary>
         /// <param name="meeting"></param>
         private void LoadMeeting(IMeetingRef meeting)
         {
+            Debug.WriteLine("Staring a new LoadMeeting.");
             // Fetch the guy from the local cache. MeetingLoader will actually return a continuous stream
             // of updates (when there is a difference) if we are close to the meeting time.
             StartMeetingUpdates = ReactiveCommand.Create();
             var ldrCmdReady = StartMeetingUpdates
-                .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
+                //.SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
+                .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => meeting.GetMeeting(), null, DateTime.Now + Settings.CacheAgendaTime))
                 .Catch((Exception e) => MeetingLoadFailed(meeting))
                 .Publish();
 
