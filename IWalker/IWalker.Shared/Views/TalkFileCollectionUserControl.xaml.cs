@@ -4,6 +4,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Reactive.Disposables;
 using System.Runtime.InteropServices.WindowsRuntime;
 using Windows.Foundation;
 using Windows.Foundation.Collections;
@@ -27,10 +28,18 @@ namespace IWalker.Views
         public TalkFileCollectionUserControl()
         {
             this.InitializeComponent();
+
+            var gc = new CompositeDisposable();
+            gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
+            gc.Add(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
         }
 

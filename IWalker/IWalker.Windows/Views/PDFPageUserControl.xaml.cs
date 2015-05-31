@@ -1,16 +1,15 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Diagnostics;
 using System.IO;
 using System.Reactive;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using IWalker.Util;
 using Windows.UI.Xaml.Media.Imaging;
-using System.Threading.Tasks;
 
 namespace IWalker.Views
 {
@@ -26,7 +25,7 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
 
-            var gd = new System.Reactive.Disposables.CompositeDisposable();
+            var gd = new CompositeDisposable();
 
             // Tie together the image source.
             // There are two ObserveOn's below, both are required:
@@ -78,7 +77,7 @@ namespace IWalker.Views
         /// </summary>
         /// <param name="imageStream"></param>
         /// <returns></returns>
-        private async Task<Tuple<BitmapImage, PDFPageViewModel>> ConvertToBMI (MemoryStream imageStream, PDFPageViewModel vm)
+        private async Task<Tuple<BitmapImage, PDFPageViewModel>> ConvertToBMI(MemoryStream imageStream, PDFPageViewModel vm)
         {
             imageStream.Seek(0, SeekOrigin.Begin);
             var bm = new BitmapImage();
@@ -118,7 +117,7 @@ namespace IWalker.Views
         public static readonly DependencyProperty RespectRenderingDimensionProperty =
             DependencyProperty.Register("RespectRenderingDimension", typeof(PDFPageViewModel.RenderingDimension), typeof(PDFPageUserControl), new PropertyMetadata(PDFPageViewModel.RenderingDimension.Horizontal));
 
-        private static Tuple<int,int> _sizeCache;
+        private static Tuple<int, int> _sizeCache;
 
         /// <summary>
         /// Return the size so the layout system can calculate the proper

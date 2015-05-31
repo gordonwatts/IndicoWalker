@@ -3,7 +3,7 @@ using IWalker.ViewModels;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Diagnostics;
+using System.Reactive.Disposables;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -19,20 +19,21 @@ namespace IWalker.Views
         public FullTalkAsStripView()
         {
             this.InitializeComponent();
-            this.WhenActivated(disposeOfMe =>
-            {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
 
-                // If the ESC key or back-button is hit, we want to navigate back.
-                var keyrelease = SlideStrip.Events().KeyDown
-                    .Where(keys => ViewModel != null);
+            var gc = new CompositeDisposable();
 
-                keyrelease
-                    .Where(keys => keys.Key == VirtualKey.Escape)
-                    .Do(keys => keys.Handled = true)
-                    .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
+            gc.Add(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
 
-                backButton.WireAsBackButton();
+            // If the ESC key or back-button is hit, we want to navigate back.
+            var keyrelease = SlideStrip.Events().KeyDown
+                .Where(keys => ViewModel != null);
+
+            gc.Add(keyrelease
+                .Where(keys => keys.Key == VirtualKey.Escape)
+                .Do(keys => keys.Handled = true)
+                .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null)));
+
+            backButton.WireAsBackButton();
 
 #if false
                 // When the VM asks us to move...
@@ -172,6 +173,14 @@ namespace IWalker.Views
                 // The orientation of this panel will affect how we calc the arrow key stuff.
                 _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
 #endif
+            this.WhenActivated(disposeOfMe =>
+            {
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
+
                 // We want to capture key strokes, etc. By default we don't have
                 // the focus, so grab it.
                 SlideStrip.Focus(Windows.UI.Xaml.FocusState.Programmatic);

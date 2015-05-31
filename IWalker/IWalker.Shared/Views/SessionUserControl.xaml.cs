@@ -1,5 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -15,12 +16,20 @@ namespace IWalker.Views
         public SessionUserControl()
         {
             this.InitializeComponent();
+
+            var gc = new CompositeDisposable();
+            gc.Add(this.OneWayBind(ViewModel, x => x.Title, y => y.SessionTitle.Text));
+            gc.Add(this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.SessionTitle.Visibility, isProper => isProper ? Visibility.Visible : Visibility.Collapsed));
+            gc.Add(this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.ItemsSource));
+            gc.Add(this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.TalkList.Margin, isProper => isProper ? new Thickness(40, 0, 0, 0) : new Thickness(0, 0, 0, 0)));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.Title, y => y.SessionTitle.Text));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.SessionTitle.Visibility, isProper => isProper ? Visibility.Visible : Visibility.Collapsed));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.Talks, y => y.TalkList.ItemsSource));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.IsProperTitledSession, y => y.TalkList.Margin, isProper => isProper ? new Thickness(40, 0, 0, 0) : new Thickness(0, 0, 0, 0)));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
         }
 

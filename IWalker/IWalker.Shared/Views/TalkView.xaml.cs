@@ -1,5 +1,6 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System.Reactive.Disposables;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -11,10 +12,17 @@ namespace IWalker.Views
         {
             this.InitializeComponent();
 
+            var gc = new CompositeDisposable();
+            gc.Add(this.OneWayBind(ViewModel, x => x.Title, y => y.TalkTitle.Text));
+            gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource));
+
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.Title, y => y.TalkTitle.Text));
-                disposeOfMe(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource));
+                if (gc != null)
+                {
+                    disposeOfMe(gc);
+                    gc = null;
+                }
             });
         }
 
