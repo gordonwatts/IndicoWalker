@@ -50,7 +50,7 @@ namespace Test_MRUDatabase
         /// <param name="maxMiliseconds">Up to how long should we wait? Throw assertion failure if we don't satisfy the test</param>
         /// <param name="extraTimeToWait">How much time to wait after we see the change in case there is another change coming</param>
         /// <returns></returns>
-        public static async Task SpinWait(Func<bool> test, int maxMiliseconds, int extraTimeToWait = 0)
+        public static async Task SpinWait(Func<bool> test, int maxMiliseconds, bool throwIfTimeout = true)
         {
             int waited = 0;
             while (!test() && waited < maxMiliseconds)
@@ -59,7 +59,7 @@ namespace Test_MRUDatabase
                 waited += 10;
             }
 
-            if (!test())
+            if (throwIfTimeout && !test())
             {
                 Assert.Fail("Timeout occurred");
             }

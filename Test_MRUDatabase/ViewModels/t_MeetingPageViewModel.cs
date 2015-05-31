@@ -73,7 +73,7 @@ namespace Test_MRUDatabase.ViewModels
             await TestUtils.SpinWaitAreEqual("Meeting1", () => mvm.MeetingTitle);
             mvm.StartMeetingUpdates.Execute(null);
 
-            await Task.Delay(100);
+            await TestUtils.SpinWait(() => meeting.NumberOfTimesFetched != 1, 400, false);
 
             Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
