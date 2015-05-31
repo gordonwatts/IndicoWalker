@@ -57,7 +57,7 @@ namespace IWalker.ViewModels
 
             // Determine the two buffer times for this meeting, and create a "pulse" that will
             // fire at the required intervals during those buffered times.
-            var bufferTimes = firstMeeting
+            var laterUpdates = firstMeeting
                 .SelectMany(m =>
                 {
                     var bufInner = new TimePeriod(m.StartTime - TimeSpan.FromMinutes(30), m.EndTime + TimeSpan.FromHours(2));
@@ -91,7 +91,7 @@ namespace IWalker.ViewModels
                         .SelectMany(_ => Observable.FromAsync(() => meeting.GetMeeting()).Catch(Observable.Empty<IMeeting>()));
                 });
 
-            var meetingSequence = Observable.Merge(firstMeeting, bufferTimes);
+            var meetingSequence = Observable.Merge(firstMeeting, laterUpdates);
 
             // TODO: why do we need this firstMeeting a published observable?
             firstMeeting.Connect();
