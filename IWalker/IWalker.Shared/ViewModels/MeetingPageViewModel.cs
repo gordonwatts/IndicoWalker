@@ -4,10 +4,8 @@ using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Collections.Generic;
 using System.Diagnostics;
 using System.Linq;
-using System.Reactive;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Popups;
@@ -94,8 +92,8 @@ namespace IWalker.ViewModels
             firstMeeting.Connect();
             return meetingSequence;
         }
-
 #endif
+
         /// <summary>
         /// Given a meeting, load the info. Since this is an asynchronous command, we have to schedule stuff off it.
         /// </summary>
@@ -103,8 +101,7 @@ namespace IWalker.ViewModels
         private void LoadMeeting(IMeetingRef meeting)
         {
             Debug.WriteLine("Staring a new LoadMeeting.");
-            // Fetch the guy from the local cache. MeetingLoader will actually return a continuous stream
-            // of updates (when there is a difference) if we are close to the meeting time.
+            // Fetch the guy from the local cache.
             StartMeetingUpdates = ReactiveCommand.Create();
             var ldrCmdReady = StartMeetingUpdates
                 //.SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))

@@ -48,38 +48,34 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void BadLoad()
+        public async Task LoadMeetingOnceAfterOneTrigger()
         {
-            // THrow an error when trying to load a meeting
-            Assert.Inconclusive();
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
+
+            var bogus = mvm.MeetingTitle;
+            mvm.StartMeetingUpdates.Execute(null);
+
+            await TestUtils.SpinWaitAreEqual("Meeting1", () => mvm.MeetingTitle);
+
+            Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
 
         [TestMethod]
-        public void ReloadTimingWithUncachedMeeting()
+        public async Task LoadMeetingOnceAfterTwoTrigger()
         {
-            // 1. Meeting is occuring now
-            // 2. The meeting is not cached
-            // 3. Make sure that multiple attempts are made to fetch it.
-            Assert.Inconclusive();
-        }
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
 
-        [TestMethod]
-        public void ReloadTimingWithCachedMeeting()
-        {
-            // 1. Meeting is occurning now
-            // 2. Meeting is cached.
-            // 3. Make sure updates occur.
-            Assert.Inconclusive();
-        }
+            var bogus = mvm.MeetingTitle;
+            mvm.StartMeetingUpdates.Execute(null);
 
-        [TestMethod]
-        public void ReloadTimingWithFailedFetches()
-        {
-            // 1. Meeting is occuring now
-            // 2. Meeting is cached.
-            // 3. Meeting fetch failes
-            // 4. Make sure next fetch occurs.
-            Assert.Inconclusive();
+            await TestUtils.SpinWaitAreEqual("Meeting1", () => mvm.MeetingTitle);
+            mvm.StartMeetingUpdates.Execute(null);
+
+            await Task.Delay(100);
+
+            Assert.AreEqual(1, meeting.NumberOfTimesFetched);
         }
 
         [TestMethod]
