@@ -16,5 +16,6 @@
         </Grid.ColumnDefinitions>
         <ItemsControl x:Name="FileLists" Grid.Column="0" />
         <!--<local:FileSlidesUserControl x:Name="FileThumbnails" Grid.Column="1"/>-->
+        <local:FirstSlideHeroUserControl x:Name="FileHero" Grid.Column="1"/>
     </Grid>
 </UserControl>

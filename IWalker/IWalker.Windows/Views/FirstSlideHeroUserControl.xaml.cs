@@ -20,20 +20,18 @@ using Windows.UI.Xaml.Navigation;
 
 namespace IWalker.Views
 {
-    public sealed partial class TalkFileCollectionUserControl : UserControl, IViewFor<TalkFileCollectionUserControlViewModel>
+    public sealed partial class FirstSlideHeroUserControl : UserControl, IViewFor<FirstSlideHeroViewModel>
     {
-        /// <summary>
-        /// Show the list of files
-        /// </summary>
-        public TalkFileCollectionUserControl()
+        public FirstSlideHeroUserControl()
         {
             this.InitializeComponent();
 
+            // WHen the VM comes in, show our guy if we can.
             var gc = new CompositeDisposable();
-            gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
-            //gc.Add(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
-            gc.Add(this.OneWayBind(ViewModel, x => x.HeroSlide, y => y.FileHero.ViewModel));
+            gc.Add(this.OneWayBind(ViewModel, x => x.HaveHeroSlide, y => y.PdfPage.Visibility));
+            gc.Add(this.OneWayBind(ViewModel, x => x.HeroPageUC, y => y.PdfPage.ViewModel));
 
+            // Upon activation, set everything up for disposing...
             this.WhenActivated(disposeOfMe =>
             {
                 if (gc != null)
@@ -45,20 +43,20 @@ namespace IWalker.Views
         }
 
         /// <summary>
-        /// Track the view models
+        /// Hold onto the view model, which we will need for doing all sorts of things.
         /// </summary>
-        public TalkFileCollectionUserControlViewModel ViewModel
+        public FirstSlideHeroViewModel ViewModel
         {
-            get { return (TalkFileCollectionUserControlViewModel)GetValue(ViewModelProperty); }
+            get { return (FirstSlideHeroViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(TalkFileCollectionUserControlViewModel), typeof(TalkFileCollectionUserControl), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(FirstSlideHeroViewModel), typeof(FirstSlideHeroUserControl), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
-            set { ViewModel = (TalkFileCollectionUserControlViewModel)value; }
+            set { ViewModel = (FirstSlideHeroViewModel)value; }
         }
     }
 }

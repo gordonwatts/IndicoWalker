@@ -142,6 +142,10 @@ namespace IWalker.ViewModels
         {
             Debug.Assert(_pageSize != null);
 
+            if (_pageSize == null)
+            {
+                return null;
+            }
             switch (orientation)
             {
                 case RenderingDimension.Horizontal:

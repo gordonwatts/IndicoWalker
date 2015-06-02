@@ -108,6 +108,7 @@
     <Compile Include="Util\BatchByStreamHelper.cs" />
     <Compile Include="Util\OnScreenTrackingHelper.cs" />
     <Compile Include="ViewModels\FileSlideListViewModel.cs" />
+    <Compile Include="ViewModels\FirstSlideHeroViewModel.cs" />
     <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
     <Compile Include="ViewModels\PDFFile.cs" />
     <Compile Include="ViewModels\PDFPageViewModel.cs" />
@@ -127,6 +128,9 @@
     </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\FirstSlideHeroUserControl.xaml.cs">
+      <DependentUpon>FirstSlideHeroUserControl.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FullTalkAsStripView.xaml.cs">
       <DependentUpon>FullTalkAsStripView.xaml</DependentUpon>
@@ -246,6 +250,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\FileSlidesUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FirstSlideHeroUserControl.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

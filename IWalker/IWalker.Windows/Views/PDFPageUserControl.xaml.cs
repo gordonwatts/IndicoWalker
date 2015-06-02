@@ -117,6 +117,12 @@ namespace IWalker.Views
         public static readonly DependencyProperty RespectRenderingDimensionProperty =
             DependencyProperty.Register("RespectRenderingDimension", typeof(PDFPageViewModel.RenderingDimension), typeof(PDFPageUserControl), new PropertyMetadata(PDFPageViewModel.RenderingDimension.Horizontal));
 
+        /// <summary>
+        /// Track the size.
+        /// </summary>
+        /// <remarks>
+        /// TODO: Really? Do we have to do this trick? It just seems... WRONG.
+        /// </remarks>
         private static Tuple<int, int> _sizeCache;
 
         /// <summary>
@@ -135,11 +141,11 @@ namespace IWalker.Views
             {
                 _sizeCache = ViewModel.CalcRenderingSize(RespectRenderingDimension, availableSize.Width, availableSize.Height);
             }
-            else
+            if (_sizeCache == null)
             {
-                if (_sizeCache == null)
-                    return base.MeasureOverride(availableSize);
+                return base.MeasureOverride(availableSize);
             }
+
             return new Size(_sizeCache.Item1, _sizeCache.Item2);
         }
 

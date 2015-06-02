@@ -23,6 +23,11 @@ namespace IWalker.ViewModels
         /// </summary>
         public ReactiveList<FileUserControlViewModel> TalkFiles { get; private set; }
 
+        /// <summary>
+        /// The "title" slide for the talk, as a teaser.
+        /// </summary>
+        public FirstSlideHeroViewModel HeroSlide { get; private set; }
+
 #if false
         /// <summary>
         /// The VM for the list of thumbnails associated with this talk.
@@ -52,6 +57,11 @@ namespace IWalker.ViewModels
             TalkFiles = new ReactiveList<FileUserControlViewModel>();
             TalkFiles.AddRange(allFilesVM.Select(f => f.UserControl));
 
+            // If there is a PDF file, then we use that to show a "hero" slide.
+            // TODO: WARNING - this will create a PDFFile, but one may not want that here
+            // if one is also going to create other PDF file guys!!
+            var pdf = allFilesVM.Where(f => f.FilePointer.FileType == "pdf" && f.FilePointer.IsValid).FirstOrDefault();
+            HeroSlide = new FirstSlideHeroViewModel(pdf == null ? null : pdf.UserControl.FileDownloader);
 #if false
             var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
             if (pdf != null)
