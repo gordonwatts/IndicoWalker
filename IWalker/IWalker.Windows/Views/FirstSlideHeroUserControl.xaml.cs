@@ -1,20 +1,11 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
 using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
+using System.Reactive;
 using System.Reactive.Disposables;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -30,6 +21,14 @@ namespace IWalker.Views
             var gc = new CompositeDisposable();
             gc.Add(this.OneWayBind(ViewModel, x => x.HaveHeroSlide, y => y.PdfPage.Visibility));
             gc.Add(this.OneWayBind(ViewModel, x => x.HeroPageUC, y => y.PdfPage.ViewModel));
+
+            // When we are clicked, open the slides.
+            var pressed = this.Events().PointerPressed;
+            var released = this.Events().PointerReleased;
+            var when = from pd in pressed
+                       from pu in released
+                       select default(Unit);
+            gc.Add(when.Subscribe(e => ViewModel.OpenFullView.Execute(null)));
 
             // Upon activation, set everything up for disposing...
             this.WhenActivated(disposeOfMe =>

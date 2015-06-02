@@ -5,6 +5,7 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using IWalker.Util;
+using Splat;
 
 namespace IWalker.ViewModels
 {
@@ -61,7 +62,16 @@ namespace IWalker.ViewModels
             // TODO: WARNING - this will create a PDFFile, but one may not want that here
             // if one is also going to create other PDF file guys!!
             var pdf = allFilesVM.Where(f => f.FilePointer.FileType == "pdf" && f.FilePointer.IsValid).FirstOrDefault();
-            HeroSlide = new FirstSlideHeroViewModel(pdf == null ? null : pdf.UserControl.FileDownloader);
+            if (pdf != null)
+            {
+                var pdfFile = new PDFFile(pdf.UserControl.FileDownloader);
+                var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
+                HeroSlide = new FirstSlideHeroViewModel(pdfFile, fullVM);
+            }
+            else
+            {
+                HeroSlide = new FirstSlideHeroViewModel((PDFFile) null, null);
+            }
 #if false
             var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
             if (pdf != null)
