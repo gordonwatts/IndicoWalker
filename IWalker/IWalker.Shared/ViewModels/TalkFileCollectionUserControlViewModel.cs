@@ -23,10 +23,12 @@ namespace IWalker.ViewModels
         /// </summary>
         public ReactiveList<FileUserControlViewModel> TalkFiles { get; private set; }
 
+#if false
         /// <summary>
         /// The VM for the list of thumbnails associated with this talk.
         /// </summary>
         public FileSlideListViewModel TalkThumbnails { get; private set; }
+#endif
 
         /// <summary>
         /// Configure for showing multiple files.
@@ -34,27 +36,30 @@ namespace IWalker.ViewModels
         /// <param name="files"></param>
         public TalkFileCollectionUserControlViewModel(IFile[] files, ITalk t)
         {
+            // The title we use is what we grab from the first file.
+            Title = files.Length > 0 ? files[0].DisplayName : "";
+
+            // Show the list of files that can downloaded/opened. These guys can opened by other
+            // apps in the system by clicking or pressing on them.
+            var allFilesVM = (from f in files
+                             select new
+                             {
+                                 FilePointer = f,
+                                 UserControl = new FileUserControlViewModel(f)
+                             })
+                             .ToArray();
+
             TalkFiles = new ReactiveList<FileUserControlViewModel>();
-            if (files.Length > 0)
-            {
-                Title = files[0].DisplayName;
-                var allFilesVM = (from f in files
-                                  select Tuple.Create(f, new FileUserControlViewModel(f)))
-                                  .ToArray();
+            TalkFiles.AddRange(allFilesVM.Select(f => f.UserControl));
 
-                TalkFiles.AddRange(allFilesVM.Select(f => f.Item2));
-
-                var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
-                if (pdf != null)
-                {
-                    var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
-                    TalkThumbnails = new FileSlideListViewModel(pdf.Item2.FileDownloader, timeSpan);
-                }
-            }
-            else
+#if false
+            var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
+            if (pdf != null)
             {
-                Title = "";
+                var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
+                TalkThumbnails = new FileSlideListViewModel(pdf.Item2.FileDownloader, timeSpan);
             }
+#endif
         }
     }
 }

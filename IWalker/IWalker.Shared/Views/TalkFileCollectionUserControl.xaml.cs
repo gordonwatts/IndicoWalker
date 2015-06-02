@@ -31,7 +31,7 @@ namespace IWalker.Views
 
             var gc = new CompositeDisposable();
             gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
-            gc.Add(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
+            //gc.Add(this.OneWayBind(ViewModel, x => x.TalkThumbnails, y => y.FileThumbnails.ViewModel));
 
             this.WhenActivated(disposeOfMe =>
             {
