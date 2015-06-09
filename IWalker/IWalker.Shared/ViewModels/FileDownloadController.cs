@@ -75,7 +75,7 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Track the global download count across the app.
         /// </summary>
-        private static LINQHelpers.LimitGlobalCounter _gLimit = new LINQHelpers.LimitGlobalCounter(1);
+        private static LINQHelpers.LimitGlobalCounter _gLimit = new LINQHelpers.LimitGlobalCounter(4);
 
         /// <summary>
         /// Reset for testing.
