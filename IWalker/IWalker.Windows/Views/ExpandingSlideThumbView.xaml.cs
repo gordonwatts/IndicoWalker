@@ -20,20 +20,19 @@ using Windows.UI.Xaml.Navigation;
 
 namespace IWalker.Views
 {
-    public sealed partial class TalkFileCollectionUserControl : UserControl, IViewFor<TalkFileCollectionUserControlViewModel>
+    public sealed partial class ExpandingSlideThumbView : UserControl, IViewFor<ExpandingSlideThumbViewModel>
     {
-        /// <summary>
-        /// Show the list of files
-        /// </summary>
-        public TalkFileCollectionUserControl()
+        public ExpandingSlideThumbView()
         {
             this.InitializeComponent();
 
             var gc = new CompositeDisposable();
-            gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileLists.ItemsSource));
-            gc.Add(this.OneWayBind(ViewModel, x => x.Thumbs, y => y.SlidesAsThumbs.ViewModel));
-            gc.Add(this.OneWayBind(ViewModel, x => x.HeroSlide, y => y.FileHero.ViewModel));
+            gc.Add(this.OneWayBind(ViewModel, x => x.TalkAsThumbs, y => y.SlidesAsThumbs.ViewModel));
+            gc.Add(this.BindCommand(ViewModel, x => x.ShowSlides, y => y.ShowThumbs));
 
+            // Wire it up!
+
+            // Remove all subscriptions after we have been shown.
             this.WhenActivated(disposeOfMe =>
             {
                 if (gc != null)
@@ -45,20 +44,20 @@ namespace IWalker.Views
         }
 
         /// <summary>
-        /// Track the view models
+        /// Hold onto the view model, which we will need for doing all sorts of things.
         /// </summary>
-        public TalkFileCollectionUserControlViewModel ViewModel
+        public ExpandingSlideThumbViewModel ViewModel
         {
-            get { return (TalkFileCollectionUserControlViewModel)GetValue(ViewModelProperty); }
+            get { return (ExpandingSlideThumbViewModel)GetValue(ViewModelProperty); }
             set { SetValue(ViewModelProperty, value); }
         }
         public static readonly DependencyProperty ViewModelProperty =
-            DependencyProperty.Register("ViewModel", typeof(TalkFileCollectionUserControlViewModel), typeof(TalkFileCollectionUserControl), new PropertyMetadata(null));
+            DependencyProperty.Register("ViewModel", typeof(ExpandingSlideThumbViewModel), typeof(ExpandingSlideThumbView), new PropertyMetadata(null));
 
         object IViewFor.ViewModel
         {
             get { return ViewModel; }
-            set { ViewModel = (TalkFileCollectionUserControlViewModel)value; }
+            set { ViewModel = (ExpandingSlideThumbViewModel)value; }
         }
     }
 }

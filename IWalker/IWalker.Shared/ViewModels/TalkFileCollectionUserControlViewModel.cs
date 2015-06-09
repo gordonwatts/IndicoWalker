@@ -29,12 +29,10 @@ namespace IWalker.ViewModels
         /// </summary>
         public FirstSlideHeroViewModel HeroSlide { get; private set; }
 
-#if false
         /// <summary>
-        /// The VM for the list of thumbnails associated with this talk.
+        /// The list of thumbs, hidden until asked to be seen.
         /// </summary>
-        public FileSlideListViewModel TalkThumbnails { get; private set; }
-#endif
+        public ExpandingSlideThumbViewModel Thumbs { get; private set; }
 
         /// <summary>
         /// Configure for showing multiple files.
@@ -67,19 +65,14 @@ namespace IWalker.ViewModels
                 var pdfFile = new PDFFile(pdf.UserControl.FileDownloader);
                 var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
                 HeroSlide = new FirstSlideHeroViewModel(pdfFile, fullVM);
+
+                var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
+                Thumbs = new ExpandingSlideThumbViewModel(pdfFile, timeSpan);
             }
             else
             {
                 HeroSlide = new FirstSlideHeroViewModel((PDFFile) null, null);
             }
-#if false
-            var pdf = allFilesVM.Where(f => f.Item1.FileType == "pdf" && f.Item1.IsValid).FirstOrDefault();
-            if (pdf != null)
-            {
-                var timeSpan = new TimePeriod(t.StartTime, t.EndTime);
-                TalkThumbnails = new FileSlideListViewModel(pdf.Item2.FileDownloader, timeSpan);
-            }
-#endif
         }
     }
 }

@@ -12,10 +12,11 @@
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="1*"/>
+            <ColumnDefinition Width="*"/>
+            <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <ItemsControl x:Name="FileLists" Grid.Column="0" />
-        <!--<local:FileSlidesUserControl x:Name="FileThumbnails" Grid.Column="1"/>-->
-        <local:FirstSlideHeroUserControl x:Name="FileHero" Grid.Column="1"/>
+        <local:ExpandingSlideThumbView x:Name="SlidesAsThumbs" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <local:FirstSlideHeroUserControl x:Name="FileHero" Grid.Column="1" VerticalAlignment="Top"/>
     </Grid>
 </UserControl>

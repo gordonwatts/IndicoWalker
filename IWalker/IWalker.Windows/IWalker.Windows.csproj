@@ -107,6 +107,7 @@
   <ItemGroup>
     <Compile Include="Util\BatchByStreamHelper.cs" />
     <Compile Include="Util\OnScreenTrackingHelper.cs" />
+    <Compile Include="ViewModels\ExpandingSlideThumbViewModel.cs" />
     <Compile Include="ViewModels\FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\FirstSlideHeroViewModel.cs" />
     <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
@@ -125,6 +126,9 @@
     </Compile>
     <Compile Include="Views\CategoryPageView.xaml.cs">
       <DependentUpon>CategoryPageView.xaml</DependentUpon>
+    </Compile>
+    <Compile Include="Views\ExpandingSlideThumbView.xaml.cs">
+      <DependentUpon>ExpandingSlideThumbView.xaml</DependentUpon>
     </Compile>
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
@@ -246,6 +250,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\CategoryPageView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\ExpandingSlideThumbView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>

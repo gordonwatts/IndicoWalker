@@ -26,10 +26,8 @@ namespace IWalker.ViewModels
         /// </summary>
         /// <param name="downloader">The download controller. This assumes this is for a PDF file, and it is Valid.</param>
         /// <param name="talkTime">The time that this guy is relevant</param>
-        public FileSlideListViewModel(FileDownloadController downloader, TimePeriod talkTime)
+        public FileSlideListViewModel(PDFFile pdfFile, TimePeriod talkTime)
         {
-            Debug.Assert(downloader != null);
-
             // Get the object consistent.
             SlideThumbnails = new ReactiveList<SlideThumbViewModel>();
 
@@ -52,20 +50,6 @@ namespace IWalker.ViewModels
                     )
                     .Where(_ => Settings.AutoDownloadNewMeeting);
             }
-
-            // The last trick is that if the file hasn't been downloaded, then we don't want to fire this.
-            // This prevents this from being auto-downloaded, if the person has not set auto-download.
-
-            updateTalkFile = updateTalkFile
-                .Where(_ => downloader.IsDownloaded);
-
-            // Ping the downloader to control when it should try to download things.
-
-            updateTalkFile
-                .InvokeCommand(downloader.DownloadOrUpdate);
-
-            // Now attach a PDF file to this guy, which we can then use to get at all files.
-            var pdfFile = new PDFFile(downloader);
 
             // A view model to show the whole thing as a strip view.
             var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
