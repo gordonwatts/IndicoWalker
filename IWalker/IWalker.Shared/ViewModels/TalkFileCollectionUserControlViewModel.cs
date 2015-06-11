@@ -24,6 +24,7 @@ namespace IWalker.ViewModels
         /// </summary>
         public ReactiveList<FileUserControlViewModel> TalkFiles { get; private set; }
 
+#if WINDOWS_APP
         /// <summary>
         /// The "title" slide for the talk, as a teaser.
         /// </summary>
@@ -33,6 +34,7 @@ namespace IWalker.ViewModels
         /// The list of thumbs, hidden until asked to be seen.
         /// </summary>
         public ExpandingSlideThumbViewModel Thumbs { get; private set; }
+#endif
 
         /// <summary>
         /// Configure for showing multiple files.
@@ -56,6 +58,7 @@ namespace IWalker.ViewModels
             TalkFiles = new ReactiveList<FileUserControlViewModel>();
             TalkFiles.AddRange(allFilesVM.Select(f => f.UserControl));
 
+#if WINDOWS_APP
             // If there is a PDF file, then we use that to show a "hero" slide.
             // TODO: WARNING - this will create a PDFFile, but one may not want that here
             // if one is also going to create other PDF file guys!!
@@ -73,6 +76,7 @@ namespace IWalker.ViewModels
             {
                 HeroSlide = new FirstSlideHeroViewModel((PDFFile) null, null);
             }
+#endif
         }
     }
 }
