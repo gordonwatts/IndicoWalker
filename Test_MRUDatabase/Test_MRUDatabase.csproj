@@ -135,6 +135,7 @@
     <Compile Include="Util\t_LINQHelpers.cs" />
     <Compile Include="Util\t_LocalTalkFileManager.cs" />
     <Compile Include="Util\t_ListOrdering.cs" />
+    <Compile Include="Util\t_RxUtils.cs" />
     <Compile Include="ViewModels\t_AddOrUpdateIndicoApiKeyViewModel.cs" />
     <Compile Include="ViewModels\t_CategoryConfigViewModel.cs" />
     <Compile Include="ViewModels\t_CategoryPageViewModel.cs" />

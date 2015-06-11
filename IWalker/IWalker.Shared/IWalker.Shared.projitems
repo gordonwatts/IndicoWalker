@@ -48,6 +48,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)Util\ListOrdering.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\LocalTalkFileManager.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\MeetingListRefUtils.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)Util\RxUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\SecurityUtils.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\Settings.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)Util\StringHelpers.cs" />
