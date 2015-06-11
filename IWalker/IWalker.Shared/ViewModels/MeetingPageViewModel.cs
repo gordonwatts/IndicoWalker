@@ -107,7 +107,7 @@ namespace IWalker.ViewModels
                 .Take(1)
                 //.SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => MeetingLoader(meeting), null, DateTime.Now + Settings.CacheAgendaTime))
                 .SelectMany(_ => Blobs.LocalStorage.GetAndFetchLatest(meeting.AsReferenceString(), () => meeting.GetMeeting(), null, DateTime.Now + Settings.CacheAgendaTime))
-                .Catch((Exception e) => MeetingLoadFailed(meeting))
+                .CatchAndSwallowIfAfter(1, (Exception e) => MeetingLoadFailed(meeting))
                 .Publish();
 
             ldrCmdReady
