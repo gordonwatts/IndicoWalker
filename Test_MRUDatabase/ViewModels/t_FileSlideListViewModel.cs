@@ -28,7 +28,8 @@ namespace Test_MRUDatabase.ViewModels
 
             var df = new dummyFile("test.pdf", "test.pdf");
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             // Initially, everything should be all zeros.
             var list = vm.SlideThumbnails;
@@ -56,7 +57,8 @@ namespace Test_MRUDatabase.ViewModels
             // Now, we are going to update the cache, and see if it gets re-read.
             df.DateToReturn = "this is the second one";
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -86,7 +88,8 @@ namespace Test_MRUDatabase.ViewModels
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -112,7 +115,8 @@ namespace Test_MRUDatabase.ViewModels
             // Now, we are going to update the cache, and see if it gets re-read (which it should since we have it)
             df.DateToReturn = "this is the second one";
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -134,7 +138,8 @@ namespace Test_MRUDatabase.ViewModels
 
             // Now, we are going to update the cache, and see if it gets re-read.
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
             Assert.IsNotNull(list);
@@ -151,7 +156,8 @@ namespace Test_MRUDatabase.ViewModels
 
             var df = new dummyFile("test.pdf", "test.pdf");
             var dfctl = new FileDownloadController(df);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
 
@@ -183,7 +189,8 @@ namespace Test_MRUDatabase.ViewModels
             var df = new dummyFile("test.pdf", "test.pdf");
             var dfctl = new FileDownloadController(df);
             dfctl.DownloadOrUpdate.Execute(null);
-            var vm = new FileSlideListViewModel(dfctl, new TimePeriod(DateTime.Now, DateTime.Now));
+            var pdfFile = new PDFFile(dfctl);
+            var vm = new FileSlideListViewModel(pdfFile, new TimePeriod(DateTime.Now, DateTime.Now));
 
             var list = vm.SlideThumbnails;
 
