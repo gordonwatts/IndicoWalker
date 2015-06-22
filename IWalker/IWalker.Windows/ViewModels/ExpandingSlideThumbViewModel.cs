@@ -1,13 +1,6 @@
-﻿using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Reactive.Disposables;
-using System.Reactive;
+﻿using IWalker.Util;
+using ReactiveUI;
 using System.Reactive.Linq;
-using System.Text;
-using System.Threading.Tasks;
-using IWalker.Util;
 
 namespace IWalker.ViewModels
 {
@@ -21,6 +14,12 @@ namespace IWalker.ViewModels
         /// When fired, it cause the strip of slides to be populated.
         /// </summary>
         public ReactiveCommand<object> ShowSlides { get; private set; }
+
+        public int NumberOfSlides
+        {
+            get { return _numberOfSlides.Value; }
+        }
+        private ObservableAsPropertyHelper<int> _numberOfSlides;
 
         /// <summary>
         /// Fired to close all other slide shows.
@@ -49,6 +48,9 @@ namespace IWalker.ViewModels
 
             var noThumbs = _resetSlideShow
                 .Select(_ => (FileSlideListViewModel)null);
+
+            downloader.WhenAny(x => x.NumberOfPages, x => x.Value)
+                .ToProperty(this, x => x.NumberOfSlides, out _numberOfSlides, 0, RxApp.MainThreadScheduler);
 
             Observable.Merge(newThumbs, noThumbs)
                 .ToProperty(this, x => x.TalkAsThumbs, out _talkAsThumbs, null, RxApp.MainThreadScheduler);

@@ -1,20 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.Linq;
 using System.Reactive.Disposables;
-using System.Runtime.InteropServices.WindowsRuntime;
-using Windows.Foundation;
-using Windows.Foundation.Collections;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
-using Windows.UI.Xaml.Controls.Primitives;
-using Windows.UI.Xaml.Data;
-using Windows.UI.Xaml.Input;
-using Windows.UI.Xaml.Media;
-using Windows.UI.Xaml.Navigation;
 
 // The User Control item template is documented at http://go.microsoft.com/fwlink/?LinkId=234236
 
@@ -29,6 +17,7 @@ namespace IWalker.Views
             var gc = new CompositeDisposable();
             gc.Add(this.OneWayBind(ViewModel, x => x.TalkAsThumbs, y => y.SlidesAsThumbs.ViewModel));
             gc.Add(this.BindCommand(ViewModel, x => x.ShowSlides, y => y.ShowThumbs));
+            gc.Add(this.OneWayBind(ViewModel, x => x.NumberOfSlides, y => y.ShowThumbs.Content, np => string.Format("({0} thumbnails)", np)));
 
             // Wire it up!
 
