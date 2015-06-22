@@ -16,7 +16,7 @@
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
         <ItemsControl x:Name="FileLists" Grid.Column="0" />
-        <local:ExpandingSlideThumbView x:Name="SlidesAsThumbs" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" />
+        <local:ExpandingSlideThumbView x:Name="SlidesAsThumbs" Grid.Column="2" HorizontalAlignment="Left" VerticalAlignment="Top" MinHeight="250" />
         <local:FirstSlideHeroUserControl x:Name="FileHero" Grid.Column="1" VerticalAlignment="Top"/>
     </Grid>
 </UserControl>

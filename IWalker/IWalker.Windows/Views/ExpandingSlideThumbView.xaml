@@ -8,102 +8,102 @@
     mc:Ignorable="d"
     d:DesignHeight="300"
     d:DesignWidth="400">
-	<UserControl.Resources>
-		<Style x:Key="FlyoutSquares" TargetType="Button">
-			<Setter Property="Background" Value="{ThemeResource ButtonBackgroundThemeBrush}"/>
-			<Setter Property="Foreground" Value="{ThemeResource ButtonForegroundThemeBrush}"/>
-			<Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderThemeBrush}"/>
-			<Setter Property="BorderThickness" Value="{ThemeResource ButtonBorderThemeThickness}"/>
-			<Setter Property="Padding" Value="12,4,12,4"/>
-			<Setter Property="HorizontalAlignment" Value="Left"/>
-			<Setter Property="VerticalAlignment" Value="Center"/>
-			<Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
-			<Setter Property="FontWeight" Value="SemiBold"/>
-			<Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
-			<Setter Property="Template">
-				<Setter.Value>
-					<ControlTemplate TargetType="Button">
-						<Grid>
-							<Grid.RowDefinitions>
-								<RowDefinition Height="*"/>
-								<RowDefinition Height="*"/>
-							</Grid.RowDefinitions>
-							<VisualStateManager.VisualStateGroups>
-								<VisualStateGroup x:Name="CommonStates">
-									<VisualState x:Name="Normal"/>
-									<VisualState x:Name="PointerOver">
-										<Storyboard>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPointerOverBackgroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPointerOverForegroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-										</Storyboard>
-									</VisualState>
-									<VisualState x:Name="Pressed">
-										<Storyboard>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedBackgroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedForegroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-										</Storyboard>
-									</VisualState>
-									<VisualState x:Name="Disabled">
-										<Storyboard>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBackgroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderBrush" Storyboard.TargetName="Border">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBorderThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-											<ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
-												<DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledForegroundThemeBrush}"/>
-											</ObjectAnimationUsingKeyFrames>
-										</Storyboard>
-									</VisualState>
-								</VisualStateGroup>
-								<VisualStateGroup x:Name="FocusStates">
-									<VisualState x:Name="Focused">
-										<Storyboard>
-											<DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualWhite"/>
-											<DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualBlack"/>
-										</Storyboard>
-									</VisualState>
-									<VisualState x:Name="Unfocused"/>
-									<VisualState x:Name="PointerFocused"/>
-								</VisualStateGroup>
-							</VisualStateManager.VisualStateGroups>
-							<Border x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="3" CornerRadius="3" BorderThickness="1" Padding="4">
-								<Grid RenderTransformOrigin="0.5,0.5">
-									<Grid.RowDefinitions>
-										<RowDefinition Height="1*" />
-										<RowDefinition Height="*"/>
-									</Grid.RowDefinitions>
-									<StackPanel Orientation="Horizontal">
-										<ContentPresenter Margin="0,0,15,0">
-											<Path Width="60" Height="60" Canvas.Left="0" Canvas.Top="0" Stretch="Fill" Fill="{TemplateBinding Foreground}" Data="F1 M 0,12.3975L 0,10.155C 0,8.82501 0.61499,8.16003 1.845,8.16003L 3.91498,8.16003C 5.14496,8.16003 5.76001,8.82501 5.76001,10.155L 5.76001,12.3975C 5.76001,13.7325 5.14496,14.4 3.91498,14.4L 1.845,14.4C 0.61499,14.4 0,13.7325 0,12.3975 Z M 0,4.23749L 0,1.995C 0,0.665039 0.61499,0 1.845,0L 3.91498,0C 5.14496,0 5.76001,0.665039 5.76001,1.995L 5.76001,4.23749C 5.76001,5.57251 5.14496,6.23999 3.91498,6.23999L 1.845,6.23999C 0.61499,6.23999 0,5.57251 0,4.23749 Z M 8.63995,12.3975L 8.63995,10.155C 8.63995,8.82501 9.255,8.16003 10.485,8.16003L 12.555,8.16003C 13.785,8.16003 14.4,8.82501 14.4,10.155L 14.4,12.3975C 14.4,13.7325 13.785,14.4 12.555,14.4L 10.485,14.4C 9.255,14.4 8.63995,13.7325 8.63995,12.3975 Z M 8.63995,4.23749L 8.63995,1.995C 8.63995,0.665039 9.255,0 10.485,0L 12.555,0C 13.785,0 14.4,0.665039 14.4,1.995L 14.4,4.23749C 14.4,5.57251 13.785,6.23999 12.555,6.23999L 10.485,6.23999C 9.255,6.23999 8.63995,5.57251 8.63995,4.23749 Z "/>
-										</ContentPresenter>
-										<ContentPresenter RenderTransformOrigin="0.5,0.5">
-											<ContentPresenter.RenderTransform>
-												<CompositeTransform Rotation="180"/>
-											</ContentPresenter.RenderTransform>
-											<Path Width="30" Height="60" Stroke="{TemplateBinding Foreground}" StrokeThickness="3.5" Stretch="Uniform" UseLayoutRounding="False" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="F1 M 328.101,80.0001L 80,328.101L 328.101,576.203" />
-										</ContentPresenter>
-									</StackPanel>
-								</Grid>
-							</Border>
-							<Rectangle x:Name="FocusVisualWhite" IsHitTestVisible="False" Opacity="0" StrokeDashOffset="1.5" StrokeEndLineCap="Square" Stroke="{ThemeResource FocusVisualWhiteStrokeThemeBrush}" StrokeDashArray="1,1" Grid.RowSpan="2"/>
-							<Rectangle x:Name="FocusVisualBlack" IsHitTestVisible="False" Opacity="0" StrokeDashOffset="0.5" StrokeEndLineCap="Square" Stroke="{ThemeResource FocusVisualBlackStrokeThemeBrush}" StrokeDashArray="1,1" Grid.RowSpan="2"/>
-							<ContentPresenter x:Name="ContentPresenter" AutomationProperties.AccessibilityView="Raw" ContentTemplate="{TemplateBinding ContentTemplate}" ContentTransitions="{TemplateBinding ContentTransitions}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Grid.Row="1" />
-						</Grid>
-					</ControlTemplate>
-				</Setter.Value>
-			</Setter>
-		</Style>
-	</UserControl.Resources>
+    <UserControl.Resources>
+        <Style x:Key="FlyoutSquares" TargetType="Button">
+            <Setter Property="Background" Value="{ThemeResource ButtonBackgroundThemeBrush}"/>
+            <Setter Property="Foreground" Value="{ThemeResource ButtonForegroundThemeBrush}"/>
+            <Setter Property="BorderBrush" Value="{ThemeResource ButtonBorderThemeBrush}"/>
+            <Setter Property="BorderThickness" Value="{ThemeResource ButtonBorderThemeThickness}"/>
+            <Setter Property="Padding" Value="12,4,12,4"/>
+            <Setter Property="HorizontalAlignment" Value="Left"/>
+            <Setter Property="VerticalAlignment" Value="Center"/>
+            <Setter Property="FontFamily" Value="{ThemeResource ContentControlThemeFontFamily}"/>
+            <Setter Property="FontWeight" Value="SemiBold"/>
+            <Setter Property="FontSize" Value="{ThemeResource ControlContentThemeFontSize}"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Grid>
+                            <Grid.RowDefinitions>
+                                <RowDefinition Height="*"/>
+                                <RowDefinition Height="*"/>
+                            </Grid.RowDefinitions>
+                            <VisualStateManager.VisualStateGroups>
+                                <VisualStateGroup x:Name="CommonStates">
+                                    <VisualState x:Name="Normal"/>
+                                    <VisualState x:Name="PointerOver">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPointerOverBackgroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPointerOverForegroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Pressed">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedBackgroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonPressedForegroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Disabled">
+                                        <Storyboard>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Background" Storyboard.TargetName="Border">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBackgroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="BorderBrush" Storyboard.TargetName="Border">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledBorderThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                            <ObjectAnimationUsingKeyFrames Storyboard.TargetProperty="Foreground" Storyboard.TargetName="ContentPresenter">
+                                                <DiscreteObjectKeyFrame KeyTime="0" Value="{ThemeResource ButtonDisabledForegroundThemeBrush}"/>
+                                            </ObjectAnimationUsingKeyFrames>
+                                        </Storyboard>
+                                    </VisualState>
+                                </VisualStateGroup>
+                                <VisualStateGroup x:Name="FocusStates">
+                                    <VisualState x:Name="Focused">
+                                        <Storyboard>
+                                            <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualWhite"/>
+                                            <DoubleAnimation Duration="0" To="1" Storyboard.TargetProperty="Opacity" Storyboard.TargetName="FocusVisualBlack"/>
+                                        </Storyboard>
+                                    </VisualState>
+                                    <VisualState x:Name="Unfocused"/>
+                                    <VisualState x:Name="PointerFocused"/>
+                                </VisualStateGroup>
+                            </VisualStateManager.VisualStateGroups>
+                            <Border x:Name="Border" BorderBrush="{TemplateBinding BorderBrush}" Background="{TemplateBinding Background}" Margin="3" CornerRadius="3" BorderThickness="1" Padding="4">
+                                <Grid RenderTransformOrigin="0.5,0.5">
+                                    <Grid.RowDefinitions>
+                                        <RowDefinition Height="1*" />
+                                        <RowDefinition Height="*"/>
+                                    </Grid.RowDefinitions>
+                                    <StackPanel Orientation="Horizontal">
+                                        <ContentPresenter Margin="0,0,15,0">
+                                            <Path Width="60" Height="60" Canvas.Left="0" Canvas.Top="0" Stretch="Fill" Fill="{TemplateBinding Foreground}" Data="F1 M 0,12.3975L 0,10.155C 0,8.82501 0.61499,8.16003 1.845,8.16003L 3.91498,8.16003C 5.14496,8.16003 5.76001,8.82501 5.76001,10.155L 5.76001,12.3975C 5.76001,13.7325 5.14496,14.4 3.91498,14.4L 1.845,14.4C 0.61499,14.4 0,13.7325 0,12.3975 Z M 0,4.23749L 0,1.995C 0,0.665039 0.61499,0 1.845,0L 3.91498,0C 5.14496,0 5.76001,0.665039 5.76001,1.995L 5.76001,4.23749C 5.76001,5.57251 5.14496,6.23999 3.91498,6.23999L 1.845,6.23999C 0.61499,6.23999 0,5.57251 0,4.23749 Z M 8.63995,12.3975L 8.63995,10.155C 8.63995,8.82501 9.255,8.16003 10.485,8.16003L 12.555,8.16003C 13.785,8.16003 14.4,8.82501 14.4,10.155L 14.4,12.3975C 14.4,13.7325 13.785,14.4 12.555,14.4L 10.485,14.4C 9.255,14.4 8.63995,13.7325 8.63995,12.3975 Z M 8.63995,4.23749L 8.63995,1.995C 8.63995,0.665039 9.255,0 10.485,0L 12.555,0C 13.785,0 14.4,0.665039 14.4,1.995L 14.4,4.23749C 14.4,5.57251 13.785,6.23999 12.555,6.23999L 10.485,6.23999C 9.255,6.23999 8.63995,5.57251 8.63995,4.23749 Z "/>
+                                        </ContentPresenter>
+                                        <ContentPresenter RenderTransformOrigin="0.5,0.5">
+                                            <ContentPresenter.RenderTransform>
+                                                <CompositeTransform Rotation="180"/>
+                                            </ContentPresenter.RenderTransform>
+                                            <Path Width="30" Height="60" Stroke="{TemplateBinding Foreground}" StrokeThickness="3.5" Stretch="Uniform" UseLayoutRounding="False" StrokeStartLineCap="Round" StrokeEndLineCap="Round" StrokeLineJoin="Round" Data="F1 M 328.101,80.0001L 80,328.101L 328.101,576.203" />
+                                        </ContentPresenter>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                            <Rectangle x:Name="FocusVisualWhite" IsHitTestVisible="False" Opacity="0" StrokeDashOffset="1.5" StrokeEndLineCap="Square" Stroke="{ThemeResource FocusVisualWhiteStrokeThemeBrush}" StrokeDashArray="1,1" Grid.RowSpan="2"/>
+                            <Rectangle x:Name="FocusVisualBlack" IsHitTestVisible="False" Opacity="0" StrokeDashOffset="0.5" StrokeEndLineCap="Square" Stroke="{ThemeResource FocusVisualBlackStrokeThemeBrush}" StrokeDashArray="1,1" Grid.RowSpan="2"/>
+                            <ContentPresenter x:Name="ContentPresenter" AutomationProperties.AccessibilityView="Raw" ContentTemplate="{TemplateBinding ContentTemplate}" ContentTransitions="{TemplateBinding ContentTransitions}" Content="{TemplateBinding Content}" HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}" Margin="0" VerticalAlignment="{TemplateBinding VerticalContentAlignment}" Grid.Row="1" />
+                        </Grid>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
     
     <Grid>
         <Button x:Name="ShowThumbs" Content="(44 slides)" Style="{StaticResource FlyoutSquares}" Margin="50,0,0,0"/>
