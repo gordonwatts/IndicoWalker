@@ -18,6 +18,7 @@ namespace IWalker.Views
             gc.Add(this.OneWayBind(ViewModel, x => x.TalkAsThumbs, y => y.SlidesAsThumbs.ViewModel));
             gc.Add(this.BindCommand(ViewModel, x => x.ShowSlides, y => y.ShowThumbs));
             gc.Add(this.OneWayBind(ViewModel, x => x.NumberOfSlides, y => y.ShowThumbs.Content, np => string.Format("({0} thumbnails)", np)));
+            gc.Add(this.OneWayBind(ViewModel, x => x.CanShowThumbs, y => y.ShowThumbs.Visibility));
 
             // Wire it up!
 
