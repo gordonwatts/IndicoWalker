@@ -140,6 +140,7 @@
     <Compile Include="ViewModels\t_CategoryConfigViewModel.cs" />
     <Compile Include="ViewModels\t_CategoryPageViewModel.cs" />
     <Compile Include="ViewModels\t_ErrorUserControLViewModel.cs" />
+    <Compile Include="ViewModels\t_ExpandingSlideThumbViewModel.cs" />
     <Compile Include="ViewModels\t_FileSlideListViewModel.cs" />
     <Compile Include="ViewModels\t_FileDownloadController.cs" />
     <Compile Include="ViewModels\t_FileUserControlViewModel.cs" />
