@@ -1,6 +1,8 @@
 ﻿using IWalker.ViewModels;
 using ReactiveUI;
+using System;
 using System.Reactive.Disposables;
+using System.Reactive.Linq;
 using Windows.UI.Xaml;
 using Windows.UI.Xaml.Controls;
 
@@ -19,6 +21,7 @@ namespace IWalker.Views
 
             var gc = new CompositeDisposable();
             gc.Add(this.OneWayBind(ViewModel, x => x.SlideThumbnails, y => y.Slides.ItemsSource));
+            gc.Add(this.WhenAny(x => x.ViewModel, y => y.Value).Where(v => v == null).Subscribe(_ => Slides.ItemsSource = null));
 
             this.WhenActivated(disposeOfMe =>
             {
