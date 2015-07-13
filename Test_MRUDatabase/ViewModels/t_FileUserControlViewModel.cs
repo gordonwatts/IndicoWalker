@@ -1,9 +1,6 @@
 ﻿using IWalker.Util;
 using IWalker.ViewModels;
-using Microsoft.Reactive.Testing;
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
-using ReactiveUI.Testing;
-using System;
 using System.Diagnostics;
 using System.IO;
 using System.Reactive.Linq;
@@ -25,7 +22,7 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
-        public void DownloadOccursWhenAsked()
+        public async Task DownloadOccursWhenAsked()
         {
             // The file - we can use dummy data b.c. we aren't feeding it to the PDF renderer.
             var f = new dummyFile();
@@ -51,6 +48,7 @@ namespace Test_MRUDatabase.ViewModels
             fucVM.ClickedUs.Execute(null);
 
             // This should be an immediate download in this test, so look for it.
+            await TestUtils.SpinWait(() => fucVM.FileNotCachedOrDownloading == false, 1000);
             Assert.IsFalse(fucVM.FileNotCachedOrDownloading);
             Assert.IsFalse(fucVM.IsDownloading);
         }
