@@ -50,7 +50,6 @@ namespace IWalker.ViewModels
         public ExpandingSlideThumbViewModel(PDFFile downloader, TimePeriod talkTime)
         {
             // Showing the slides should generate it here, and nullify it everywhere else.
-            _resetSlideShow = ReactiveCommand.Create();
             ShowSlides = ReactiveCommand.Create();
 
             // FIre the reset command, with the current downloader as an argument
@@ -75,7 +74,7 @@ namespace IWalker.ViewModels
             Observable.Merge(newThumbs, noThumbs)
                 .Select(x => x == null ? true : false)
                 .CombineLatest(downloader.WhenAny(x => x.NumberOfPages, x => x.Value != 0), (thumbsSeen, npagesSeen) => npagesSeen ? thumbsSeen : false)
-                .WriteLine(x => string.Format("  -> and writing out {0}", x))
+                .WriteLine(x => string.Format("  -> and writing out {0} for can show thumbs", x))
                 .ToProperty(this, x => x.CanShowThumbs, out _canShowThumbs, true, RxApp.MainThreadScheduler);
 
             // Track the # of pages. Used to display some info below the button in most impelemntations.

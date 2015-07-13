@@ -97,12 +97,16 @@ namespace Test_MRUDatabase.ViewModels
 
             // Make sure there are no slides - also primes the pump for Rx.
             Assert.IsNull(exp.TalkAsThumbs);
+            Assert.IsTrue(exp.CanShowThumbs);
 
             // Open the slides!
             exp.ShowSlides.Execute(null);
 
             // See if they opened!
             await TestUtils.SpinWait(() => exp.TalkAsThumbs != null, 5000);
+
+            // And the can show thumbs should now be false.
+            await TestUtils.SpinWait(() => exp.CanShowThumbs == false, 100);
         }
 
         /// <summary>
