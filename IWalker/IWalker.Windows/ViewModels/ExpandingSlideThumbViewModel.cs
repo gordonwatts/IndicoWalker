@@ -71,9 +71,16 @@ namespace IWalker.ViewModels
                 .WriteLine(x => string.Format("--> writing out a {0} to the actual display property.", x == null ? "null" : "non-null"))
                 .ToProperty(this, x => x.TalkAsThumbs, out _talkAsThumbs, null, RxApp.MainThreadScheduler);
 
-            Observable.Merge(newThumbs, noThumbs)
-                .Select(x => x == null ? true : false)
-                .CombineLatest(downloader.WhenAny(x => x.NumberOfPages, x => x.Value != 0), (thumbsSeen, npagesSeen) => npagesSeen ? thumbsSeen : false)
+            // The logic for canShowThumbs is tricky:
+            // 1. True if the downloader has downloaded and opened the file and parsed it successfully (# pages != 0).
+            // 2. False if we have fired off a new thumbs guy, but that can be only active if can show thumbs is true (right??).
+            // 3. True if we've shown thumbs and we stop showing them.
+
+            var downloaded = downloader.WhenAny(x => x.NumberOfPages, x => x.Value != 0);
+            var areShowing = Observable.Merge(newThumbs, noThumbs)
+                .Select(x => x == null ? true : false);
+
+            Observable.Merge(downloaded, areShowing)
                 .WriteLine(x => string.Format("  -> and writing out {0} for can show thumbs", x))
                 .ToProperty(this, x => x.CanShowThumbs, out _canShowThumbs, true, RxApp.MainThreadScheduler);
 

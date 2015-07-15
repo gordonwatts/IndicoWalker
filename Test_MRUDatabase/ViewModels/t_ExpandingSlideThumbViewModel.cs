@@ -53,6 +53,7 @@ namespace Test_MRUDatabase.ViewModels
                 };
                 var dc = new dummyCache();
                 var vm = new FileDownloadController(f, dc);
+                vm.DownloadOrUpdate.Execute(null);
 
                 return new PDFFile(vm);
             };
@@ -97,7 +98,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // Make sure there are no slides - also primes the pump for Rx.
             Assert.IsNull(exp.TalkAsThumbs);
-            Assert.IsTrue(exp.CanShowThumbs);
+            await TestUtils.SpinWait(() => exp.CanShowThumbs == true, 1000);
 
             // Open the slides!
             exp.ShowSlides.Execute(null);
@@ -135,13 +136,38 @@ namespace Test_MRUDatabase.ViewModels
             await TestUtils.SpinWait(() => exps[0].TalkAsThumbs == null, 1000);
         }
 
-#if later
+        /// <summary>
+        /// As long as the file hasn't been downloaded, mark the button as not yet availible.
+        /// </summary>
+        /// <returns></returns>
         [TestMethod]
         public async Task ButtonNotGoodTillDownload()
         {
-            // Make sure that while a file is downloading that the button to show the slides doesn't work
-            Assert.Inconclusive();
+            // Build a PDF file that will only download after we ask it to.
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+            var dc = new dummyCache();
+            var vm = new FileDownloadController(f, dc);
+
+            var pdf = new PDFFile(vm);
+
+
+            // Open a single talk and see if we can see it open.
+            var now = new TimePeriod(DateTime.Now, DateTime.Now + TimeSpan.FromSeconds(1000));
+
+            var exp = new ExpandingSlideThumbViewModel(pdf, now);
+
+            // Make sure there are no slides - also primes the pump for Rx.
+            Assert.IsNull(exp.TalkAsThumbs);
+            await TestUtils.SpinWait(() => exp.CanShowThumbs == false, 1000);
+
+            // Now, make sure that things go "true" after we fire off the file.
+            vm.DownloadOrUpdate.Execute(null);
+            await TestUtils.SpinWait(() => exp.CanShowThumbs == true, 1000);
         }
-#endif
     }
 }
