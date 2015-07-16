@@ -83,7 +83,7 @@ namespace IWalker.ViewModels
 
             Observable.Merge(downloaded, areShowing)
                 .WriteLine(x => string.Format("  -> and writing out {0} for can show thumbs", x))
-                .ToProperty(this, x => x.CanShowThumbs, out _canShowThumbs, true, RxApp.MainThreadScheduler);
+                .ToProperty(this, x => x.CanShowThumbs, out _canShowThumbs, false, RxApp.MainThreadScheduler);
 
             // Track the # of pages. Used to display some info below the button in most impelemntations.
             downloader.WhenAny(x => x.NumberOfPages, x => x.Value)
