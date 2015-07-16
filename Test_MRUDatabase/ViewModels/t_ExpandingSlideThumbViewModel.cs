@@ -169,5 +169,50 @@ namespace Test_MRUDatabase.ViewModels
             vm.DownloadOrUpdate.Execute(null);
             await TestUtils.SpinWait(() => exp.CanShowThumbs == true, 1000);
         }
+
+        /// <summary>
+        /// WHen we open the second talk, the first one should be closed.
+        /// </summary>
+        /// <returns></returns>
+        [TestMethod]
+        public async Task ShowSlidesInSecondTalkCausesFirstNonDownloadedToShowButton()
+        {
+            // The normal one, that will download and whose button we can press.
+
+            var now = new TimePeriod(DateTime.Now, DateTime.Now + TimeSpan.FromSeconds(1000));
+            var pf = await MakeDownloaders(1);
+            var exp1 = pf.Select(pdf => new ExpandingSlideThumbViewModel(pdf, now)).First();
+
+            // The second one that will be "stuck".
+
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+            var dc = new dummyCache();
+            var vm = new FileDownloadController(f, dc);
+
+            var pdf2 = new PDFFile(vm);
+
+            var exp2 = new ExpandingSlideThumbViewModel(pdf2, now);
+
+            // Initialize the download guys
+            Assert.IsNull(exp1.TalkAsThumbs);
+            Assert.IsNull(exp2.TalkAsThumbs);
+
+            // The first talk should have slides ready to show, and the second one not since
+            // we've not started the download yet.
+            await TestUtils.SpinWait(() => exp1.CanShowThumbs == true, 1000);
+            await TestUtils.SpinWait(() => exp2.CanShowThumbs == false, 1000);
+
+            // Show the thumbs for the first talk.
+            exp1.ShowSlides.Execute(null);
+
+            // And now both should be false.
+            await TestUtils.SpinWait(() => exp1.CanShowThumbs == false, 1000);
+            await TestUtils.SpinWait(() => exp2.CanShowThumbs == false, 1000);
+        }
     }
 }

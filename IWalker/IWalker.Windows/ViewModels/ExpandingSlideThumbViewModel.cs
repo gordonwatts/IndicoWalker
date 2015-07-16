@@ -57,9 +57,10 @@ namespace IWalker.ViewModels
                 .Select(_ => downloader)
                 .InvokeCommand(_resetSlideShow);
 
-            // When the reset shows up, only pay attention if a different file is being shown.
+            // When the reset shows up, only pay attention if a different file is being shown
+            // and we have something to show!
             var noThumbs = _resetSlideShow
-                .Where(dl => downloader != dl)
+                .Where(dl => downloader != dl && downloader.NumberOfPages != 0)
                 .Select(_ => (FileSlideListViewModel)null);
 
             // When we want to show the slides just create the new view model.
