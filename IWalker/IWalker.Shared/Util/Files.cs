@@ -133,20 +133,23 @@ namespace IWalker.Util
             /// <returns></returns>
             public Windows.Foundation.IAsyncOperationWithProgress<IBuffer, uint> ReadAsync(IBuffer buffer, uint count, InputStreamOptions options)
             {
-                var goodCount = (int) Math.Min(DistTillEnd(), (ulong) count);
                 return AsyncInfo.Run<IBuffer, uint>(async (token, progress) =>
                 {
                     return await Task.Factory.StartNew(() =>
                     {
-                        if (goodCount == 0)
-                            return null;
-                        using (var dw = new DataWriter())
+                        lock (this)
                         {
-                            var b = _buffer.AsBuffer((int)_position, goodCount);
-                            dw.WriteBuffer(b);
-                            var result = dw.DetachBuffer();
-                            _position += (ulong)goodCount;
-                            return result;
+                            var goodCount = (int)Math.Min(DistTillEnd(), (ulong)count);
+                            if (goodCount == 0)
+                                return null;
+                            using (var dw = new DataWriter())
+                            {
+                                var b = _buffer.AsBuffer((int)_position, goodCount);
+                                dw.WriteBuffer(b);
+                                var result = dw.DetachBuffer();
+                                _position += (ulong)goodCount;
+                                return result;
+                            }
                         }
                     });
                 });
