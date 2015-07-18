@@ -57,6 +57,7 @@ namespace IWalker.Views
                 .Select(_ => Tuple.Create(RespectRenderingDimension, ActualWidth, ActualHeight))
                 .DistinctUntilChanged()
                 .CombineLatest(this.WhenAny(x => x.ViewModel, x => x.Value).Where(x => x != null), (t, vm) => t)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(t => ViewModel.RenderImage.Execute(t)));
 
             // Finally, when we are activated, provide a way to release all of our resources.
