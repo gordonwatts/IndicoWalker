@@ -3,7 +3,6 @@ using IWalker.Util;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Diagnostics;
 using System.Linq;
 using System.Reactive;
 using System.Reactive.Linq;
@@ -55,38 +54,50 @@ namespace IWalker.ViewModels
             var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
 
             // All we do is sit and watch for the # of pages to change, and when it does, we fix up the list of SlideThumbViewModel.
-            pdfFile.WhenAny(x => x.NumberOfPages, x => x.Value)
-                .DistinctUntilChanged()
+
+            var newSlideInfo = from nPages in pdfFile.WhenAny(x => x.NumberOfPages, x => x.Value).DistinctUntilChanged()
+                               from newSlides in CreateNewThumbs(nPages, pdfFile, fullVM)
+                               select new
+                               {
+                                   n = nPages,
+                                   slides = newSlides
+                               };
+
+            newSlideInfo
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(n => SetNumberOfThumbNails(n, pdfFile, fullVM));
+                .Subscribe(info => SetNumberOfThumbNails(info.n, info.slides));
         }
 
         /// <summary>
-        /// Something about the # of pages in the list has changed. We need
-        /// to update the list.
+        /// Update the UI list of page renderings.
+        /// </summary>
+        /// <param name="n">Number of pages</param>
+        /// <remarks>Must run on UI thread</remarks>
+        /// <param name="slideThumbViewModel">New slides to be added (might be an empty array)</param>
+        private void SetNumberOfThumbNails(int n, SlideThumbViewModel[] slideThumbViewModel)
+        {
+            SlideThumbnails.AddRange(slideThumbViewModel);
+            while (SlideThumbnails.Count > n)
+            {
+                SlideThumbnails.RemoveAt(SlideThumbnails.Count - 1);
+            }
+        }
+
+        /// <summary>
+        /// Create the new slides and load them up.
         /// </summary>
         /// <param name="n"></param>
         /// <param name="pdfFile"></param>
-        private async Task SetNumberOfThumbNails(int n, PDFFile pdfFile, Lazy<FullTalkAsStripViewModel> fullVM)
+        /// <param name="fullVM"></param>
+        /// <returns></returns>
+        private async Task<SlideThumbViewModel[]> CreateNewThumbs(int n, PDFFile pdfFile, Lazy<FullTalkAsStripViewModel> fullVM)
         {
-            // If we are adding slides, make sure they are "setup" before showing them.
-            if (SlideThumbnails.Count < n)
+            var newSlides = Enumerable.Range(SlideThumbnails.Count, n - SlideThumbnails.Count).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), fullVM, i)).ToArray();
+            foreach (var sld in newSlides)
             {
-                var newSlides = Enumerable.Range(SlideThumbnails.Count, n - SlideThumbnails.Count).Select(i => new SlideThumbViewModel(pdfFile.GetPageStreamAndCacheInfo(i), fullVM, i));
-                foreach (var sld in newSlides)
-                {
-                    await sld.LoadSize();
-                }
-                SlideThumbnails.AddRange(newSlides);
+                await sld.LoadSize();
             }
-            else
-            {
-                while (SlideThumbnails.Count > n)
-                {
-                    SlideThumbnails.RemoveAt(SlideThumbnails.Count - 1);
-                }
-
-            }
+            return newSlides;
         }
     }
 }
