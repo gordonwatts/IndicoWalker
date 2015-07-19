@@ -3,7 +3,8 @@ using IWalker.ViewModels;
 using ReactiveUI;
 using Splat;
 using System;
-using System.Reactive.Disposables;
+using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 using Windows.System;
 using Windows.UI.Xaml;
@@ -12,70 +13,28 @@ using Windows.UI.Xaml.Controls;
 namespace IWalker.Views
 {
     /// <summary>
-    /// View for a PDF talk as a full list of slides (full screen) with keys and other things to navigate around.
+    /// View for a PDF talk as a full list of slides (full screen) with keys and other things to navagate around.
     /// </summary>
     public sealed partial class FullTalkAsStripView : Page, IViewFor<FullTalkAsStripViewModel>
     {
         public FullTalkAsStripView()
         {
             this.InitializeComponent();
+            this.WhenActivated(disposeOfMe =>
+            {
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
 
-            var gc = new CompositeDisposable();
+                // If the ESC key or backbutton is hit, we want to navigate back.
+                var keyrelease = SlideStrip.Events().KeyDown
+                    .Where(keys => ViewModel != null);
 
-            gc.Add(this.OneWayBind(ViewModel, x => x.Pages, y => y.SlideStrip.ItemsSource));
+                keyrelease
+                    .Where(keys => keys.Key == VirtualKey.Escape)
+                    .Do(keys => keys.Handled = true)
+                    .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null));
 
-            // If the ESC key or back-button is hit, we want to navigate back.
-            var keyrelease = SlideStrip.Events().KeyDown
-                .Where(keys => ViewModel != null);
+                backButton.WireAsBackButton();
 
-            gc.Add(keyrelease
-                .Where(keys => keys.Key == VirtualKey.Escape)
-                .Do(keys => keys.Handled = true)
-                .Subscribe(e => Locator.Current.GetService<RoutingState>().NavigateBack.Execute(null)));
-
-            backButton.WireAsBackButton();
-
-#if false
-                // When the VM asks us to move...
-                // And when we get asked to bring a page into view...
-                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
-                    .CombineLatest(SlideStrip.Events().Loaded, (vm, loaded) => vm)
-                    .Where(x => x != null)
-                    .SelectMany(vm => vm.MoveToPage)
-                    .Delay(TimeSpan.FromMilliseconds(500))
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Where(p => SlideStrip.Items.Count >= p)
-                    .Subscribe(p => SlideStrip.ScrollIntoView(SlideStrip.Items[p])));
-
-                // Forward and backwards arrows.
-                // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
-                // get a scroll to the item we want. So we need to aggregate those while running.
-                _currentPage = 0;
-
-                // When the VM asks us to move...
-                // And when we get asked to bring a page into view...
-                disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value)
-                    .CombineLatest(SlideStrip.Events().Loaded, (vm, loaded) => vm)
-                    .Where(x => x != null)
-                    .SelectMany(vm => vm.MoveToPage)
-                    .Do(p => _currentPage = p)
-                    .ObserveOn(RxApp.MainThreadScheduler)
-                    .Where(p => SlideStrip.Items.Count >= p)
-                    .Subscribe(p => Debug.WriteLine("Looking at page {0}", p)));
-                    //.Subscribe(p => SlideStrip.ScrollIntoView(SlideStrip.Items[p])));
-
-                var keysByScrolling = keyrelease
-                        .Select(k => Tuple.Create(k, calcKeyMoveRequest(k)))
-                        .Where(k => k.Item2 != 0)
-                        .Do(k => k.Item1.Handled = true)
-                        .Select(k => k.Item2);
-
-                disposeOfMe(keysByScrolling
-                    .Select(delta => _currentPage + delta)
-                    .InvokeCommand(ViewModel, x => x.PageMove));
-
-#endif
-#if false
                 // Forward and backwards arrows.
                 // Tricky because if we calcCurrentPage while in the middle of the scroll we won't
                 // get a scroll to the item we want. So we need to aggregate those while running.
@@ -170,21 +129,12 @@ namespace IWalker.Views
                 this.Events().Unloaded
                     .Subscribe(t => _holder.Unload());
 
-                // The orientation of this panel will affect how we calc the arrow key stuff.
-                _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
-#endif
-            this.WhenActivated(disposeOfMe =>
-            {
-                if (gc != null)
-                {
-                    disposeOfMe(gc);
-                    gc = null;
-                }
-
                 // We want to capture key strokes, etc. By default we don't have
                 // the focus, so grab it.
-                SlideStrip.Focus(Windows.UI.Xaml.FocusState.Programmatic);
+                Focus(Windows.UI.Xaml.FocusState.Programmatic);
 
+                // The orientation of this pannel will affect how we calc the arrow key stuff.
+                _orientation = theScrollViewer.VerticalScrollMode == ScrollMode.Disabled ? FullPanelOrientation.Horizontal : FullPanelOrientation.Vertical;
             });
         }
 
@@ -201,7 +151,6 @@ namespace IWalker.Views
                 return -1;
             return 0;
         }
-#if false
 
         /// <summary>
         /// Keep track of how we are going to do the scrolling.
@@ -274,15 +223,6 @@ namespace IWalker.Views
         }
 
         /// <summary>
-        /// What orientation is this panel?
-        /// </summary>
-        public enum FullPanelOrientation
-        {
-            Horizontal, Vertical
-        }
-#endif
-
-        /// <summary>
         /// Hold onto the view model, which we will need for doing all sorts of things.
         /// </summary>
         public FullTalkAsStripViewModel ViewModel
@@ -298,5 +238,14 @@ namespace IWalker.Views
             get { return ViewModel; }
             set { ViewModel = (FullTalkAsStripViewModel)value; }
         }
+
+        /// <summary>
+        /// What orientation is this pannel?
+        /// </summary>
+        public enum FullPanelOrientation
+        {
+            Horizontal, Vertical
+        }
     }
 }
+
