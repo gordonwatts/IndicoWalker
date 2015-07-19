@@ -32,15 +32,16 @@ namespace IWalker.Views
             //   - BItmapImage must be dealt with on the main thread
             //   - Despite that, when it comes back from loading the image, it may not be on the default thread!
             // TODO: can we use this to make this cleaner? http://stackoverflow.com/questions/24049931/making-an-iobservablet-that-uses-async-await-return-completed-tasks-in-origina
+
+
             gd.Add(this.WhenAny(x => x.ViewModel.ImageStream, x => x.Value)
                 .SelectMany(imageStreams => imageStreams)
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Where(_ => ViewModel != null)
                 .Do(_ => _pageVMCache = ViewModel)
                 .SelectMany(stream => ConvertToBMI(stream, _pageVMCache))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Where(t => t.Item2 == _pageVMCache)
                 .Select(t => t.Item1)
+                .ObserveOn(RxApp.MainThreadScheduler)
                 .BindTo(ThumbImage, x => x.Source));
 
             // The following things should cause a re-rendering:
@@ -52,12 +53,10 @@ namespace IWalker.Views
 
             gd.Add(this.Events().SizeChanged.Select(a => default(Unit))
                 .Merge(this.WhenAny(x => x.ShowPDF, x => default(Unit)))
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Where(_ => ShowPDF)
                 .Select(_ => Tuple.Create(RespectRenderingDimension, ActualWidth, ActualHeight))
                 .DistinctUntilChanged()
                 .CombineLatest(this.WhenAny(x => x.ViewModel, x => x.Value).Where(x => x != null), (t, vm) => t)
-                .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(t => ViewModel.RenderImage.Execute(t)));
 
             // Finally, when we are activated, provide a way to release all of our resources.
