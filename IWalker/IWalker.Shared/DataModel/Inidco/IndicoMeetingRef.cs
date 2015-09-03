@@ -438,7 +438,8 @@ namespace IWalker.DataModel.Inidco
             // Load up the normalized data.
 
             var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
-            var agenda = await al.GetNormalizedConferenceData(_info);
+            var apiInfo = IndicoApiKeyAccess.GetKey(_info.AgendaSite);
+            var agenda = await al.GetNormalizedConferenceData(_info, apiInfo == null ? null : apiInfo.ApiKey, apiInfo == null ? null : apiInfo.SecretKey);
             return new IndicoMeeting(agenda, _info.AsShortString());
         }
 
