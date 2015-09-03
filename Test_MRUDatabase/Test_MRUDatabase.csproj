@@ -180,6 +180,10 @@
     </Content>
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="..\IWalker.BackgroundTasks\IWalker.BackgroundTasks.csproj">
+      <Project>{7db05d47-7e03-42ed-9739-510f91609132}</Project>
+      <Name>IWalker.BackgroundTasks</Name>
+    </ProjectReference>
     <ProjectReference Include="..\IWalker\IWalker.Windows\IWalker.Windows.csproj">
       <Project>{aa8289dd-e217-4e94-9ab6-71deacad6883}</Project>
       <Name>IWalker.Windows</Name>
