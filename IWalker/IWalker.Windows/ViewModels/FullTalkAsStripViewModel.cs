@@ -71,10 +71,21 @@ namespace IWalker.ViewModels
 
             Pages = new ReactiveList<PDFPageViewModel>();
 
-            file.WhenAny(x => x.NumberOfPages, x => x.Value)
+            var pageSizeChanged = file.WhenAny(x => x.NumberOfPages, x => x.Value)
                 .DistinctUntilChanged()
+                .ObserveOn(RxApp.MainThreadScheduler);
+
+            var b = from newPageLength in pageSizeChanged
+                    let np = Pages.Count
+                    from allpages in CreateNPages(newPageLength - np, np, file)
+                    select new {
+                        numPages = newPageLength,
+                        freshPages = allpages
+                    };
+
+            b
                 .ObserveOn(RxApp.MainThreadScheduler)
-                .Subscribe(n => SetNPages(n, file));
+                .Subscribe(info => SetNPages(info.numPages, info.freshPages));
 
             // Page navigation. Make sure things are clean and we don't over-burden the UI before
             // we pass the info back to the UI!
@@ -104,31 +115,46 @@ namespace IWalker.ViewModels
         }
 
         /// <summary>
-        /// Configure as n pages
+        /// Create n pages, as requested, and prepare them for the UI.
         /// </summary>
         /// <param name="n"></param>
         /// <param name="file"></param>
         /// <returns></returns>
-        private async Task SetNPages(int n, PDFFile file)
+        private async Task<PDFPageViewModel[]> CreateNPages(int n, int start_index, PDFFile file)
         {
-            // First, generate enough pages for adding.
-            if (Pages.Count < n)
+            if (n <= 0)
             {
-                var newPages = Enumerable.Range(Pages.Count, n - Pages.Count).Select(i => new PDFPageViewModel(file.GetPageStreamAndCacheInfo(i))).ToArray();
-                var sequenceOfPages = newPages.Select(p => p.LoadSize());
-                foreach (var seq in sequenceOfPages)
-                {
-                    var r = await seq.ToArray();
-                }
-                Pages.AddRange(newPages);
+                return new PDFPageViewModel[0];
             }
-            else
+
+            // Create and initialize pages
+            var newPages = Enumerable.Range(start_index, n).Select(i => new PDFPageViewModel(file.GetPageStreamAndCacheInfo(i))).ToArray();
+            var sequenceOfPages = newPages.Select(p => p.LoadSize());
+            foreach (var seq in sequenceOfPages)
             {
-                while (Pages.Count > n)
-                {
-                    Pages.RemoveAt(Pages.Count - 1);
-                }
+                var r = await seq.ToArray();
             }
+
+            return newPages;
+        }
+
+        /// <summary>
+        /// Configure as n pages
+        /// </summary>
+        /// <param name="n"></param>
+        /// <returns></returns>
+        private void SetNPages(int n, PDFPageViewModel[] newPages)
+        {
+            // Add pages...
+            Pages.AddRange(newPages);
+
+            // And then take them away...
+            while (Pages.Count > n)
+            {
+                Pages.RemoveAt(Pages.Count - 1);
+            }
+
+            // Record what we've done for anyone else that is waiting on us.
             _numberPages = (uint)n;
             _loaded.OnNext(default(Unit));
         }
