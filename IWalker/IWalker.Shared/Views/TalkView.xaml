@@ -15,12 +15,6 @@
             <RowDefinition Height="1*"/>
         </Grid.RowDefinitions>
         <TextBlock x:Name="TalkTitle" Style="{StaticResource BodyTextBlockStyle}" Margin="5 0 0 4" Grid.Row="0">hi</TextBlock>
-        <ItemsControl x:Name="FileNameList" Grid.Row="1">
-            <ItemsControl.ItemsPanel>
-                <ItemsPanelTemplate>
-                    <ItemsWrapGrid Orientation="Horizontal"/>
-                </ItemsPanelTemplate>
-            </ItemsControl.ItemsPanel>
-        </ItemsControl>
+        <ItemsControl x:Name="FileNameList" Grid.Row="1" />
     </Grid>
 </UserControl>
