@@ -16,7 +16,7 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> ShowSlides { get; private set; }
 
         /// <summary>
-        /// Now many slides are availible for this talk?
+        /// Now many slides are available for this talk?
         /// </summary>
         public int NumberOfSlides
         {
@@ -85,7 +85,7 @@ namespace IWalker.ViewModels
                 .WriteLine(x => string.Format("  -> and writing out {0} for can show thumbs", x))
                 .ToProperty(this, x => x.CanShowThumbs, out _canShowThumbs, false, RxApp.MainThreadScheduler);
 
-            // Track the # of pages. Used to display some info below the button in most impelemntations.
+            // Track the # of pages. Used to display some info below the button in most implementations.
             downloader.WhenAny(x => x.NumberOfPages, x => x.Value)
                 .ToProperty(this, x => x.NumberOfSlides, out _numberOfSlides, 0, RxApp.MainThreadScheduler);
 
