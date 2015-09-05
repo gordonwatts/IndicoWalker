@@ -24,23 +24,24 @@
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="120"/>
                 <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
             </Grid.ColumnDefinitions>
-            <Button x:Name="backButton" Margin="39,59,39,0"
+            <Button x:Name="backButton" Margin="39,59,39,0" Grid.Column="0"
                         Style="{StaticResource NavigationBackButtonNormalStyle}"
                         VerticalAlignment="Top"
                         AutomationProperties.Name="Back"
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
-            <StackPanel Orientation="Vertical" Grid.Column="1" Margin="0,59,0,0">
-                <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" Grid.Column="1" 
+            <StackPanel Orientation="Vertical" Grid.Column="1" Margin="0,59,10,0">
+                <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" 
                             IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
-                <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Bottom" Margin="0,5,0,0" Grid.Column="1" Style="{StaticResource BodyTextBlockStyle}"/>
+                <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Bottom" Margin="0,8,0,0" Style="{StaticResource BodyTextBlockStyle}"/>
             </StackPanel>
-            <StackPanel Grid.Column="1" Margin="0" Orientation="Horizontal" HorizontalAlignment="Right">
+            <StackPanel Grid.Column="2" Margin="0" Orientation="Horizontal" HorizontalAlignment="Right">
             	<ComboBox x:Name="ConferenceDayPicker" HorizontalAlignment="Center" VerticalAlignment="Center">
             		<ComboBox.ItemTemplate>
             			<DataTemplate>
-            				<TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left" Grid.Column="0"/>
+            				<TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left"/>
             			</DataTemplate>
             		</ComboBox.ItemTemplate>
             	</ComboBox>
