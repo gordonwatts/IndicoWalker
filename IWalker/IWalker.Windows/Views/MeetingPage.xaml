@@ -33,8 +33,9 @@
                         AutomationProperties.AutomationId="BackButton"
                         AutomationProperties.ItemType="Navigation Button"/>
             <StackPanel Orientation="Vertical" Grid.Column="1" Margin="0,59,10,0">
-                <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}" 
-                            IsHitTestVisible="false" TextWrapping="NoWrap" TextTrimming="WordEllipsis" VerticalAlignment="Bottom" Margin="0,0,0,0"/>
+                <TextBlock x:Name="MeetingTitle" Text="Test" Style="{StaticResource HeaderTextBlockStyle}"
+                           IsHitTestVisible="false" TextWrapping="NoWrap" LineHeight="50" TextLineBounds="Full"
+                           TextTrimming="WordEllipsis" VerticalAlignment="Center" Margin="0,0,0,0"/>
                 <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Center" Margin="0,8,0,0" Style="{StaticResource BodyTextBlockStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Margin="0" Orientation="Horizontal" HorizontalAlignment="Right">
