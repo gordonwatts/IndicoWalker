@@ -25,7 +25,6 @@ namespace IWalker.ViewModels
         /// Returns true if we have a hero slide to be shown.
         /// </summary>
         public bool HaveHeroSlide { get; private set; }
-        private ObservableAsPropertyHelper<bool> _haveHeroSlide;
 
         /// <summary>
         /// Open the full view of the talk.

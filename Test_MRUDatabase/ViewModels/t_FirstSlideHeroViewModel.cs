@@ -39,6 +39,7 @@ namespace Test_MRUDatabase.ViewModels
 
             // The first spin guy
             var hero = new FirstSlideHeroViewModel(pf, null);
+            Assert.IsNull(hero.HeroPageUC);
 
             // Run the download
             fdc.DownloadOrUpdate.Execute(null);
