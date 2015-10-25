@@ -54,7 +54,6 @@ namespace IWalker.ViewModels
             var fullVM = new Lazy<FullTalkAsStripViewModel>(() => new FullTalkAsStripViewModel(Locator.Current.GetService<IScreen>(), pdfFile));
 
             // All we do is sit and watch for the # of pages to change, and when it does, we fix up the list of SlideThumbViewModel.
-
             var newSlideInfo = from nPages in pdfFile.WhenAny(x => x.NumberOfPages, x => x.Value).DistinctUntilChanged()
                                from newSlides in CreateNewThumbs(nPages, pdfFile, fullVM)
                                select new

@@ -90,7 +90,8 @@ namespace IWalker.ViewModels
             // Always pull from the cache first, but if that doesn't work, then render and place
             // in the cache.
 
-            // Get the size of the thing when it is requested.
+            // Get the size of the thing when it is requested. This sequence must be finished before
+            // any size calculations can be done!
             var imageSize = from pgInfo in pageInfo
                             from sz in _cache.GetOrFetchPageSize(pgInfo.Item1, () => pgInfo.Item2.Take(1).Select(pdf => pdf.Size.ToIWalkerSize()))
                             select new
@@ -138,6 +139,8 @@ namespace IWalker.ViewModels
         /// <param name="width">Width of the area, or 0 or infinity</param>
         /// <param name="height">Height of the area, or 0 or infinity</param>
         /// <returns></returns>
+        /// <remarks>If this is called before the initialization sequence is done, then there will be a bomb below
+        /// because we don't know the size to base our rendering on!</remarks>
         public Tuple<int, int> CalcRenderingSize(RenderingDimension orientation, double width, double height)
         {
             Debug.Assert(_pageSize != null);

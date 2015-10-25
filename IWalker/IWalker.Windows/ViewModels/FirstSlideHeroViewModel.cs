@@ -2,6 +2,7 @@
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Reactive.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -14,15 +15,17 @@ namespace IWalker.ViewModels
     public class FirstSlideHeroViewModel : ReactiveObject
     {
         /// <summary>
-        /// Get/Set the page VM.
+        /// Get the page VM.
         /// </summary>
         /// <remarks>Null if we don't have anything to show</remarks>
-        public PDFPageViewModel HeroPageUC { get; private set; }
+        public PDFPageViewModel HeroPageUC { get { return _heroPageUC.Value; } }
+        private ObservableAsPropertyHelper<PDFPageViewModel> _heroPageUC;
 
         /// <summary>
         /// Returns true if we have a hero slide to be shown.
         /// </summary>
         public bool HaveHeroSlide { get; private set; }
+        private ObservableAsPropertyHelper<bool> _haveHeroSlide;
 
         /// <summary>
         /// Open the full view of the talk.
@@ -35,24 +38,28 @@ namespace IWalker.ViewModels
         /// <param name="file">The PDF File to generate. If null, we will make this VM as invalid</param>
         public FirstSlideHeroViewModel(PDFFile file, Lazy<FullTalkAsStripViewModel> fullVM)
         {
-            if (file == null)
+            // If we are actually connected to a file, then
+            // - setup the hero slide
+            // - a button to show all slides
+            if (file != null)
             {
-                HeroPageUC = null;
-                HaveHeroSlide = false;
-            }
-            else
-            {
-                HeroPageUC = new PDFPageViewModel(file.GetPageStreamAndCacheInfo(0));
-                HaveHeroSlide = true;
-            }
+                // Hero slide. Tricky because we can't display until
+                // a fetch has been done on the PDF data.
+                var pdf = new PDFPageViewModel(file.GetPageStreamAndCacheInfo(0));
+                _heroPageUC = pdf.LoadSize()
+                    .Select(_ => pdf)
+                    .ToProperty(this, m => m.HeroPageUC, scheduler: RxApp.MainThreadScheduler);
 
-            // Open the full view. Only need to do that if we actually have it. Otherwise we should be
-            // null always!
-            if (HaveHeroSlide)
-            {
+                HaveHeroSlide = true;
+
+                // Allow a full view
                 OpenFullView = ReactiveCommand.Create();
                 OpenFullView
                     .Subscribe(_ => fullVM.Value.LoadPage(0));
+            } else
+            {
+                _heroPageUC = new ObservableAsPropertyHelper<PDFPageViewModel>(Observable.Return(null), () => { }, scheduler: RxApp.MainThreadScheduler);
+                HaveHeroSlide = false;
             }
         }
 
