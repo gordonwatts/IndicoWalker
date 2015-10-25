@@ -111,7 +111,7 @@ namespace Test_MRUDatabase
         {
             get
             {
-                throw new NotImplementedException();
+                return new ITalk[0];
             }
         }
     }
