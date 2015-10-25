@@ -254,7 +254,30 @@ namespace IWalker.DataModel.Inidco
             }
             private IFile[] _allTalkFiles = null;
 
+            /// <summary>
+            /// A unique meeting ID that is written out and serialized
+            /// </summary>
             public string MeetingUniqueID { get; set; }
+
+            /// <summary>
+            /// Return all talk files that are attached as sub-talks.
+            /// </summary>
+            [JsonIgnore]
+            public ITalk[] SubTalks
+            {
+                get
+                {
+                    if (_subTalks == null)
+                    {
+                        _subTalks = aTalk.SubTalks == null ?
+                            new ITalk[0]
+                            : aTalk.SubTalks.Select(st => new IndicoTalk(st, "neverUsedIHope")).ToArray();
+                    }
+                    return _subTalks;
+                    return null;
+                }
+            }
+            private ITalk[] _subTalks = null;
         }
 
         /// <summary>

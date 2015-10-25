@@ -144,5 +144,58 @@ namespace Test_MRUDatabase.DataModel.Indico
             var mr = new IndicoMeetingRef.IndicoTalk(mess, "t1");
             Assert.AreEqual("", mr.TalkFile.FileType);
         }
+
+        [TestMethod]
+        public void ParseSubTalksRight()
+        {
+            var talksubtalk = new Talk()
+            {
+                Title = "this is a talk",
+                StartDate = DateTime.Now - TimeSpan.FromMinutes(30),
+                EndDate = DateTime.Now + TimeSpan.FromMinutes(30),
+                ID = "5",
+                SlideURL = null,
+                Speakers = new string[] { },
+                TalkType = TypeOfTalk.Talk,
+                FilenameExtension = null,
+                DisplayFilename = null,
+                SubTalks = new Talk[]
+                {
+                    new Talk()
+                    {
+                        ID = "10",
+                        SlideURL = null,
+                        Speakers = new string[] { },
+                        TalkType = TypeOfTalk.Talk,
+                        FilenameExtension = null,
+                        DisplayFilename = "fork of it",
+                        Title = "subtalk1"
+                    }
+                }
+            };
+
+            var mr = new IndicoMeetingRef.IndicoTalk(talksubtalk, "t1");
+            Assert.AreEqual(1, mr.SubTalks.Length);
+            Assert.AreEqual("subtalk1", mr.SubTalks[0].Title);
+        }
+
+        [TestMethod]
+        public void NoSubTalksIsNotNull()
+        {
+            var mess = new Talk()
+            {
+                Title = "this is a talk",
+                StartDate = DateTime.Now - TimeSpan.FromMinutes(30),
+                EndDate = DateTime.Now + TimeSpan.FromMinutes(30),
+                ID = "5",
+                SlideURL = null,
+                Speakers = new string[] { },
+                TalkType = TypeOfTalk.Talk,
+                FilenameExtension = null,
+                DisplayFilename = null
+            };
+            var mr = new IndicoMeetingRef.IndicoTalk(mess, "t1");
+            Assert.AreEqual(0, mr.SubTalks.Length);
+        }
     }
 }

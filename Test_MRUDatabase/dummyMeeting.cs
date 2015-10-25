@@ -106,6 +106,14 @@ namespace Test_MRUDatabase
         {
             get { return new IFile[] { TalkFile }; }
         }
+
+        public ITalk[] SubTalks
+        {
+            get
+            {
+                throw new NotImplementedException();
+            }
+        }
     }
 
     // A dummy file.

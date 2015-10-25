@@ -28,5 +28,10 @@ namespace IWalker.DataModel.Interfaces
         /// Time when the talk should finish.
         /// </summary>
         DateTime EndTime { get; }
+
+        /// <summary>
+        /// Return list of sub-talks
+        /// </summary>
+        ITalk[] SubTalks { get; }
     }
 }

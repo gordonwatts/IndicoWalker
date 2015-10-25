@@ -3,6 +3,7 @@ using IWalker.Util;
 using ReactiveUI;
 using System.Linq;
 using System;
+using System.Collections;
 
 namespace IWalker.ViewModels
 {
@@ -14,12 +15,17 @@ namespace IWalker.ViewModels
         /// <summary>
         /// Get the talk we are showing. Used by others to see if we are "the same" when new updates show up.
         /// </summary>
-
         public ITalk Talk { get; private set; }
+
         /// <summary>
         /// The list of material associated with the talk, organized by name (so duplicate files get grouped in the UI).
         /// </summary>
         public ReactiveList<TalkFileCollectionUserControlViewModel> TalkFiles { get; private set; }
+
+        /// <summary>
+        /// List of any subtalks that this guy might have. Normally this is zero.
+        /// </summary>
+        public ReactiveList<ITalk> SubTalks { get; private set; }
 
         /// <summary>
         /// Init with the various items for a talk.
@@ -39,6 +45,8 @@ namespace IWalker.ViewModels
 
             TalkFiles = new ReactiveList<TalkFileCollectionUserControlViewModel>();
             TalkFiles.AddRange(byName.Select(fs => new TalkFileCollectionUserControlViewModel(fs.ToArray(), t)));
+
+            SubTalks = new ReactiveList<ITalk>();
         }
 
         /// <summary>
