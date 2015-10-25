@@ -13,8 +13,10 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="1*"/>
+            <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
         <TextBlock x:Name="TalkTitle" Style="{StaticResource BodyTextBlockStyle}" Margin="5 0 0 4" Grid.Row="0">hi</TextBlock>
         <ItemsControl x:Name="FileNameList" Grid.Row="1" />
+        <ItemsControl x:Name="SubTalkList" Grid.Row="2" Margin="40,0,0,0" />
     </Grid>
 </UserControl>

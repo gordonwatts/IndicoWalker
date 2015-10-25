@@ -15,6 +15,7 @@ namespace IWalker.Views
             var gc = new CompositeDisposable();
             gc.Add(this.OneWayBind(ViewModel, x => x.Title, y => y.TalkTitle.Text));
             gc.Add(this.OneWayBind(ViewModel, x => x.TalkFiles, y => y.FileNameList.ItemsSource));
+            gc.Add(this.OneWayBind(ViewModel, x => x.SubTalks, y => y.SubTalkList.ItemsSource));
 
             this.WhenActivated(disposeOfMe =>
             {
