@@ -440,7 +440,24 @@ namespace IWalker.DataModel.Inidco
             var al = new AgendaLoader(IndicoDataFetcher.Fetcher);
             var apiInfo = IndicoApiKeyAccess.GetKey(_info.AgendaSite);
             var agenda = await al.GetNormalizedConferenceData(_info, apiInfo == null ? null : apiInfo.ApiKey, apiInfo == null ? null : apiInfo.SecretKey);
+
+            // Clean it up
+            CleanUpMeeting(agenda);
+
             return new IndicoMeeting(agenda, _info.AsShortString());
+        }
+
+        /// <summary>
+        /// Clean up the meeting (null talks, etc.)
+        /// </summary>
+        /// <param name="agenda"></param>
+        private void CleanUpMeeting(Meeting agenda)
+        {
+            agenda.MeetingTalks = agenda.MeetingTalks.Where(m => m.StartDate.Year != 1 && m.EndDate.Year != 1).ToArray();
+            foreach (var s in agenda.Sessions)
+            {
+                s.Talks = s.Talks.Where(t => t.StartDate.Year != 1 && t.EndDate.Year != 1).ToArray();
+            }
         }
 
         /// <summary>
