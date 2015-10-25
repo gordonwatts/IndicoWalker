@@ -18,7 +18,7 @@ namespace IWalker.ViewModels
         /// Get the page VM.
         /// </summary>
         /// <remarks>Null if we don't have anything to show</remarks>
-        public PDFPageViewModel HeroPageUC { get { return _heroPageUC.Value; } }
+        public PDFPageViewModel HeroPageUC { get { return _heroPageUC != null ? _heroPageUC.Value : null; } }
         private ObservableAsPropertyHelper<PDFPageViewModel> _heroPageUC;
 
         /// <summary>
@@ -41,6 +41,8 @@ namespace IWalker.ViewModels
             // If we are actually connected to a file, then
             // - setup the hero slide
             // - a button to show all slides
+            _heroPageUC = null;
+            HaveHeroSlide = false;
             if (file != null)
             {
                 // Hero slide. Tricky because we can't display until
@@ -56,10 +58,6 @@ namespace IWalker.ViewModels
                 OpenFullView = ReactiveCommand.Create();
                 OpenFullView
                     .Subscribe(_ => fullVM.Value.LoadPage(0));
-            } else
-            {
-                _heroPageUC = new ObservableAsPropertyHelper<PDFPageViewModel>(Observable.Return(null), () => { }, scheduler: RxApp.MainThreadScheduler);
-                HaveHeroSlide = false;
             }
         }
 
