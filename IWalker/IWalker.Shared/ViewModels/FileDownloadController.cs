@@ -134,7 +134,7 @@ namespace IWalker.ViewModels
                 .Do(_ => downloadInProgress.OnNext(false))
                 .Catch(Observable.Empty<Unit>())
                 .Select(_ => true)
-                .Publish();
+                .Replay(1);
             downloadSuccessful.Connect();
 
             FileDownloadedAndCached = downloadSuccessful.Select(_ => default(Unit));
@@ -148,9 +148,11 @@ namespace IWalker.ViewModels
             // in order, no matter what latencies get caught up in the system.
             // This must be run when we are subscribed to, hence the defer.
             var initiallyCached = Observable.Defer(() => File.GetCacheCreateTime(Cache)
+                .Delay(TimeSpan.FromMilliseconds(50))
                 .Select(dt => dt.HasValue));
 
             Observable.Concat(initiallyCached, downloadSuccessful)
+                .WriteLine(v => string.Format("We are doing the IsDownloaded to {0}", v))
                 .ToProperty(this, x => x.IsDownloaded, out _isDownloaded, false);
         }
 

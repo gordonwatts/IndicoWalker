@@ -195,6 +195,36 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
+        public async Task SizePerpareCausesErrorsIfCalledEarly()
+        {
+            // Get the size stuff ready, and then call it to make sure
+            // there are no issues with doing the size calculation.
+
+            // Get the infrastructure setup
+            var f = new dummyFile();
+            var data = await TestUtils.GetFileAsBytes("test.pdf");
+            f.GetStream = () =>
+            {
+                return Observable.Return(new StreamReader(new MemoryStream(data)));
+            };
+
+            var dc = new dummyCache();
+
+            var vm = new FileDownloadController(f, dc);
+            var pf = new PDFFile(vm);
+            vm.DownloadOrUpdate.Execute(null);
+
+            // Now, build the VM
+
+            var pdfVM = new PDFPageViewModel(pf.GetPageStreamAndCacheInfo(1), dc);
+
+            // Next, fire off the size thing.
+
+            var r = pdfVM.CalcRenderingSize(IWalker.ViewModels.PDFPageViewModel.RenderingDimension.Horizontal, (double)100, (double)100);
+            Assert.IsNull(r);
+        }
+
+        [TestMethod]
         public async Task RenderAlreadyCachedFile()
         {
             // If the file has already been downloaded and installed locally (on a previous

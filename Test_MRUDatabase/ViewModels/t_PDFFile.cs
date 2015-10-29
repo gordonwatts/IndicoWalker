@@ -100,7 +100,7 @@ namespace Test_MRUDatabase.ViewModels
             // Start it off
             vm.DownloadOrUpdate.Execute(null);
 
-            Assert.AreEqual(10, pf.NumberOfPages);
+            await TestUtils.SpinWait(() => pf.NumberOfPages == 10, 1000);
 
             // Now, make sure we did it only once.
             // TODO: Currently this is 2 b.c. there is a second lookup for a date, which also includes

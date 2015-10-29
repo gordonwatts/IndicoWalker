@@ -38,10 +38,17 @@ namespace Test_MRUDatabase.ViewModels
             var f = new dummyFile();
             var dc = new dummyCache();
             await f.SaveFileInCache(DateTime.Now.ToString(), new byte[] { 0, 1 }, dc);
-            var vm = new FileDownloadController(f, dc);
-            var dummy = vm.IsDownloaded;
 
-            Assert.IsTrue(vm.IsDownloaded);
+            var vm = new FileDownloadController(f, dc);
+
+            bool value = false;
+            var dispose = vm.WhenAny(x => x.IsDownloaded, y => y.Value)
+                .Subscribe(v => value = v);
+
+            await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
+            await TestUtils.SpinWait(() => value == true, 1000);
+
+            dispose.Dispose();
         }
 
         [TestMethod]
@@ -61,7 +68,6 @@ namespace Test_MRUDatabase.ViewModels
 
             vm.DownloadOrUpdate.Execute(null);
             await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
-            Assert.IsTrue(vm.IsDownloaded);
             Assert.AreEqual(1, downloadUpdateCount);
         }
 
@@ -86,8 +92,7 @@ namespace Test_MRUDatabase.ViewModels
             // the trigger for this happens earlier.
             var bogus = vm.IsDownloaded;
 
-            await TestUtils.SpinWait(() => vm.IsDownloaded, 1000);
-            Assert.IsTrue(vm.IsDownloaded);
+            await TestUtils.SpinWait(() => vm.IsDownloaded == true, 1000);
             await TestUtils.SpinWait(() => downloadUpdateCount == 1, 1000);
             Assert.AreEqual(1, downloadUpdateCount);
         }
@@ -135,7 +140,7 @@ namespace Test_MRUDatabase.ViewModels
             vm.FileDownloadedAndCached.Subscribe(_ => downloadUpdateCount++);
 
             vm.DownloadOrUpdate.Execute(null);
-            Assert.IsTrue(vm.IsDownloaded);
+            await TestUtils.SpinWait(() =>vm.IsDownloaded == true, 1000);
             Assert.AreEqual(0, downloadUpdateCount);
         }
 
