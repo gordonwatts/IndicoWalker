@@ -6,9 +6,6 @@
     >
     <Application.Resources>
     	<ResourceDictionary>
-    		<ResourceDictionary.MergedDictionaries>
-    			<ResourceDictionary Source="ms-appx:///WindowsStoreResources.xaml"/>
-    		</ResourceDictionary.MergedDictionaries>
     		<Style x:Key="ButtonAsSimpleText" TargetType="Button">
     			<Setter Property="Background" Value="{ThemeResource ButtonBackgroundThemeBrush}"/>
     			<Setter Property="Foreground" Value="{ThemeResource ButtonForegroundThemeBrush}"/>
