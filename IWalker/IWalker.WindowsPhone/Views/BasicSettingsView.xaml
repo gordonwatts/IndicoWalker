@@ -39,8 +39,8 @@
                             <TextBlock.Text>
                                 Click the button to load a certificate that
                             can be used to authenticate for public meetings on the
-                            CERN indico.cern.ch site. Enter a password to decrypt the
-                            certificate if required.
+                            CERN indico.cern.ch site. If a password is requird to decrypt the
+                            certificate enter it first.
                             </TextBlock.Text>
                         </TextBlock>
                         <Grid>
@@ -56,7 +56,7 @@
                         <TextBlock x:Name="ErrorMessage" Text="test" Foreground="#FFFD0909" />
 
                         <!-- ApiKeys for indico -->
-                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="CERN Security Certificate" />
+                        <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Indico API Keys" />
                         <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
                             <TextBlock.Text>
                                 Indico ApiKeys can be used to access indico without a username or password (IndicoWalker only uses them for Indico Category access currently). To
