@@ -20,7 +20,7 @@
                 <HubSection.Resources>
                     <DataTemplate x:Key="ClickableHeader">
                         <Grid>
-                            <Button HorizontalAlignment="Left" Content="{Binding}" VerticalAlignment="Top" Click="OpenFullCalendarListsList" FontFamily="Global User Interface" FontSize="26.667" FontWeight="Light" />
+                            <Button HorizontalAlignment="Left" Content="{Binding}" VerticalAlignment="Top" Click="OpenFullCalendarListsList" FontFamily="Global User Interface" FontSize="26.667" FontWeight="Light" Style="{StaticResource ButtonAsSimpleText}" />
                         </Grid>
                     </DataTemplate>
                 </HubSection.Resources>
