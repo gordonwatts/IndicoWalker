@@ -14,10 +14,6 @@
                 <Grid>
                     <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
                                 IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Left"/>
-                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
-                        <TextBox Name="IndicoUrl" Width="300" FontSize="12" HorizontalContentAlignment="Left" Padding="0" Height="23" MinHeight="0" />
-                        <Button Name="FindIndicoUrl" Content="Load It!"/>
-                    </StackPanel>
                 </Grid>
             </Hub.Header>
             <HubSection Header="Upcoming Meetings" Width="600" IsHeaderInteractive="True">
@@ -63,7 +59,8 @@
     <Page.BottomAppBar>
         <CommandBar ClosedDisplayMode="Minimal" >
             <CommandBar.SecondaryCommands>
-                <AppBarButton x:Name="GoToSettingsPage" Label="Settings" IsCompact="True"/>
+                <AppBarButton x:Name="GoToLoadPage" Label="Load Meeting..." IsCompact="True" />
+                <AppBarButton x:Name="GoToSettingsPage" Label="Settings..." IsCompact="True"/>
             </CommandBar.SecondaryCommands>
         </CommandBar>
     </Page.BottomAppBar>

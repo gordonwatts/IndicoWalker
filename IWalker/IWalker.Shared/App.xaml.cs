@@ -70,6 +70,7 @@ namespace IWalker
 #endif
 #if WINDOWS_PHONE_APP
             Locator.CurrentMutable.Register(() => new BasicSettingsView(), typeof(IViewFor<BasicSettingsViewModel>));
+            Locator.CurrentMutable.Register(() => new LoadMeetingView(), typeof(IViewFor<OpenURLControlViewModel>));
 #endif
 
             // Create the main view model, and register that.

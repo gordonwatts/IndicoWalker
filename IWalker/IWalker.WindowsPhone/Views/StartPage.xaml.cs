@@ -20,15 +20,14 @@ namespace IWalker.Views
 
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl));
-                disposeOfMe(this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text));
-
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext));
 
                 // Do the navagation when we need it here.
                 disposeOfMe(Observable.FromEventPattern<RoutedEventArgs>(GoToSettingsPage, "Click")
                     .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new BasicSettingsViewModel(ViewModel.HostScreen))));
+                disposeOfMe(Observable.FromEventPattern<RoutedEventArgs>(GoToLoadPage, "Click")
+                    .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new OpenURLControlViewModel(ViewModel.HostScreen))));
 
                 // Update everything
                 ViewModel.LoadRecentMeetings

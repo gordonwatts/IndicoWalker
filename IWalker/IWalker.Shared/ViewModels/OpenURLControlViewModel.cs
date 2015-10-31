@@ -12,7 +12,7 @@ namespace IWalker.ViewModels
     /// Enable the user to enter a URL and then open either a category or an
     /// indico meeting from the URL that he user enters.
     /// </summary>
-    public class OpenURLControlViewModel : ReactiveObject
+    public class OpenURLControlViewModel : ReactiveObject, IRoutableViewModel
     {
         /// <summary>
         /// When clicked, it will open the requested meeting in a new xaml page.
@@ -30,13 +30,12 @@ namespace IWalker.ViewModels
         private string _meetingAddress;
 
         /// <summary>
-        /// How we get to navagate around.
+        /// Initialize the URL opener.
         /// </summary>
-        private IScreen _hostScreen = null;
-
+        /// <param name="screen"></param>
         public OpenURLControlViewModel(IScreen screen)
         {
-            _hostScreen = screen;
+            HostScreen = screen;
             
             // Setup the first value for the last time we ran to make life a little simpler.
             MeetingAddress = Settings.LastViewedMeeting;
@@ -52,7 +51,7 @@ namespace IWalker.ViewModels
                 .Subscribe(addr =>
                 {
                     Settings.LastViewedMeeting = addr;
-                    _hostScreen.Router.Navigate.Execute(new MeetingPageViewModel(_hostScreen, ConvertToIMeeting(addr)));
+                    HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
                 });
             SwitchPages
                 .Select(x => MeetingAddress)
@@ -60,7 +59,7 @@ namespace IWalker.ViewModels
                 .Subscribe(addr =>
                 {
                     Settings.LastViewedMeeting = addr;
-                    _hostScreen.Router.Navigate.Execute(new CategoryPageViewModel(_hostScreen, ConvertToIAgendaList(addr)));
+                    HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(HostScreen, ConvertToIAgendaList(addr)));
                 });
 
             // Finally, if we don't know what to do with it, we come here.
@@ -73,6 +72,19 @@ namespace IWalker.ViewModels
                 .Subscribe();
 
         }
+
+        /// <summary>
+        /// The URL for stashing it on the navagation stack
+        /// </summary>
+        public string UrlPathSegment
+        {
+            get { return "/LoadMeeting"; }
+        }
+
+        /// <summary>
+        /// How to get to navagation, etc.
+        /// </summary>
+        public IScreen HostScreen { get; private set; }
 
         /// <summary>
         /// Return a list of possible meetings
