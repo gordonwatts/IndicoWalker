@@ -18,11 +18,9 @@ namespace IWalker.Views
 
             this.WhenActivated(disposeOfMe =>
             {
-                disposeOfMe(this.BindCommand(ViewModel, x => x.SwitchPages, x => x.FindIndicoUrl));
-                disposeOfMe(this.Bind(ViewModel, x => x.MeetingAddress, y => y.IndicoUrl.Text));
-
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.RecentMeetings, y => y.MainHubView.Sections[1].DataContext));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.OpenURLControlVM, y => y.OpenURLControl.ViewModel));
 
                 ViewModel.LoadRecentMeetings
                     .Execute(null);

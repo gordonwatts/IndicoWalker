@@ -144,6 +144,9 @@
       <DependentUpon>MeetingPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Views\OpenURLControlView.xaml.cs">
+      <DependentUpon>OpenURLControlView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\PDFPageUserControl.xaml.cs">
       <DependentUpon>PDFPageUserControl.xaml</DependentUpon>
     </Compile>
@@ -285,6 +288,10 @@
     <Page Include="Views\MeetingPage.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\OpenURLControlView.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\PDFPageUserControl.xaml">
       <SubType>Designer</SubType>

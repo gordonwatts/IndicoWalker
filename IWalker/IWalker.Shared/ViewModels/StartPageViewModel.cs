@@ -1,5 +1,4 @@
-﻿using CERNSSO;
-using IndicoInterface.NET;
+﻿using IndicoInterface.NET;
 using IWalker.DataModel.Inidco;
 using IWalker.DataModel.Interfaces;
 using IWalker.DataModel.MRU;
@@ -9,14 +8,7 @@ using System;
 using System.Linq;
 using System.Collections.Generic;
 using System.Reactive.Linq;
-using System.Reactive.Subjects;
-using System.Threading.Tasks;
-using Windows.ApplicationModel.Activation;
-using Windows.Security.Cryptography.Certificates;
-using Windows.Storage.Pickers;
-using Windows.UI.Xaml;
 using IWalker.DataModel.Categories;
-using Windows.UI.Popups;
 
 namespace IWalker.ViewModels
 {
@@ -26,11 +18,6 @@ namespace IWalker.ViewModels
     public class StartPageViewModel :  ReactiveObject, IRoutableViewModel
     {
         /// <summary>
-        /// When clicked, it will open the requested meeting in a new xaml page.
-        /// </summary>
-        public ReactiveCommand<object> SwitchPages { get; set; }
-
-        /// <summary>
         /// Pass in a MRU object to have it opened in a new xaml page.
         /// </summary>
         public ReactiveCommand<object> OpenMRUMeeting { get; private set; }
@@ -39,16 +26,6 @@ namespace IWalker.ViewModels
         /// Pass in an upcoming meeting to be opened.
         /// </summary>
         public ReactiveCommand<object> OpenUpcomingMeeting { get; private set; }
-
-        /// <summary>
-        /// The meeting address (bindable).
-        /// </summary>
-        public string MeetingAddress
-        {
-            get { return _meetingAddress; }
-            set { this.RaiseAndSetIfChanged(ref _meetingAddress, value); }
-        }
-        private string _meetingAddress;
 
         /// <summary>
         /// The list of recently set meetings.
@@ -71,42 +48,19 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> UpdateUpcomingMeetings { get; private set; }
 
         /// <summary>
+        /// Attache the Open URL Control VM.
+        /// </summary>
+        public OpenURLControlViewModel OpenURLControlVM { get; private set; }
+
+        /// <summary>
         /// Setup the page
         /// </summary>
         public StartPageViewModel(IScreen screen)
         {
             HostScreen = screen;
 
-            // We can switch pages only when the user has written something into the meeting address text.
-            var canNavagateAway = this.WhenAny(x => x.MeetingAddress, x => !string.IsNullOrWhiteSpace(x.Value));
-            SwitchPages = ReactiveCommand.Create(canNavagateAway);
-
-            // When we navigate away, we should save the text and go
-            SwitchPages
-                .Select(x => MeetingAddress)
-                .Where(x => IsMeeting(x))
-                .Subscribe(addr =>
-                {
-                    Settings.LastViewedMeeting = addr;
-                    HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, ConvertToIMeeting(addr)));
-                });
-            SwitchPages
-                .Select(x => MeetingAddress)
-                .Where(x => IsAgendaList(x))
-                .Subscribe(addr =>
-                {
-                    Settings.LastViewedMeeting = addr;
-                    HostScreen.Router.Navigate.Execute(new CategoryPageViewModel(HostScreen, ConvertToIAgendaList(addr)));
-                });
-
-            // Finally, if we don't know what to do with it, we come here.
-            SwitchPages
-                .Select(x => MeetingAddress)
-                .Where(x => !IsMeeting(x) && !IsAgendaList(x))
-                .ObserveOn(RxApp.MainThreadScheduler)
-                .Select(x => new MessageDialog("That is not something I recognize as a meeting address or a meeting category address!"))
-                .SelectMany(d => d.ShowAsync())
-                .Subscribe();
+            // A Open URL Control View
+            OpenURLControlVM = new OpenURLControlViewModel(screen);
 
             // MRU button was pressed.
             OpenMRUMeeting = ReactiveCommand.Create();
@@ -121,9 +75,6 @@ namespace IWalker.ViewModels
                 .Cast<IMeetingRefExtended>()
                 .Where(m => m != null)
                 .Subscribe(m => HostScreen.Router.Navigate.Execute(new MeetingPageViewModel(HostScreen, m.Meeting)));
-
-            // Setup the first value for the last time we ran to make life a little simpler.
-            MeetingAddress = Settings.LastViewedMeeting;
 
             // And populate the most recently viewed meeting list.
             RecentMeetings = new ReactiveList<MRU>();
@@ -195,46 +146,6 @@ namespace IWalker.ViewModels
         /// Keep track of all the various meetings, and how we are going to have to combine them.
         /// </summary>
         Dictionary<string, IMeetingRefExtended[]> _meetingCatalog = new Dictionary<string, IMeetingRefExtended[]>();
-
-        /// <summary>
-        /// Return true if this is url is a valid agenda listing
-        /// </summary>
-        /// <param name="url"></param>
-        /// <returns></returns>
-        private bool IsAgendaList(string url)
-        {
-            return IndicoMeetingListRef.IsValid(url);
-        }
-
-        /// <summary>
-        /// Return true if this is a meeting
-        /// </summary>
-        /// <param name="x"></param>
-        /// <returns></returns>
-        private bool IsMeeting(string url)
-        {
-            return IndicoMeetingRef.IsValid(url);
-        }
-
-        /// <summary>
-        /// Return a list of possible meetings
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <returns></returns>
-        private IMeetingListRef ConvertToIAgendaList(string addr)
-        {
-            return new IndicoMeetingListRef(addr);
-        }
-
-        /// <summary>
-        /// Convert text entry to some sort of address.
-        /// </summary>
-        /// <param name="addr"></param>
-        /// <returns></returns>
-        private IMeetingRef ConvertToIMeeting(string addr)
-        {
-            return new IndicoMeetingRef(addr);
-        }
 
         /// <summary>
         /// Given a MRU, convert it to a meeting.
