@@ -48,6 +48,19 @@ namespace Test_MRUDatabase.ViewModels
         }
 
         [TestMethod]
+        public async Task MeetingReady()
+        {
+            var meeting = MeetingHelpers.CreateMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
+            Assert.IsFalse(mvm.MeetingIsReadyForDisplay);
+
+            var bogus = mvm.MeetingTitle;
+            mvm.StartMeetingUpdates.Execute(null);
+
+            await TestUtils.SpinWaitAreEqual(true, () => mvm.MeetingIsReadyForDisplay);
+        }
+
+        [TestMethod]
         public async Task LoadMeetingOnceAfterOneTrigger()
         {
             var meeting = MeetingHelpers.CreateMeeting();

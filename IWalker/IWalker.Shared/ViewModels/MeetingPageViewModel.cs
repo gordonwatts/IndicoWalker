@@ -214,6 +214,7 @@ namespace IWalker.ViewModels
                     );
             }
             Debug.WriteLine("  Display now contains {0} Sessions.", Sessions.Count);
+            MeetingIsReadyForDisplay = true;
         }
 
         /// <summary>
@@ -235,6 +236,18 @@ namespace IWalker.ViewModels
             get { return _title.Value; }
         }
         private ObservableAsPropertyHelper<string> _title;
+
+        /// <summary>
+        /// Goes true when we have data to populate all the fields of
+        /// the meeting.
+        /// </summary>
+        /// <remarks>Do not access via the backing property! The Changed event won't be raised.</remarks>
+        public bool MeetingIsReadyForDisplay
+        {
+            get { return _meetingIsReady; }
+            private set { this.RaiseAndSetIfChanged(ref _meetingIsReady, value); }
+        }
+        private bool _meetingIsReady = false;
 
         /// <summary>
         /// The start time.

@@ -74,10 +74,9 @@ namespace Test_MRUDatabase
         /// <param name="maxMiliseconds"></param>
         /// <returns></returns>
         internal static async Task SpinWaitAreEqual<T>(T expected, Func<T> eval, int maxMiliseconds = 1000)
-            where T : class
         {
             int waited = 0;
-            while ((eval() != expected) && waited < maxMiliseconds)
+            while (!eval().Equals(expected) && waited < maxMiliseconds)
             {
                 await Task.Delay(10);
                 waited += 10;
