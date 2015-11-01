@@ -274,7 +274,6 @@ namespace IWalker.DataModel.Inidco
                             : aTalk.SubTalks.Select(st => new IndicoTalk(st, "neverUsedIHope")).ToArray();
                     }
                     return _subTalks;
-                    return null;
                 }
             }
             private ITalk[] _subTalks = null;
