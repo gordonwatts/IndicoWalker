@@ -36,6 +36,7 @@ namespace IWalker.Views
             gc.Add(this.OneWayBind(ViewModel, x => x.Days.Count, y => y.ConferenceDayPicker.Visibility, cnt => cnt <= 1 ? Visibility.Collapsed : Visibility.Visible));
             gc.Add(this.BindCommand(ViewModel, x => x.OpenMeetingInBrowser, y => y.OpenInBrowser));
             gc.Add(this.OneWayBind(ViewModel, x => x.MeetingIsEmpty, y => y.NothingFound.Visibility));
+            gc.Add(this.OneWayBind(ViewModel, x => x.MeetingIsReadyForDisplay, y => y.LoadingProgress.Visibility, val => val ? Visibility.Collapsed : Visibility.Visible));
 
             // Start the data population. Do it here to make sure that everything else has already been setup.
             gc.Add(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).DistinctUntilChanged().Subscribe(vm => vm.StartMeetingUpdates.Execute(null)));

@@ -13,7 +13,7 @@
                 <EntranceThemeTransition/>
             </TransitionCollection>
         </Grid.ChildrenTransitions>
-        
+
         <Grid.RowDefinitions>
             <RowDefinition Height="140"/>
             <RowDefinition Height="*"/>
@@ -39,25 +39,29 @@
                 <TextBlock x:Name="StartTime" Text="2011-01-01 11:11" VerticalAlignment="Center" Margin="0,8,0,0" Style="{StaticResource BodyTextBlockStyle}"/>
             </StackPanel>
             <StackPanel Grid.Column="2" Margin="0" Orientation="Horizontal" HorizontalAlignment="Right">
-            	<ComboBox x:Name="ConferenceDayPicker" HorizontalAlignment="Center" VerticalAlignment="Center">
-            		<ComboBox.ItemTemplate>
-            			<DataTemplate>
-            				<TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left"/>
-            			</DataTemplate>
-            		</ComboBox.ItemTemplate>
-            	</ComboBox>
-            	<AppBarButton x:Name="OpenInBrowser" HorizontalAlignment="Center" Icon="Globe" Label="" VerticalAlignment="Center" Margin="0,20,0,0" ToolTipService.ToolTip="Open Meeting Web Page"/>
+                <ComboBox x:Name="ConferenceDayPicker" HorizontalAlignment="Center" VerticalAlignment="Center">
+                    <ComboBox.ItemTemplate>
+                        <DataTemplate>
+                            <TextBlock Text="{Binding DayOfWeek}" HorizontalAlignment="Left"/>
+                        </DataTemplate>
+                    </ComboBox.ItemTemplate>
+                </ComboBox>
+                <AppBarButton x:Name="OpenInBrowser" HorizontalAlignment="Center" Icon="Globe" Label="" VerticalAlignment="Center" Margin="0,20,0,0" ToolTipService.ToolTip="Open Meeting Web Page"/>
             </StackPanel>
         </Grid>
         <Border x:Name="NothingFound" Grid.Row="1" Grid.Column="0" BorderBrush="{ThemeResource ApplicationForegroundThemeBrush}" BorderThickness="2" HorizontalAlignment="Center" VerticalAlignment="Center" Padding="10,0,10,10">
             <TextBlock Text="No Talks or Sessions Found" HorizontalAlignment="Center" VerticalAlignment="Center" Style="{StaticResource SubheaderTextBlockStyle}" />
         </Border>
-         <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
+        <ScrollViewer HorizontalScrollMode="Disabled"  Grid.Row="1" Grid.Column="0" VerticalScrollBarVisibility="Auto" VerticalScrollMode="Auto">
             <ItemsControl x:Name="SessionList">
                 <ItemsPanelTemplate>
                     <VirtualizingStackPanel/>
                 </ItemsPanelTemplate>
             </ItemsControl>
         </ScrollViewer>
+        <Grid x:Name="LoadingProgress" HorizontalAlignment="Center" Margin="0" Grid.Row="1" VerticalAlignment="Center">
+            <TextBlock x:Name="textBlock" Margin="0" TextWrapping="Wrap" Text="Loading..." VerticalAlignment="Center" d:LayoutOverrides="Width" HorizontalAlignment="Center" Style="{StaticResource BaseTextBlockStyle}" FontFamily="Global User Interface"/>
+            <ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0" Width="100" Height="100" IsActive="True" Foreground="{ThemeResource ApplicationForegroundThemeBrush}"/>
+        </Grid>
     </Grid>
 </Page>
