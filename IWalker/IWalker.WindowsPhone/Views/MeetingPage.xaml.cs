@@ -31,6 +31,8 @@ namespace IWalker.Views
 
                 disposeOfMe(this.BindCommand(ViewModel, x => x.OpenMeetingInBrowser, y => y.OpenInBrowser));
 
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.MeetingIsReadyForDisplay, y => y.LoadingProgress.Visibility, val => val ? Visibility.Collapsed : Visibility.Visible));
+
                 // Start the data population. Do it here to make sure that everything else has already been setup.
                 disposeOfMe(this.WhenAny(x => x.ViewModel, x => x.Value).Where(vm => vm != null).Subscribe(vm => vm.StartMeetingUpdates.Execute(null)));
 

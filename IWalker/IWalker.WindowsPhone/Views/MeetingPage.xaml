@@ -43,6 +43,10 @@
             <ScrollViewer HorizontalScrollMode="Disabled" Grid.Row="1">
                 <ItemsControl x:Name="SessionList"/>
             </ScrollViewer>
+            <StackPanel x:Name="LoadingProgress" Orientation="Vertical" HorizontalAlignment="Center" Grid.Row="1" VerticalAlignment="Center">
+                <ProgressRing HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0"  IsActive="True" Foreground="{ThemeResource ApplicationForegroundThemeBrush}"/>
+                <TextBlock x:Name="textBlock" Margin="0,5,0,0" TextWrapping="Wrap" Text="Loading..." VerticalAlignment="Center" d:LayoutOverrides="Width" HorizontalAlignment="Center" Style="{StaticResource BaseTextBlockStyle}" FontFamily="Global User Interface"/>
+            </StackPanel>
         </Grid>
     </Grid>
     <Page.BottomAppBar>
