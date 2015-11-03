@@ -54,10 +54,28 @@ namespace Test_MRUDatabase.ViewModels
             var mvm = new MeetingPageViewModel(null, meeting);
             Assert.IsFalse(mvm.MeetingIsReadyForDisplay);
 
-            var bogus = mvm.MeetingTitle;
+            var bogus1 = mvm.MeetingIsEmpty;
+            var bogus2 = mvm.MeetingIsReadyForDisplay;
             mvm.StartMeetingUpdates.Execute(null);
 
             await TestUtils.SpinWaitAreEqual(true, () => mvm.MeetingIsReadyForDisplay);
+            await TestUtils.SpinWaitAreEqual(false, () => mvm.MeetingIsEmpty);
+        }
+
+        [TestMethod]
+        public async Task EmptyMeeting()
+        {
+            var meeting = MeetingHelpers.CreateEmptyMeeting();
+            var mvm = new MeetingPageViewModel(null, meeting);
+            Assert.IsFalse(mvm.MeetingIsReadyForDisplay);
+
+            var bogus1 = mvm.MeetingIsEmpty;
+            var bogus2 = mvm.MeetingIsReadyForDisplay;
+
+            mvm.StartMeetingUpdates.Execute(null);
+
+            await TestUtils.SpinWaitAreEqual(true, () => mvm.MeetingIsReadyForDisplay);
+            await TestUtils.SpinWaitAreEqual(true, () => mvm.MeetingIsEmpty);
         }
 
         [TestMethod]

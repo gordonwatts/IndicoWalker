@@ -125,7 +125,7 @@ namespace IWalker.ViewModels
 
             var ldrSessions = ldrCmdReady
                 .Select(m => m.Sessions)
-                .Where(s => s != null && s.Length > 0);
+                .Select(s => s == null ? new ISession[0] : s);
 
             // Multi-day meetings are a bit more complex. Here we take the sessions and extract all the days associated with them.
             // Day's is a stream of date/times.
@@ -143,7 +143,15 @@ namespace IWalker.ViewModels
                 .Subscribe(ds =>
                 {
                     Days.MakeListLookLike(ds);
-                    if (DisplayDayIndex == -1)
+                    if (DisplayDayIndex < 0 && ds.Length == 0)
+                    {
+                        DisplayDayIndex -= 1; // Otherwise nothign will get through!
+                    }
+                    if (DisplayDayIndex >= ds.Length)
+                    {
+                        DisplayDayIndex = ds.Length - 1;
+                    }
+                    if (ds.Length > 0 && DisplayDayIndex < 0)
                     {
                         DisplayDayIndex = 0;
                     }
@@ -152,9 +160,8 @@ namespace IWalker.ViewModels
             // When we have a set of sessions, only display the day we want to show.
             var selectedByUserDay = this.ObservableForProperty(x => x.DisplayDayIndex)
                 .Select(v => v.Value)
-                .Where(v => v >= 0)
                 .DistinctUntilChanged()
-                .Select(index => Days[index]);
+                .Select(index => index >= 0 && index < Days.Count ? Days[index] : new DateTime());
             var theDaysSessions = Observable.CombineLatest(ldrSessions, selectedByUserDay, (ses, day) => Tuple.Create(ses, day))
                 .Select(x => x.Item1.Where(s => s.StartTime.DayOfYear == x.Item2.DayOfYear));
 

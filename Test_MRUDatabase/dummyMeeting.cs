@@ -19,6 +19,33 @@ namespace Test_MRUDatabase
         {
             return new dummyMeetingRef();
         }
+
+        public static dummyEmptyMeetingRef CreateEmptyMeeting()
+        {
+            return new dummyEmptyMeetingRef();
+        }
+    }
+
+    class dummyEmptyMeeting : IMeeting
+    {
+        public dummyEmptyMeeting()
+        {
+            Sessions = new ISession[] { };
+            Title = "Meeting2";
+            StartTime = DateTime.Now;
+            EndTime = DateTime.Now + TimeSpan.FromMinutes(30);
+        }
+        public string Title { get; set; }
+
+        public ISession[] Sessions { get; set; }
+
+        public DateTime StartTime { get; set; }
+        public DateTime EndTime { get; set; }
+
+        public string AsReferenceString()
+        {
+            return Title;
+        }
     }
 
     class dummyMeeting : IMeeting
@@ -219,6 +246,37 @@ namespace Test_MRUDatabase
         }
     }
 
+    /// <summary>
+    /// A pretty simple dummy meeting.
+    /// </summary>
+    public class dummyEmptyMeetingRef : IMeetingRef
+    {
+        public dummyEmptyMeetingRef()
+        {
+            NumberOfTimesFetched = 0;
+        }
+
+        public Task<IMeeting> GetMeeting()
+        {
+            NumberOfTimesFetched++;
+            return Task.Factory.StartNew(() => new dummyEmptyMeeting() as IMeeting);
+        }
+
+        public string AsReferenceString()
+        {
+            return "meeting2";
+        }
+
+        [JsonIgnore]
+        public int NumberOfTimesFetched { get; set; }
+
+
+        [JsonIgnore]
+        public string WebURL
+        {
+            get { throw new NotImplementedException(); }
+        }
+    }
 
     class myMeetingListRef : IMeetingListRef
     {
