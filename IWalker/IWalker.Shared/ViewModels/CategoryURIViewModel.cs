@@ -37,6 +37,15 @@ namespace IWalker.ViewModels
         public ErrorUserControlViewModel ErrorsVM { get; private set; }
 
         /// <summary>
+        /// Readonly true if the category list is ready to display.
+        /// </summary>
+        public bool IsReady
+        {
+            get { return _isReady.Value; }
+        }
+        private ObservableAsPropertyHelper<bool> _isReady;
+
+        /// <summary>
         /// Init ourselves with a new meeting ref
         /// </summary>
         /// <param name="meetings"></param>
@@ -48,7 +57,7 @@ namespace IWalker.ViewModels
             // is an error we should display it.
             MeetingList = new ReactiveList<IMeetingRefExtended>();
             var meetingStream = meetings.FetchAndUpdateRecentMeetings(cache: cache)
-                .Publish();
+                .Replay(1);
 
             meetingStream
                 .OnErrorResumeNext(Observable.Empty<IMeetingRefExtended[]>())
@@ -61,6 +70,10 @@ namespace IWalker.ViewModels
             meetingStream
                 .Subscribe(_ => { },
                 except => errorStream.OnNext(except));
+
+            meetingStream
+                .Select(_ => true)
+                .ToProperty(this, x => x.IsReady, out _isReady, false, RxApp.MainThreadScheduler);
 
             meetingStream.Connect();
 

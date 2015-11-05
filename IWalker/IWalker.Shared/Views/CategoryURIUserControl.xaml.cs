@@ -29,6 +29,9 @@ namespace IWalker.Views
                         disposeOfMe(vm.MeetingToVisit
                             .Subscribe(m => Locator.Current.GetService<RoutingState>().Navigate.Execute(m)));
                     }));
+
+                //disposeOfMe(this.OneWayBind(ViewModel, x => x.IsReady, y => y.LoadingProgress.Visibility, v => v ? Visibility.Visible : Visibility.Collapsed));
+                disposeOfMe(this.OneWayBind(ViewModel, x => x.IsReady, y => y.LoadingProgress.Visibility, val => val ? Visibility.Collapsed : Visibility.Visible));
             });
         }
 
