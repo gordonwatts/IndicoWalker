@@ -9,7 +9,7 @@
     d:DesignHeight="130"
     d:DesignWidth="100">
 
-    <Grid Background="#FFC73333" Height="110" Width="90">
+    <Grid Background="#1A64A0" Height="110" Width="90">
         <Button Name="FileClick" HorizontalAlignment="Stretch" VerticalAlignment="Stretch" MinWidth="20" MinHeight="20" Margin="5,0"/>
         <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
         	<TextBlock x:Name="DocumentType" Text="PDF" HorizontalAlignment="Center" Style="{ThemeResource BodyTextBlockStyle}" IsHitTestVisible="False" Margin="0,0,0,2"/>
