@@ -19,8 +19,7 @@ namespace Test_MRUDatabase.DataModel.Categories
         [TestInitialize]
         public void ResetCategoryDB()
         {
-            if (ApplicationData.Current.RoamingSettings.Values.ContainsKey("CategoryDBSerliazied"))
-                ApplicationData.Current.RoamingSettings.Values.Remove("CategoryDBSerliazied");
+            CategoryDB.ResetCategoryDB();
             Locator.CurrentMutable.Register(() => new JsonSerializerSettings()
             {
                 ObjectCreationHandling = ObjectCreationHandling.Replace,

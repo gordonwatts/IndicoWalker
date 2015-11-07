@@ -121,5 +121,14 @@ namespace IWalker.DataModel.Categories
                 .Where(m => m.MeetingList.UniqueString == meeting.UniqueString)
                 .FirstOrDefault();
         }
+
+        /// <summary>
+        /// For testing - reset the database
+        /// </summary>
+        public static void ResetCategoryDB()
+        {
+            if (ApplicationData.Current.RoamingSettings.Values.ContainsKey(CategoryDBSettingName))
+                ApplicationData.Current.RoamingSettings.Values.Remove(CategoryDBSettingName);
+        }
     }
 }

@@ -75,8 +75,12 @@ namespace Test_MRUDatabase
         /// <returns></returns>
         internal static async Task SpinWaitAreEqual<T>(T expected, Func<T> eval, int maxMiliseconds = 1000)
         {
+            // If you expect this to be null, use somethign else - otherwise it gets much trickier to call Equals below!
+            Assert.IsNotNull(expected);
+
+            // Sit in a loop.
             int waited = 0;
-            while (!eval().Equals(expected) && waited < maxMiliseconds)
+            while (!expected.Equals(eval()) && waited < maxMiliseconds)
             {
                 await Task.Delay(10);
                 waited += 10;

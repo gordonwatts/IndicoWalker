@@ -25,6 +25,7 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeeting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingListRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingListRefFactory.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingRefExtended.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMRUDatabase.cs" />
