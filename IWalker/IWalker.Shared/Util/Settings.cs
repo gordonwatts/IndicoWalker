@@ -8,6 +8,19 @@ namespace IWalker.Util
     /// </summary>
     public class Settings
     {
+        public static bool FirstTimeWeHaveRun
+        {
+            get
+            {
+                if (ApplicationData.Current.RoamingSettings.Values.Keys.Contains("HasAlreadyRun"))
+                {
+                    return false;
+                }
+                ApplicationData.Current.RoamingSettings.Values["HasAlreadyRun"] = "yes";
+                return true;
+            }
+        }
+
         public static string LastViewedMeeting
         {
             get
