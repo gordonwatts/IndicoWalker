@@ -141,6 +141,14 @@ namespace Test_MRUDatabase
                 return new ITalk[0];
             }
         }
+
+        public string[] Speakers
+        {
+            get
+            {
+                return new string[] { "J. Doe", "J. Clease" };
+            }
+        }
     }
 
     // A dummy file.

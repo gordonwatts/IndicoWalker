@@ -4,6 +4,7 @@ using ReactiveUI;
 using System.Linq;
 using System;
 using System.Collections;
+using System.Text;
 
 namespace IWalker.ViewModels
 {
@@ -33,8 +34,24 @@ namespace IWalker.ViewModels
         /// <param name="t"></param>
         public TalkUserControlViewModel(ITalk t)
         {
-            Title = t.Title;
             Talk = t;
+
+            // Talk metadata.
+            Title = t.Title;
+            var auth = new StringBuilder();
+            foreach (var a in t.Speakers)
+            {
+                if (auth.Length > 0)
+                {
+                    auth.AppendFormat(", {0}", a);
+                }
+                else
+                {
+                    auth.Append(a);
+                }
+            }
+            Authors = auth.ToString();
+            Time = string.Format("{0} - {1} ({2} minutes)", t.StartTime.ToString("h:mm tt"), t.EndTime.ToString("h:mm tt"), (t.EndTime - t.StartTime).Minutes);
 
             // Split the talk out by file names, and put them out to be displayed everywhere.
             // We screen out everything here that doesn't have a good file type (one of the requirements of IsValid for now).
@@ -53,5 +70,15 @@ namespace IWalker.ViewModels
         /// Get the title (for the UI).
         /// </summary>
         public string Title { get; private set; }
+
+        /// <summary>
+        /// Get the time this talk is running
+        /// </summary>
+        public string Time { get; private set; }
+
+        /// <summary>
+        /// Get the authors for this talk.
+        /// </summary>
+        public string Authors { get; private set; }
     }
 }

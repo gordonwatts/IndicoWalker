@@ -15,8 +15,15 @@
             <RowDefinition Height="1*"/>
             <RowDefinition Height="Auto"/>
         </Grid.RowDefinitions>
-        <TextBlock x:Name="TalkTitle" Style="{StaticResource BodyTextBlockStyle}" Margin="5 0 0 4" Grid.Row="0">hi</TextBlock>
-        <ItemsControl x:Name="FileNameList" Grid.Row="1" />
+        <StackPanel Orientation="Vertical" d:LayoutOverrides="Width" Margin="0,0,0,2">
+            <TextBlock x:Name="TalkTitle" Text="This Talk is about MVA's" Style="{StaticResource BodyTextBlockStyle}" />
+            <StackPanel Orientation="Horizontal" Margin="5,2,0,0">
+                <TextBlock x:Name="TalkTime" Text="12:00AM - 1:00PM (60 minutes)"/>
+                <TextBlock Text=" - "/>
+                <TextBlock Name="Authors" Text="G. Watts (UW), B. Bond (UM)" Margin="3,0,0,0"/>
+            </StackPanel>
+        </StackPanel>
+        <ItemsControl x:Name="FileNameList" Grid.Row="1" Margin="5,0,0,0" />
         <ItemsControl x:Name="SubTalkList" Grid.Row="2" Margin="40,0,0,0" />
     </Grid>
 </UserControl>

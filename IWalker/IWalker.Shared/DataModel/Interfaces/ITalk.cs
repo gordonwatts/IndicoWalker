@@ -33,5 +33,10 @@ namespace IWalker.DataModel.Interfaces
         /// Return list of sub-talks
         /// </summary>
         ITalk[] SubTalks { get; }
+
+        /// <summary>
+        /// List of the authors for this talk
+        /// </summary>
+        string[] Speakers { get; }
     }
 }

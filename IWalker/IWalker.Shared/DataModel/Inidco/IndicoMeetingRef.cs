@@ -277,6 +277,16 @@ namespace IWalker.DataModel.Inidco
                 }
             }
             private ITalk[] _subTalks = null;
+
+            /// <summary>
+            /// Get a list of the authors for this talk.
+            /// </summary>
+            [JsonIgnore]
+            public string[] Speakers
+            {
+                get { return aTalk.Speakers; }
+            }
+
         }
 
         /// <summary>
