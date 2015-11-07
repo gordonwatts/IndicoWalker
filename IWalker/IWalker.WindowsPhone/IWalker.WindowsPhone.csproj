@@ -98,6 +98,9 @@
     <Compile Include="Views\FileSlidesUserControl.xaml.cs">
       <DependentUpon>FileSlidesUserControl.xaml</DependentUpon>
     </Compile>
+    <Compile Include="Views\FirstRunView.xaml.cs">
+      <DependentUpon>FirstRunView.xaml</DependentUpon>
+    </Compile>
     <Compile Include="Views\LoadMeetingView.xaml.cs">
       <DependentUpon>LoadMeetingView.xaml</DependentUpon>
     </Compile>
@@ -219,6 +222,10 @@
       <Generator>MSBuild:Compile</Generator>
     </Page>
     <Page Include="Views\FileSlidesUserControl.xaml">
+      <SubType>Designer</SubType>
+      <Generator>MSBuild:Compile</Generator>
+    </Page>
+    <Page Include="Views\FirstRunView.xaml">
       <SubType>Designer</SubType>
       <Generator>MSBuild:Compile</Generator>
     </Page>
