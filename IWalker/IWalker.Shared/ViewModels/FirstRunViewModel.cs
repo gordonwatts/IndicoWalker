@@ -65,6 +65,7 @@ namespace IWalker.ViewModels
         {
             Tuple.Create("Argonne Lab: HEP Conferences", "https://indico.hep.anl.gov/indico/categoryDisplay.py?categId=2"),
             Tuple.Create("Argonne Lab: Future pp Colliders", "https://indico.hep.anl.gov/indico/categoryDisplay.py?categId=26"),
+            Tuple.Create("CERN: Academic Training", "https://indico.cern.ch/category/72/"),
         };
 
         /// <summary>
