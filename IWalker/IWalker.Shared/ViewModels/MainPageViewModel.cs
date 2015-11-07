@@ -20,7 +20,8 @@ namespace IWalker.ViewModels
         public void MoveAlong()
         {
             // Go to the first page and get this show ion the road.
-            Router.Navigate.Execute(new StartPageViewModel(this));
+            //Router.Navigate.Execute(new StartPageViewModel(this));
+            Router.Navigate.Execute(new FirstRunViewModel(this));
         }
     }
 }

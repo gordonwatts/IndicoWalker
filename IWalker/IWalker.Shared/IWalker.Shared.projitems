@@ -18,10 +18,11 @@
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Categories\CategoryConfigInfo.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Categories\CategoryDB.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\DBTestHelpers.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingListRef.cs" />
+    <Compile Include="$(MSBuildThisFileDirectory)DataModel\MeetingListGenerator.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoApiKey.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoApiKeyAccess.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoDataFetcher.cs" />
-    <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingListRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Inidco\IndicoMeetingRef.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeeting.cs" />
     <Compile Include="$(MSBuildThisFileDirectory)DataModel\Interfaces\IMeetingListRef.cs" />

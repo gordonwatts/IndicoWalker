@@ -5,6 +5,7 @@ using ReactiveUI;
 using Splat;
 using System;
 using System.Linq;
+using System.Reactive;
 using System.Reactive.Linq;
 
 namespace IWalker.ViewModels
@@ -62,7 +63,7 @@ namespace IWalker.ViewModels
         /// </summary>
         private Tuple<string, string>[] _defaultItems =
         {
-            Tuple.Create("Argonne Lab: HEP Conferences at ", "https://indico.hep.anl.gov/indico/categoryDisplay.py?categId=2"),
+            Tuple.Create("Argonne Lab: HEP Conferences", "https://indico.hep.anl.gov/indico/categoryDisplay.py?categId=2"),
             Tuple.Create("Argonne Lab: Future pp Colliders", "https://indico.hep.anl.gov/indico/categoryDisplay.py?categId=26"),
         };
 
@@ -74,25 +75,35 @@ namespace IWalker.ViewModels
         {
             HostScreen = screen;
 
+            // Init variables everyone will be looking at.
+            _fetchingItems = false;
+            _itemBeingFetched = "";
+
             // Adding them means putting them in our DB and
             // also doing the query (so the user lands with something
             // interesting in their input feed).
 
             AddDefaultCategories = ReactiveCommand.Create();
 
+            Exception bummer = null;
             var categoryItems = AddDefaultCategories
                 .Take(1)
                 .SelectMany(_ => _defaultItems)
                 .Select(item => makeAMeeting(item.Item1, item.Item2))
                 .Select(cat =>
                 {
-                    _fetchingItems = true;
-                    _itemBeingFetched = cat.CategoryTitle;
+                    FetchingItems = true;
+                    ItemBeingFetched = cat.CategoryTitle;
                     CategoryDB.SaveCategories(CategoryDB.LoadCategories().Concat(new CategoryConfigInfo[] { cat }).ToList());
                     return cat;
                 })
                 .SelectMany(cat => cat.MeetingList.FetchAndUpdateRecentMeetings(cache: Blobs.LocalStorage))
-                .Finally(() => HostScreen.Router.Navigate.Execute(new StartPageViewModel(HostScreen)))
+                .Catch<IMeetingRefExtended[], Exception>(e =>
+                {
+                    bummer = e;
+                    return Observable.Empty<IMeetingRefExtended[]>();
+                })
+                .Finally(() => new int[] { 1 }.ToObservable().ObserveOn(RxApp.MainThreadScheduler).Subscribe(_ => HostScreen.Router.Navigate.Execute(new StartPageViewModel(HostScreen))))
                 .Subscribe();
 
             // When we want to skip the intro, we just move onto the main

@@ -15,6 +15,7 @@ using System.Reactive.Linq;
 using IWalker.Util;
 using IWalker.DataModel.Categories;
 using IWalker.DataModel.Inidco;
+using IWalker.DataModel;
 
 #if WINDOWS_APP
 using Windows.UI.ApplicationSettings;
@@ -53,6 +54,7 @@ namespace IWalker
             // Register everything so the ReactiveUI view model finder can do the wiring it needs to do.
 
             Locator.CurrentMutable.Register(() => new StartPage(), typeof(IViewFor<StartPageViewModel>));
+            Locator.CurrentMutable.Register(() => new FirstRunView(), typeof(IViewFor<FirstRunViewModel>));
             Locator.CurrentMutable.Register(() => new MeetingPage(), typeof(IViewFor<MeetingPageViewModel>));
             Locator.CurrentMutable.Register(() => new CategoryPageView(), typeof(IViewFor<CategoryPageViewModel>));
             Locator.CurrentMutable.Register(() => new TalkView(), typeof(IViewFor<TalkUserControlViewModel>));
@@ -77,6 +79,9 @@ namespace IWalker
             var r = new RoutingState();
             Locator.CurrentMutable.RegisterConstant(r, typeof(RoutingState));
             Locator.CurrentMutable.RegisterConstant(new MainPageViewModel(r), typeof(IScreen));
+
+            // A tool to convert URL's to meeting list refs
+            Locator.CurrentMutable.Register(() => new MeetingListGenerator(), typeof(IMeetingListRefFactory));
 
             // Setup suspend and resume. Note we need to do this once
             // we have routine info.
