@@ -115,8 +115,7 @@ namespace IWalker.ViewModels
                 .ToProperty(this, x => x.MeetingTitle, out _title, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
-                .Select(m => m.StartTime)
-                .Select(dt => dt.ToString())
+                .Select(m => m.StartTime.ToString(@"M\/d\/yyyy h\:mm tt") + " - " + m.EndTime.ToString(@"h\:mm tt") + " (" + (m.EndTime - m.StartTime).ToString(@"h\:mm") + " long)")
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
             ldrCmdReady
