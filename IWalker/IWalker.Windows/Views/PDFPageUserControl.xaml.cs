@@ -5,6 +5,7 @@ using System.IO;
 using System.Reactive;
 using System.Reactive.Disposables;
 using System.Reactive.Linq;
+using System.Reactive.Subjects;
 using System.Threading.Tasks;
 using Windows.Foundation;
 using Windows.UI.Xaml;
@@ -33,6 +34,12 @@ namespace IWalker.Views
             //   - Despite that, when it comes back from loading the image, it may not be on the default thread!
             // TODO: can we use this to make this cleaner? http://stackoverflow.com/questions/24049931/making-an-iobservablet-that-uses-async-await-return-completed-tasks-in-origina
 
+            var follower = new Subject<bool>();
+            var turnOn = Observable.Timer(TimeSpan.FromMilliseconds(200))
+                .Select(_ => true);
+            gd.Add(turnOn.CombineLatest(follower.StartWith(true), (init, foll) => init && foll)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(v => DrawInProgress.IsActive = v));
 
             gd.Add(this.WhenAny(x => x.ViewModel.ImageStream, x => x.Value)
                 .SelectMany(imageStreams => imageStreams)
@@ -42,6 +49,7 @@ namespace IWalker.Views
                 .Where(t => t.Item2 == _pageVMCache)
                 .Select(t => t.Item1)
                 .ObserveOn(RxApp.MainThreadScheduler)
+                .Do(bmi => follower.OnNext(bmi == null))
                 .BindTo(ThumbImage, x => x.Source));
 
             // The following things should cause a re-rendering:

@@ -8,7 +8,9 @@
     mc:Ignorable="d"
     d:DesignHeight="200"
     d:DesignWidth="250">
-    
-    <Image x:Name="ThumbImage"/>
 
+    <Grid>
+        <Image Name="ThumbImage"/>
+        <ProgressRing Name="DrawInProgress" IsActive="False"/>
+    </Grid>
 </UserControl>
