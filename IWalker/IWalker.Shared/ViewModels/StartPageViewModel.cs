@@ -18,7 +18,7 @@ namespace IWalker.ViewModels
     public class StartPageViewModel :  ReactiveObject, IRoutableViewModel
     {
         /// <summary>
-        /// Pass in a MRU object to have it opened in a new xaml page.
+        /// Pass in a MRU object to have it opened in a new XAML page.
         /// </summary>
         public ReactiveCommand<object> OpenMRUMeeting { get; private set; }
 
@@ -48,7 +48,7 @@ namespace IWalker.ViewModels
         public ReactiveCommand<object> UpdateUpcomingMeetings { get; private set; }
 
         /// <summary>
-        /// Attache the Open URL Control VM.
+        /// Attach the Open URL Control VM.
         /// </summary>
         public OpenURLControlViewModel OpenURLControlVM { get; private set; }
 
@@ -131,7 +131,7 @@ namespace IWalker.ViewModels
         }
 
         /// <summary>
-        /// Set/Update teh MRU meeting list
+        /// Set/Update the MRU meeting list
         /// </summary>
         /// <param name="meetings"></param>
         private void SetMRUMeetings(IEnumerable<MRU> meetings)
