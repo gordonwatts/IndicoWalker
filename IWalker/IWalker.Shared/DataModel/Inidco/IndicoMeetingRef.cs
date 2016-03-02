@@ -490,7 +490,7 @@ namespace IWalker.DataModel.Inidco
             {
                 s.Talks = s.Talks.Where(t => t.StartDate.Year != 1 && t.EndDate.Year != 1).ToArray();
             }
-            agenda.Sessions = agenda.Sessions.Where(s => s.Talks.Length > 0).ToArray();
+            agenda.Sessions = agenda.Sessions.Where(s => s.StartDate.Year != 1 && s.EndDate.Year != 1).ToArray();
         }
 
         /// <summary>
