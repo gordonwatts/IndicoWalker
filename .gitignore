@@ -6,3 +6,4 @@ packages/*/*
 !**/packages/repositories.config
 *.appx
 IWalker/IWalker.Windows/AppPackages/*
+*.pdb/*/*
