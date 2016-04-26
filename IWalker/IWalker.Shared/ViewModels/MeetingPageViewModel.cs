@@ -118,9 +118,18 @@ namespace IWalker.ViewModels
                 .Select(m => m.StartTime.ToString(@"M\/d\/yyyy h\:mm tt") + " - " + m.EndTime.ToString(@"h\:mm tt") + " (" + (m.EndTime - m.StartTime).ToString(@"h\:mm") + " long)")
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
 
-            ldrCmdReady
-                .Select(m => m.Sessions.SelectMany(s => s.Talks).Count() == 0 && m.Sessions.Length <= 1)
+            // We want to notify the user that the meeting has no talks. We need to turn on the "no talk" thing
+            // and also switch off the "loading" (which is normally switched off after all the talks are loaded).
+            var meetingIsEmpty = ldrCmdReady
+                .Select(m => m.Sessions.SelectMany(s => s.Talks).Count() == 0 && m.Sessions.Length <= 1);
+
+            meetingIsEmpty
                 .ToProperty(this, x => x.MeetingIsEmpty, out _meetingIsEmpty, false, RxApp.MainThreadScheduler);
+
+            meetingIsEmpty
+                .Where(mcnt => mcnt)
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(_displayDayIndex => MeetingIsReadyForDisplay = true);
 
             var ldrSessions = ldrCmdReady
                 .Select(m => m.Sessions)
@@ -142,10 +151,6 @@ namespace IWalker.ViewModels
                 .Subscribe(ds =>
                 {
                     Days.MakeListLookLike(ds);
-                    if (DisplayDayIndex < 0 && ds.Length == 0)
-                    {
-                        DisplayDayIndex -= 1; // Otherwise nothign will get through!
-                    }
                     if (DisplayDayIndex >= ds.Length)
                     {
                         DisplayDayIndex = ds.Length - 1;
@@ -210,16 +215,14 @@ namespace IWalker.ViewModels
         private void SetAsSessions(ISession[] sessions, IObservable<ISession[]> ldrSessions)
         {
             Debug.WriteLine("Setting up display for {0} sessions.", sessions.Length);
-            // Normally, we'd want to use this. However, this causes a total list reset,
-            // and often the below code will not touch the list at all.
-            //using (Talks.SuppressChangeNotifications())
-            {
-                Sessions.MakeListLookLike(sessions,
-                    (oItem, dItem) => oItem.Id == dItem.Id && oItem.StartTime == dItem.StartTime,
-                    dItem => new SessionUserControlViewModel(dItem, ldrSessions, sessions.Length == 1)
-                    );
-            }
+
+            Sessions.MakeListLookLike(sessions,
+                (oItem, dItem) => oItem.Id == dItem.Id && oItem.StartTime == dItem.StartTime,
+                dItem => new SessionUserControlViewModel(dItem, ldrSessions, sessions.Length == 1)
+                );
             Debug.WriteLine("  Display now contains {0} Sessions.", Sessions.Count);
+
+            // Make sure that that propagates out - because we are ready to show everything now.
             MeetingIsReadyForDisplay = true;
         }
 
