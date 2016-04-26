@@ -11,6 +11,6 @@
 
     <Grid>
         <Image Name="ThumbImage"/>
-        <ProgressRing Name="DrawInProgress" IsActive="False"/>
+        <ProgressRing Name="DrawInProgress" IsActive="False" Foreground="{ThemeResource AppBarItemForegroundThemeBrush}"/>
     </Grid>
 </UserControl>
