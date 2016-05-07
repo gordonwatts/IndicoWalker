@@ -3,6 +3,8 @@ using SQLite;
 using System;
 using System.Collections.Generic;
 using System.Diagnostics;
+using System.Reactive;
+using System.Reactive.Subjects;
 using System.Text;
 using System.Threading.Tasks;
 
@@ -19,10 +21,21 @@ namespace IWalker.DataModel.MRU
         SQLiteDb _db = null;
 
         /// <summary>
+        /// Fires every time the MRU database is updated (even if it didn't change).
+        /// </summary>
+        public IObservable<Unit> MRUDBUpdated { get { return _mrusUpdated; } }
+
+        /// <summary>
+        /// Hold onto the trigger to fire when we have an update
+        /// </summary>
+        private Subject<Unit> _mrusUpdated;
+
+        /// <summary>
         /// Connect up to our MRU database.
         /// </summary>
         public MRUDatabaseAccess()
         {
+            _mrusUpdated = new Subject<Unit>();
         }
 
         /// <summary>
@@ -52,6 +65,7 @@ namespace IWalker.DataModel.MRU
                     LastLookedAt = DateTime.Now
                 };
                 var r = await _db.AsyncConnection.InsertAsync(mru);
+                _mrusUpdated.OnNext(default(Unit));
             }
             else
             {
@@ -63,6 +77,7 @@ namespace IWalker.DataModel.MRU
                 entry.StartTime = m.StartTime;
 
                 await _db.AsyncConnection.UpdateAsync(entry);
+                _mrusUpdated.OnNext(default(Unit));
             }
         }
 
