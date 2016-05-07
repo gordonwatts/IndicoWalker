@@ -119,4 +119,21 @@ namespace IWalker
             return new IWalker.DataModel.Inidco.IndicoMeetingRef(ai.ConferenceUrl);
         }
     }
+
+    /// <summary>
+    /// Do an MRU compare
+    /// </summary>
+    public class MURCompare : IEqualityComparer<MRU>
+    {
+        public bool Equals(MRU x, MRU y)
+        {
+            return GetHashCode(x) == GetHashCode(y)
+                && x.IDRef == y.IDRef;
+        }
+
+        public int GetHashCode(MRU obj)
+        {
+            return obj.IDRef.GetHashCode();
+        }
+    }
 }

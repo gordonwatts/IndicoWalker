@@ -99,7 +99,8 @@ namespace IWalker.Util
                     let dMatch = dArray.Where(dItem => compare(oItem, dItem)).FirstOrDefault()
                     where dMatch != null
                     select Tuple.Create(dMatch, oIndex);
-            var desiredToOriginalMapping = r.ToDictionary(info => info.Item1, info => info.Item2);
+            var desiredToOriginalMapping = r
+                .ToDictionary(info => info.Item1, info => info.Item2);
 
             // Where we have a desired item, return that. Otherwise, the other guy.
             // Note that the ToArray below has to be here because the original list, and the

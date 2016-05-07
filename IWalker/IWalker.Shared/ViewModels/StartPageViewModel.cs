@@ -82,13 +82,18 @@ namespace IWalker.ViewModels
             LoadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
             {
                 var m = new MRUDatabaseAccess();
+
+                // Run this in the SQL engine
                 var mruMeetings = 
                     (await m.QueryMRUDB())
                     .OrderByDescending(mru => mru.LastLookedAt)
                     .Take(20)
                     .ToListAsync();
+
+                // Ok, now run locally that we have a small list
                 return (await mruMeetings)
                     .OrderByDescending(mru => mru.StartTime)
+                    .Distinct(new MURCompare())
                     .ToList();
             });
             LoadRecentMeetings
