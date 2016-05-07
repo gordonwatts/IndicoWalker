@@ -13,7 +13,8 @@ using IWalker.DataModel.Categories;
 namespace IWalker.ViewModels
 {
     /// <summary>
-    /// ViewModel for a category view - lists all the category items
+    /// ViewModel for a category view - lists all the meetings in a single category along with
+    /// the config items
     /// </summary>
     public class CategoryPageViewModel : ReactiveObject, IRoutableViewModel
     {
