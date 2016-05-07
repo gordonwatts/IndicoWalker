@@ -91,7 +91,10 @@ namespace IWalker.ViewModels
         /// <param name="m"></param>
         private void SetMeetings(IMeetingRefExtended[] m)
         {
-            MeetingList.MakeListLookLike(m,
+            // We need the list to be sorted by date
+            var sortedMeetings = m.OrderBy(s => s.StartTime);
+
+            MeetingList.MakeListLookLike(sortedMeetings,
                 (oItem, dItem) => oItem.Meeting.AsReferenceString() == dItem.Meeting.AsReferenceString(),
                 dItem => dItem
                 );
