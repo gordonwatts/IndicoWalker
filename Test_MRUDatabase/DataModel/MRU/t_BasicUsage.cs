@@ -36,6 +36,22 @@ namespace Test_MRUDatabase.DataModel.MRU
         }
 
         [TestMethod]
+        public async Task AddMeetingCausesRxFire()
+        {
+            // Add a single meeting, and get back that meeting.
+            var c = new MRUDatabaseAccess();
+
+            int fireCount = 0;
+            c.MRUDBUpdated
+                .Subscribe(_ => fireCount++);
+
+            var m = GenerateSimpleMeeting(DateTime.Now);
+            await c.MarkVisitedNow(m);
+
+            await TestUtils.SpinWait(() => fireCount == 1, 1000);
+        }
+
+        [TestMethod]
         public async Task Add2Meetings()
         {
             // Add two of them.
