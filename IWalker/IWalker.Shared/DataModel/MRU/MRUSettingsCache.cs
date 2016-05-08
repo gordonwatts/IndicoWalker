@@ -5,6 +5,8 @@ using System.Linq;
 using System.Collections.Generic;
 using System.Text;
 using Windows.Storage;
+using System.Reactive;
+using System.Reactive.Subjects;
 
 namespace IWalker.DataModel.MRU
 {
@@ -16,12 +18,56 @@ namespace IWalker.DataModel.MRU
     /// <remarks>
     /// Eventually this should be replaced by a real system that will store everything in the cloud.
     /// </remarks>
-    public class MRUSettingsCache
+    public static class MRUSettingsCache
     {
         /// <summary>
         /// WHat we use to access the remote MRU lists.
         /// </summary>
         private const string RemoteMRUSettingsName = "RemoteMRULists";
+
+        /// <summary>
+        /// Cache our private version of the update stream.
+        /// </summary>
+        /// <remarks>
+        /// It will fire if we update the local cache or if someone remote updates the
+        /// local data.
+        /// </remarks>
+        private static Lazy<Subject<Unit>> _remoteMachineCacheUpdate = null;
+
+        /// <summary>
+        /// Get everything setup
+        /// </summary>
+        static MRUSettingsCache()
+        {
+            Init();
+        }
+
+        /// <summary>
+        /// Initialize everything
+        /// </summary>
+        private static void Init()
+        {
+            _remoteMachineCacheUpdate = new Lazy<Subject<Unit>>(() =>
+            {
+                var r = new Subject<Unit>();
+
+                // When it comes in from a roaming data update by the OS.
+                ApplicationData.Current.DataChanged += (sender, args) => r.OnNext(default(Unit));
+
+                return r;
+            });
+        }
+
+        /// <summary>
+        /// Fires when the remote machine cache is updated (e.g. a file changes, etc.)
+        /// It doesn't know enough to be able to say why it updated. Just touching a file, for example,
+        /// may be enough to trigger this.
+        /// </summary>
+        /// <remarks>
+        /// It will not cause a trigger the first time you hook up. You'll have to wait until
+        /// something changes before that happens
+        /// </remarks>
+        public static IObservable<Unit> RemoteMachineCacheUpdate { get { return _remoteMachineCacheUpdate.Value; } }
 
         /// <summary>
         /// Grab the MRU lists from all other machines, combine them, and return them.
@@ -65,6 +111,9 @@ namespace IWalker.DataModel.MRU
         {
             var settings = GetOrCreateSettingsContainer();
             settings.Values[machineName] = JsonConvert.SerializeObject(mrus);
+
+            // Let the rest of the application know
+            _remoteMachineCacheUpdate.Value.OnNext(default(Unit));
         }
 
         /// <summary>
@@ -86,6 +135,10 @@ namespace IWalker.DataModel.MRU
             {
                 ApplicationData.Current.RoamingSettings.DeleteContainer(RemoteMRUSettingsName);
             }
+
+            // Reset the notification fellow as well
+            _remoteMachineCacheUpdate = null;
+            Init();
         }
     }
 }

@@ -23,19 +23,21 @@ namespace IWalker.DataModel.MRU
         /// <summary>
         /// Fires every time the MRU database is updated (even if it didn't change).
         /// </summary>
-        public IObservable<Unit> MRUDBUpdated { get { return _mrusUpdated; } }
+        public static IObservable<Unit> MRUDBUpdated { get { return _mrusUpdated; } }
 
         /// <summary>
         /// Hold onto the trigger to fire when we have an update
         /// </summary>
-        private Subject<Unit> _mrusUpdated;
+        private static Subject<Unit> _mrusUpdated = new Subject<Unit>();
 
         /// <summary>
-        /// Connect up to our MRU database.
+        /// Mark the meeting as having been visited
         /// </summary>
-        public MRUDatabaseAccess()
+        /// <param name="m"></param>
+        /// <returns></returns>
+        public Task MarkVisitedNow(IMeeting m)
         {
-            _mrusUpdated = new Subject<Unit>();
+            return MarkVisitedNow(m, null);
         }
 
         /// <summary>
@@ -44,8 +46,11 @@ namespace IWalker.DataModel.MRU
         /// <param name="meeting"></param>
         /// <param name="startTime"></param>
         /// <param name="title"></param>
-        public async Task MarkVisitedNow(IMeeting m)
+        public async Task MarkVisitedNow(IMeeting m, DateTime? timeStamp = null)
         {
+            // Setup the time stamp
+            var ts = timeStamp.HasValue ? timeStamp.Value : DateTime.Now;
+
             await CreateDBConnection();
 
             // See if this meeting is already in the database. We have to
@@ -62,7 +67,7 @@ namespace IWalker.DataModel.MRU
                     IDRef = mref,
                     StartTime = m.StartTime,
                     Title = m.Title,
-                    LastLookedAt = DateTime.Now
+                    LastLookedAt = ts
                 };
                 var r = await _db.AsyncConnection.InsertAsync(mru);
                 _mrusUpdated.OnNext(default(Unit));

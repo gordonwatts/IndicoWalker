@@ -42,7 +42,7 @@ namespace Test_MRUDatabase.DataModel.MRU
             var c = new MRUDatabaseAccess();
 
             int fireCount = 0;
-            c.MRUDBUpdated
+            MRUDatabaseAccess.MRUDBUpdated
                 .Subscribe(_ => fireCount++);
 
             var m = GenerateSimpleMeeting(DateTime.Now);

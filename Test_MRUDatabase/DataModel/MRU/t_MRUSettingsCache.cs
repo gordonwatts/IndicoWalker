@@ -2,11 +2,13 @@
 using Microsoft.VisualStudio.TestPlatform.UnitTestFramework;
 using System;
 using System.Linq;
+using System.Threading.Tasks;
+using Windows.Storage;
 
 namespace Test_MRUDatabase.DataModel.MRU
 {
     /// <summary>
-    /// test out the mru setting cache
+    /// test out the MRU setting cache
     /// </summary>
     [TestClass]
     public class t_MRUSettingsCache
@@ -39,6 +41,34 @@ namespace Test_MRUDatabase.DataModel.MRU
                 Assert.AreEqual(dual.Item1.StartTime, dual.Item2.StartTime);
                 Assert.AreEqual(dual.Item1.Title, dual.Item2.Title);
             }
+        }
+
+        [TestMethod]
+        public async Task CreationOfMachineTriggersUpdateNotification()
+        {
+            int counter = 0;
+            MRUSettingsCache.RemoteMachineCacheUpdate
+                .Subscribe(_ => counter++);
+
+            var mrus = GenerateMRUs();
+            MRUSettingsCache.UpdateForMachine("MACHINE1", mrus);
+
+            await TestUtils.SpinWait(() => counter == 1, 1000);
+        }
+
+        [TestMethod]
+        public async Task UpdateOfMachineTriggersUpdateNotification()
+        {
+            var mrus = GenerateMRUs();
+            MRUSettingsCache.UpdateForMachine("MACHINE1", mrus);
+
+            int counter = 0;
+            MRUSettingsCache.RemoteMachineCacheUpdate
+                .Subscribe(_ => counter++);
+
+            mrus = GenerateMRUs();
+            MRUSettingsCache.UpdateForMachine("MACHINE1", mrus);
+            await TestUtils.SpinWait(() => counter == 1, 1000);
         }
 
         [TestMethod]
