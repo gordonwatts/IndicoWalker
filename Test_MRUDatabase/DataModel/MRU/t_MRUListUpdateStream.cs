@@ -60,10 +60,15 @@ namespace Test_MRUDatabase.DataModel.MRU
             // Setup the DB first, and make sure the MRU list returns that item
             // when we go for it.
             await LoadDB(1);
+
+            // Prime the setup so we can make sure that other stuff shows up even after
+            // it has started.
             var dummyCache = await GetFirstMRUList();
 
+            // Load up a further two items by marking them.
             await LoadDB(2, 1);
-            dummyCache = await GetFirstMRUList();
+
+            dummyCache = await GetFirstMRUList(3);
             Assert.AreEqual(3, dummyCache.Length);
         }
 
@@ -81,19 +86,29 @@ namespace Test_MRUDatabase.DataModel.MRU
             Assert.Inconclusive();
             // Make sure they come back in the right order
         }
+
+        [TestMethod]
+        public async Task MachineFileWritten()
+        {
+            Assert.Inconclusive();
+            // Make sure the per-machine files are written.
+            // This test may not actually belong here, however.
+        }
+
 #endif
 
         /// <summary>
         /// Return the MRU list that is first off the presses.
         /// </summary>
         /// <returns></returns>
-        private static async Task<IWalker.MRU[]> GetFirstMRUList()
+        private static async Task<IWalker.MRU[]> GetFirstMRUList(int sizeMin = 0)
         {
             var s = await MRUListUpdateStream.GetMRUListStream();
             IWalker.MRU[] dummyCache = null;
             using (var tmp = s.Subscribe(lst => dummyCache = lst))
             {
                 await TestUtils.SpinWait(() => dummyCache != null, 1000);
+                await TestUtils.SpinWait(() => dummyCache.Length >= sizeMin, 1000);
             }
 
             return dummyCache;
