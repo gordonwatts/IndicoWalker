@@ -41,6 +41,7 @@ namespace IWalker.DataModel.MRU
         {
             _MRUStream = null;
             _MRUDBSubscription = null;
+            _machineName = null;
         }
 
         /// <summary>
@@ -101,7 +102,8 @@ namespace IWalker.DataModel.MRU
                 .Select(mlst => mlst
                     .OrderByDescending(k => k.StartTime)
                     .Take(NumberOfMRUMeetings)
-                    .ToArray());
+                    .ToArray())
+                .Distinct(lst => MRUListHash(lst));
 
             // Make sure that it replays so when new folks join us (or a page gets re-initialized) they get the same
             // thing.
@@ -119,6 +121,22 @@ namespace IWalker.DataModel.MRU
                 });
 
             return _MRUStream;
+        }
+
+        /// <summary>
+        /// Returns true if order and number are the same
+        /// </summary>
+        /// <param name="list1"></param>
+        /// <param name="list2"></param>
+        /// <returns></returns>
+        private static int MRUListHash (IWalker.MRU[] list)
+        {
+            var bld = new StringBuilder();
+            foreach (var l in list)
+            {
+                bld.Append(l.IDRef);
+            }
+            return bld.ToString().GetHashCode();
         }
 
         /// <summary>

@@ -55,6 +55,15 @@ namespace Test_MRUDatabase.DataModel.MRU
         }
 
         [TestMethod]
+        public async Task MRUSLimited()
+        {
+            await LoadDB(40);
+
+            var dummyCache = await GetFirstMRUList();
+            Assert.AreEqual(20, dummyCache.Length);
+        }
+
+        [TestMethod]
         public async Task MRUUpdateCreatesRemoteFile()
         {
             var dummyCache = await GetFirstMRUList();
@@ -147,41 +156,52 @@ namespace Test_MRUDatabase.DataModel.MRU
             Assert.IsTrue(minutesDifferent.Minutes >= 59, $"Youngest date {youngest} was too close to {DateTime.Now} (it was {minutesDifferent.Minutes} minutes apart).");
         }
 
-        #if false
-        // We will undo these tests as we go. Mostly written as ideas of what I want to make sure this
-        // module conforms to for now.
-        [TestMethod]
-        public async Task MRUSLimited()
-        {
-            Assert.Inconclusive();
-            // Make sure we get back only 20 even when weird stuff happens.
-        }
-
-        [TestMethod]
-        public async Task MRUSorted()
-        {
-            Assert.Inconclusive();
-            // Make sure they come back in the right order
-        }
-
         [TestMethod]
         public async Task MachineFileWritten()
         {
-            Assert.Inconclusive();
-            // Make sure the per-machine files are written.
-            // This test may not actually belong here, however.
+            // Write out to a local machine file.
+            MRUListUpdateStream.MachineName = "ThisTestMachine";
+
+            // Prime and get the system up and running
+            var dummyCache = await GetFirstMRUList();
+
+            // Load in 10, see if they were cached correctly.
+            await LoadDB(10);
+
+            await TestUtils.SpinWait(() => MRUSettingsCache.GetFromMachine("ThisTestMachine") != null, 1000);
+            var mrus = MRUSettingsCache.GetFromMachine("ThisTestMachine");
+            Assert.IsNotNull(mrus);
+            Assert.AreEqual(10, mrus.Length);
         }
 
         [TestMethod]
-        public async Task UpdatesThatDontChagneDontCauseUpdates()
+        public async Task UpdateMachineMRUWithNoChangeRemoteMRUList()
         {
-            Assert.Inconslusive();
+            // If something happens that causes an update to a remote MRU, we should
+            // not generate a change to the rest of the world.
 
-            // Do an update that would trigger something, but no data change. The output
-            // should not alter and remain quiet.
+            // Write out an MRU list to a machine, and start up everything.
+            GenerateOtherMachineMRU("MACHINE2", 10);
+
+            int count = 0;
+            MRUListUpdateStream.GetMRUListStream()
+                .Subscribe(_ => count++);
+
+            await TestUtils.SpinWaitAreEqual(1, () => count);
+
+            // Now, redo the update for machine 2, so we write the same data back.
+            // Wait, and see what happens.
+            var mrus = MRUSettingsCache.GetFromMachine("MACHINE2");
+            MRUSettingsCache.UpdateForMachine("MACHINE2", mrus);
+
+            await TestUtils.SpinWait(() => count != 1, 500, false);
+            Assert.AreEqual(1, count);
+
+            // Write it to a new machine
+            MRUSettingsCache.UpdateForMachine("MACHINE1", mrus);
+            await TestUtils.SpinWait(() => count != 1, 500, false);
+            Assert.AreEqual(1, count);
         }
-
-#endif
 
         /// <summary>
         /// Return the MRU list that is first off the presses.
