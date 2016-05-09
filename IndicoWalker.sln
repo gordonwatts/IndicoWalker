@@ -1,7 +1,7 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 2013
-VisualStudioVersion = 12.0.31101.0
+# Visual Studio 14
+VisualStudioVersion = 14.0.25123.0
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "IWalker", "IWalker", "{B17CF88B-C903-41DD-AEFD-B7986582ABC3}"
 EndProject
@@ -135,6 +135,7 @@ Global
 		{7DB05D47-7E03-42ED-9739-510F91609132}.Release|Mixed Platforms.Build.0 = Release|Any CPU
 		{7DB05D47-7E03-42ED-9739-510F91609132}.Release|x64.ActiveCfg = Release|Any CPU
 		{7DB05D47-7E03-42ED-9739-510F91609132}.Release|x86.ActiveCfg = Release|Any CPU
+		{7DB05D47-7E03-42ED-9739-510F91609132}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
