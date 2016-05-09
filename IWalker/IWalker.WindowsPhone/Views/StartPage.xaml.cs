@@ -30,8 +30,6 @@ namespace IWalker.Views
                     .Subscribe(a => ViewModel.HostScreen.Router.Navigate.Execute(new OpenURLControlViewModel(ViewModel.HostScreen))));
 
                 // Update everything
-                ViewModel.LoadRecentMeetings
-                    .Execute(null);
                 ViewModel.UpdateUpcomingMeetings
                     .Execute(null);
             });

@@ -107,7 +107,7 @@ namespace Test_MRUDatabase.DataModel.MRU
             {
                 var dummyCache = await GetFirstMRUList();
                 MRUListUpdateStream.MachineName = "MACHINE1";
-            } catch (InvalidOperationException e)
+            } catch (InvalidOperationException)
             {
                 return;
             }

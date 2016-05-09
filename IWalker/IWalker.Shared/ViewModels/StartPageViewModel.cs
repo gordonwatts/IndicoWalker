@@ -38,11 +38,6 @@ namespace IWalker.ViewModels
         public ReactiveList<IMeetingRefExtended> UpcomingMeetings { get; private set; }
 
         /// <summary>
-        /// Reload from the DB all the meetings
-        /// </summary>
-        public ReactiveCommand<List<MRU>> LoadRecentMeetings { get; private set; }
-
-        /// <summary>
         /// Reload the up coming meetings
         /// </summary>
         public ReactiveCommand<object> UpdateUpcomingMeetings { get; private set; }
@@ -79,24 +74,7 @@ namespace IWalker.ViewModels
             // And populate the most recently viewed meeting list.
             RecentMeetings = new ReactiveList<MRU>();
 
-            LoadRecentMeetings = ReactiveCommand.CreateAsyncTask(async o =>
-            {
-                var m = new MRUDatabaseAccess();
-
-                // Run this in the SQL engine
-                var mruMeetings = 
-                    (await m.QueryMRUDB())
-                    .OrderByDescending(mru => mru.LastLookedAt)
-                    .Take(20)
-                    .ToListAsync();
-
-                // Ok, now run locally that we have a small list
-                return (await mruMeetings)
-                    .OrderByDescending(mru => mru.StartTime)
-                    .Distinct(new MURCompare())
-                    .ToList();
-            });
-            LoadRecentMeetings
+            MRUListUpdateStream.GetMRUListStream()
                 .ObserveOn(RxApp.MainThreadScheduler)
                 .Subscribe(l => SetMRUMeetings(l));
 

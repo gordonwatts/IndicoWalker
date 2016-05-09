@@ -22,8 +22,6 @@ namespace IWalker.Views
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.UpcomingMeetings, y => y.MainHubView.Sections[0].DataContext));
                 disposeOfMe(this.OneWayBind(ViewModel, x => x.OpenURLControlVM, y => y.OpenURLControl.ViewModel));
 
-                ViewModel.LoadRecentMeetings
-                    .Execute(null);
                 ViewModel.UpdateUpcomingMeetings
                     .Execute(null);
             });
