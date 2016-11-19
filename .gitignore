@@ -7,3 +7,4 @@ packages/*/*
 *.appx
 IWalker/IWalker.Windows/AppPackages/*
 *.pdb/*/*
+/IWalker/IWalker.WindowsPhone/AppPackages/*
