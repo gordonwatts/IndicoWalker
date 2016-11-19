@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Package xmlns="http://schemas.microsoft.com/appx/2010/manifest" xmlns:m2="http://schemas.microsoft.com/appx/2013/manifest">
-  <Identity Name="a7edf6e0-715f-480b-b7fc-77ed1ab013fe" Publisher="CN=Indico Walker Temp CERT For PUBLIC" Version="1.0.0.5" />
+  <Identity Name="a7edf6e0-715f-480b-b7fc-77ed1ab013fe" Publisher="CN=Gordon" Version="1.0.0.7" />
   <Properties>
     <DisplayName>Indico Walker</DisplayName>
     <PublisherDisplayName>Gordon Watts</PublisherDisplayName>
