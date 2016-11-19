@@ -21,6 +21,7 @@
     <AllowCrossPlatformRetargeting>False</AllowCrossPlatformRetargeting>
     <NuGetPackageImportStamp>
     </NuGetPackageImportStamp>
+    <PackageCertificateThumbprint>E57B8622770A54D493548340C647849BED64EAED</PackageCertificateThumbprint>
   </PropertyGroup>
   <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
     <DebugSymbols>true</DebugSymbols>
