@@ -485,7 +485,7 @@ namespace IWalker.DataModel.Inidco
         /// <param name="agenda"></param>
         private void CleanUpMeeting(Meeting agenda)
         {
-            agenda.MeetingTalks = agenda.MeetingTalks.Where(m => m.StartDate.Year != 1 && m.EndDate.Year != 1).ToArray();
+            agenda.MeetingTalks = agenda.MeetingTalks.Where(m => (m.Title == null && m.SubTalks != null && m.SubTalks.Length > 0) || (m.StartDate.Year != 1 && m.EndDate.Year != 1)).ToArray();
             foreach (var s in agenda.Sessions)
             {
                 s.Talks = s.Talks.Where(t => t.StartDate.Year != 1 && t.EndDate.Year != 1).ToArray();
