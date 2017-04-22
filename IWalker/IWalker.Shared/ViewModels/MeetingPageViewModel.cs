@@ -22,6 +22,7 @@ namespace IWalker.ViewModels
             // Initial default values
             HostScreen = hs;
             Sessions = new ReactiveList<SessionUserControlViewModel>();
+            TalkFiles = new ReactiveList<FileUserControlViewModel>();
 
             // And start off a background guy to populate everything.
             LoadMeeting(mRef);
@@ -117,6 +118,12 @@ namespace IWalker.ViewModels
             ldrCmdReady
                 .Select(m => m.StartTime.ToString(@"M\/d\/yyyy h\:mm tt") + " - " + m.EndTime.ToString(@"h\:mm tt") + " (" + (m.EndTime - m.StartTime).ToString(@"h\:mm") + " long)")
                 .ToProperty(this, x => x.StartTime, out _startTime, "", RxApp.MainThreadScheduler);
+
+            // The talks that are in the meeting header.
+            ldrCmdReady
+                .Select(m => m.AttachedFiles.OrderBy(mt => mt.DisplayName).ToArray())
+                .ObserveOn(RxApp.MainThreadScheduler)
+                .Subscribe(files => SetAsMeetingFiles(files));
 
             // We want to notify the user that the meeting has no talks. We need to turn on the "no talk" thing
             // and also switch off the "loading" (which is normally switched off after all the talks are loaded).
@@ -227,6 +234,19 @@ namespace IWalker.ViewModels
         }
 
         /// <summary>
+        /// Given the talk list, make our current list look like it.
+        /// We integrate the current talks into the current list.
+        /// </summary>
+        /// <param name="sessions"></param>
+        private void SetAsMeetingFiles(IFile[] files)
+        {
+            TalkFiles.MakeListLookLike(files,
+                (oItem, dItem) => oItem.File.UniqueKey == dItem.UniqueKey,
+                dItem => new FileUserControlViewModel(dItem)
+                );
+        }
+
+        /// <summary>
         /// Start the automatic meeting update process, including the one when this VM is initially loaded.
         /// </summary>
         /// <remarks>This is only done on a time-table. Re-firing this after it is fired once will not cause the update to re-trigger unless the time interval has been reached.</remarks>
@@ -280,6 +300,11 @@ namespace IWalker.ViewModels
         /// Get the list of talks
         /// </summary>
         public ReactiveList<SessionUserControlViewModel> Sessions { get; private set; }
+
+        /// <summary>
+        /// Get the list of talks that are attached to the header of this meeting
+        /// </summary>
+        public ReactiveList<FileUserControlViewModel> TalkFiles { get; private set; }
 
         /// <summary>
         /// A list of the days this meeting covers for multi-day meetings

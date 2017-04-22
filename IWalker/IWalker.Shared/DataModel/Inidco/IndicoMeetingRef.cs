@@ -452,6 +452,35 @@ namespace IWalker.DataModel.Inidco
             }
 
             /// <summary>
+            /// Return any files attached to the header of the meeting
+            /// </summary>
+            [JsonIgnore]
+            public IFile[] AttachedFiles
+            {
+                get
+                {
+                    if (_attachedFiles == null)
+                    {
+                        if (aAgenda.MeetingTalks == null || aAgenda.MeetingTalks.Length == 0)
+                        {
+                            _attachedFiles = new IFile[0];
+                        } else
+                        {
+                            var talks = aAgenda.MeetingTalks.Select(t => new IndicoTalk(t, aShortString));
+                            var allTalks = talks.SelectMany(t => t.SubTalks);
+                            _attachedFiles = allTalks.Concat(talks.Cast<ITalk>()).Select(t => t.TalkFile).Where(f => f != null && f.IsValid).ToArray();
+                        }
+                    }
+                    return _attachedFiles;
+                }
+            }
+
+            /// <summary>
+            /// Keep track of attached files.
+            /// </summary>
+            private IFile[] _attachedFiles = null;
+
+            /// <summary>
             /// Return the short flufable string.
             /// </summary>
             /// <returns></returns>

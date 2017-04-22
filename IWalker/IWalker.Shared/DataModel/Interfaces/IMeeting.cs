@@ -28,6 +28,11 @@ namespace IWalker.DataModel.Interfaces
         DateTime EndTime { get; }
 
         /// <summary>
+        /// A list of files attached to the meeting header. These are usually just
+        /// </summary>
+        IFile[] AttachedFiles { get; }
+
+        /// <summary>
         /// Turn the meeting into some sort of string that we can then use to re-constitute
         /// this IMeeting. This should be short - of order 60 characters (initial db size is 100).
         /// </summary>

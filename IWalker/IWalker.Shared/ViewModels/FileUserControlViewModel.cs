@@ -57,11 +57,17 @@ namespace IWalker.ViewModels
         public FileDownloadController FileDownloader { get; private set; }
 
         /// <summary>
+        /// Get the file we are attached to
+        /// </summary>
+        public IFile File { get; private set; }
+
+        /// <summary>
         /// Initialize all of our behaviors.
         /// </summary>
         /// <param name="file"></param>
         public FileUserControlViewModel(IFile file, IBlobCache cache = null)
         {
+            File = file;
             cache = cache ?? Blobs.LocalStorage;
 
             // Save the document type for the UI
