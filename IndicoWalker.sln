@@ -19,6 +19,7 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "IWalker.UWP", "IWalker.UWP\
 EndProject
 Global
 	GlobalSection(SharedMSBuildProjectFiles) = preSolution
+		IWalker\IWalker.Shared\IWalker.Shared.projitems*{3e6de764-cd32-4757-8531-d94bea727824}*SharedItemsImports = 4
 		IWalker\IWalker.Shared\IWalker.Shared.projitems*{6fdd6e77-c236-42e9-a2d4-d572c1f726e8}*SharedItemsImports = 13
 		IWalker\IWalker.Shared\IWalker.Shared.projitems*{a51ede9a-63ec-4841-82fe-9f8d84cdd205}*SharedItemsImports = 4
 		IWalker\IWalker.Shared\IWalker.Shared.projitems*{aa8289dd-e217-4e94-9ab6-71deacad6883}*SharedItemsImports = 4
