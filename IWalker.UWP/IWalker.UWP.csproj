@@ -96,6 +96,32 @@
       <DependentUpon>MainPage.xaml</DependentUpon>
     </Compile>
     <Compile Include="Properties\AssemblyInfo.cs" />
+    <Compile Include="Util\BatchByStreamHelper.cs" />
+    <Compile Include="Util\OnScreenTrackingHelper.cs" />
+    <Compile Include="ViewModels\ExpandingSlideThumbViewModel.cs" />
+    <Compile Include="ViewModels\FileSlideListViewModel.cs" />
+    <Compile Include="ViewModels\FirstSlideHeroViewModel.cs" />
+    <Compile Include="ViewModels\FullTalkAsStripViewModel.cs" />
+    <Compile Include="ViewModels\PDFFile.cs" />
+    <Compile Include="ViewModels\PDFPageViewModel.cs" />
+    <Compile Include="ViewModels\SlideThumbViewModel.cs" />
+    <Compile Include="ViewModels\TalkAsSlidesViewModel.cs" />
+    <Compile Include="Views\BasicSettingsFlyout.xaml.cs" />
+    <Compile Include="Views\CategoryAllPageView.xaml.cs" />
+    <Compile Include="Views\CategoryConfigUserControl.xaml.cs" />
+    <Compile Include="Views\CategoryPageView.xaml.cs" />
+    <Compile Include="Views\ExpandingSlideThumbView.xaml.cs" />
+    <Compile Include="Views\FileSlidesUserControl.xaml.cs" />
+    <Compile Include="Views\FirstRunView.xaml.cs" />
+    <Compile Include="Views\FirstSlideHeroUserControl.xaml.cs" />
+    <Compile Include="Views\FullTalkAsStripView.xaml.cs" />
+    <Compile Include="Views\MeetingPage.xaml.cs" />
+    <Compile Include="Views\OpenURLControlView.xaml.cs" />
+    <Compile Include="Views\PDFPageUserControl.xaml.cs" />
+    <Compile Include="Views\SecuritySettingsPage.xaml.cs" />
+    <Compile Include="Views\SlideThumbUserControl.xaml.cs" />
+    <Compile Include="Views\StartPage.xaml.cs" />
+    <Compile Include="Views\TalkFileCollectionUserControl.xaml.cs" />
   </ItemGroup>
   <ItemGroup>
     <AppxManifest Include="Package.appxmanifest">
@@ -115,6 +141,70 @@
   </ItemGroup>
   <ItemGroup>
     <Page Include="MainPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\BasicSettingsFlyout.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CategoryAllPageView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CategoryConfigUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\CategoryPageView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\ExpandingSlideThumbView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FileSlidesUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FirstRunView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FirstSlideHeroUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\FullTalkAsStripView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\MeetingPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\OpenURLControlView.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\PDFPageUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SecuritySettingsPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\SlideThumbUserControl.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\StartPage.xaml">
+      <Generator>MSBuild:Compile</Generator>
+      <SubType>Designer</SubType>
+    </Page>
+    <Page Include="Views\TalkFileCollectionUserControl.xaml">
       <Generator>MSBuild:Compile</Generator>
       <SubType>Designer</SubType>
     </Page>

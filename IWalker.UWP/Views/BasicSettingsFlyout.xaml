@@ -1,0 +1,69 @@
+﻿<SettingsFlyout
+    x:Class="IWalker.Views.BasicSettingsFlyout"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IWalker.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    IconSource="Assets/SmallLogo.png"
+    Title="Basic Settings"
+    d:DesignWidth="346">
+                        
+            <!-- This StackPanel acts as a root panel for vertical layout of the content sections -->
+    <StackPanel VerticalAlignment="Stretch" HorizontalAlignment="Stretch" >
+
+        <!-- The StackPanel(s) below define individual content sections -->
+
+        <!-- Content Section 1-->
+        <StackPanel Style="{StaticResource SettingsFlyoutSectionStyle}">
+
+            <!-- Section 1 header -->
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Secure Website Access" />
+
+            <!-- Section 1 body -->
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Various indico websites require certificates to log in.
+                </TextBlock.Text>
+            </TextBlock>
+            <Button x:Name="OpenSecurityPage" Content="Modify Web Security" HorizontalAlignment="Right" Click="OpenSecurityPage_Click"/>
+
+            <!-- Section 2 header -->
+            <TextBlock Style="{StaticResource TitleTextBlockStyle}" Text="Local Cache" Margin="0,10,0,0" />
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    If requested, all talks can be automatically downloaded (and cached) when a meeting is opened.
+                </TextBlock.Text>
+            </TextBlock>
+            <ToggleSwitch Name="AutoDownload" HorizontalAlignment="Right" OffContent="Manual" OnContent="Automatic" Toggled="AutoDownload_Toggled" />
+
+
+            <!-- Section 2 body -->
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    The agenda data is cached locally to make it availible offline and to make display quick even when online. It is refreshed when you look at a meeting. How long should it be kept?
+                </TextBlock.Text>
+            </TextBlock>
+            <ComboBox x:Name="ClearCacheAgenda" HorizontalAlignment="Right" SelectionChanged="ClearCacheAgenda_SelectionChanged"/>
+
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Talk files are cached locally to make them availible offline and to make display quick even when online (and are considerably larger than the agendas). They are monitored for updates. How long should the files be kept?
+                </TextBlock.Text>
+            </TextBlock>
+            <ComboBox x:Name="ClearCacheTalkFiles" HorizontalAlignment="Right" SelectionChanged="ClearCacheTalkFiles_SelectionChanged"/>
+
+            <TextBlock Style="{StaticResource BodyTextBlockStyle}" Margin="0,0,0,25" TextWrapping="Wrap">
+                <TextBlock.Text>
+                    Indico talks and agendas are cached locally to speed up access and make it possible to explore meetings offline.
+                </TextBlock.Text>
+            </TextBlock>
+            <Button x:Name="ClearCache" Content="Delete Local Cache" HorizontalAlignment="Right" Click="ClearCache_Click"/>
+
+        </StackPanel>
+
+        <!-- Define more Content Sections below as necessary -->
+
+    </StackPanel>
+</SettingsFlyout>

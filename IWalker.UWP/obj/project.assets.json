@@ -27300,7 +27300,7 @@
       },
       "reactiveui": {
         "target": "Package",
-        "version": "[7.4.0, )"
+        "version": "7.4.0"
       }
     },
     "frameworks": {
@@ -27317,6 +27317,10 @@
           "Microsoft.NETCore.UniversalWindowsPlatform": {
             "target": "Package",
             "version": "5.3.3"
+          },
+          "reactiveui": {
+            "target": "Package",
+            "version": "7.4.0"
           }
         }
       }

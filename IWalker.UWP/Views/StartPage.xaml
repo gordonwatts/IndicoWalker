@@ -1,0 +1,60 @@
+﻿<Page
+    x:Class="IWalker.Views.StartPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:local="using:IWalker.Views"
+    xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+    xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+    mc:Ignorable="d"
+    Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+
+    <Grid>
+        <Hub x:Name="MainHubView" HorizontalContentAlignment="Stretch">
+            <Hub.Header>
+                <Grid>
+                    <TextBlock Text="Indico Walker" Style="{StaticResource HeaderTextBlockStyle}"
+                                IsHitTestVisible="false" TextWrapping="NoWrap" VerticalAlignment="Center" Margin="0,0,0,0" HorizontalAlignment="Left"/>
+                    <local:OpenURLControlView x:Name="OpenURLControl" HorizontalAlignment="Right" />
+                </Grid>
+            </Hub.Header>
+            <HubSection Header="Upcoming Meetings" Width="600" IsHeaderInteractive="True">
+            	<HubSection.Resources>
+            		<DataTemplate x:Key="ClickableHeader">
+            			<Grid>
+            				<Button HorizontalAlignment="Left" Content="{Binding}" VerticalAlignment="Top" Style="{StaticResource TextBlockButtonStyle}" Click="OpenFullCalendarListsList" FontFamily="Global User Interface" FontSize="26.667" FontWeight="Light" />
+            			</Grid>
+            		</DataTemplate>
+            	</HubSection.Resources>
+            	<HubSection.HeaderTemplate>
+            		<StaticResource ResourceKey="ClickableHeader"/>
+            	</HubSection.HeaderTemplate>
+                <DataTemplate>
+                    <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="ListView_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Width="500">
+                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="Wrap" FontFamily="Global User Interface" />
+                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DataTemplate>
+            </HubSection>
+            <HubSection Header="Viewed Meetings">
+                <DataTemplate>
+                    <ListView SelectionMode="None" IsItemClickEnabled="True" ItemsSource="{Binding}" ItemClick="GridView_ItemClick">
+                        <ListView.ItemTemplate>
+                            <DataTemplate>
+                                <StackPanel Orientation="Vertical" Width="500">
+                                    <TextBlock Style="{StaticResource SubheaderTextBlockStyle}" Text="{Binding Title}"  TextWrapping="NoWrap" />
+                                    <TextBlock Style="{StaticResource TitleTextBlockStyle}"  Text="{Binding StartTime}" TextWrapping="NoWrap" />
+                                </StackPanel>
+                            </DataTemplate>
+                        </ListView.ItemTemplate>
+                    </ListView>
+                </DataTemplate>
+            </HubSection>
+        </Hub>
+    </Grid>
+</Page>
